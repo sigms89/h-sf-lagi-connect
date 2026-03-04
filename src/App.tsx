@@ -19,6 +19,8 @@ import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
 import NotFound from "@/pages/NotFound";
+import VendorView from "@/pages/VendorView";
+import CategoryDetail from "@/pages/CategoryDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,6 +101,26 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Analytics />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics/vendors"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <VendorView />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics/category/:categoryId"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CategoryDetail />
                   </AppLayout>
                 </ProtectedRoute>
               }
