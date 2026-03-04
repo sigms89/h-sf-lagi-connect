@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Lock, Scale, TrendingDown, Bug } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,8 +10,8 @@ import { db } from '@/integrations/supabase/db';
 import type { Profile } from '@/types/database';
 import {
   useBenchmarkData,
-  DEFAULT_FILTERS,
-  type BenchmarkFilters as BenchmarkFiltersType,
+  useBenchmarkFilters,
+  useComparableCount,
 } from '@/hooks/useBenchmarking';
 import { BenchmarkFilters } from '@/components/benchmarking/BenchmarkFilters';
 import { BenchmarkChart } from '@/components/benchmarking/BenchmarkChart';
@@ -20,13 +19,8 @@ import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 
 export default function Benchmarking() {
   const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
-  const [filters, setFilters] = useState<BenchmarkFiltersType>(DEFAULT_FILTERS);
+  const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
   const { user } = useAuth();
-
-  const updateFilter = <K extends keyof BenchmarkFiltersType>(key: K, value: BenchmarkFiltersType[K]) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
-  const resetFilters = () => setFilters(DEFAULT_FILTERS);
 
   const { data: profile } = useQuery({
     queryKey: ['profile-benchmarking', user?.id],
@@ -44,18 +38,13 @@ export default function Benchmarking() {
   const hasPaidTier = association?.subscription_tier === 'plus' || association?.subscription_tier === 'pro';
   const isUnlocked = hasPaidTier || isSuperAdmin;
 
-  const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(association?.id, filters);
+  const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(
+    association?.id,
+    association?.num_units,
+    filters
+  );
 
-  // Compute comparable count from the data
-  const comparableCount = benchmarkRows.length > 0 ? benchmarkRows[0].participantCount : 0;
-
-  function getStatus(row: { yourAvg: number | null; marketAvg: number | null }) {
-    if (row.yourAvg == null || row.marketAvg == null || row.marketAvg === 0) return 'average';
-    const diff = ((row.yourAvg - row.marketAvg) / row.marketAvg) * 100;
-    if (diff < -10) return 'below';
-    if (diff > 10) return 'above';
-    return 'average';
-  }
+  const { data: comparableCount, isLoading: isLoadingCount } = useComparableCount(association?.id, filters);
 
   if (isLoadingAssoc) {
     return (
@@ -82,7 +71,7 @@ export default function Benchmarking() {
         {isUnlocked && benchmarkRows.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingDown className="h-4 w-4 text-green-600" />
-            <span>{benchmarkRows.filter((r) => getStatus(r) === 'below').length} flokkar undir meðaltali</span>
+            <span>{benchmarkRows.filter((r) => r.status === 'below').length} flokkar undir meðaltali</span>
           </div>
         )}
       </div>
@@ -111,7 +100,7 @@ export default function Benchmarking() {
         </div>
       ) : (
         <>
-          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingData} onUpdate={updateFilter} onReset={resetFilters} />
+          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingCount} onUpdate={updateFilter} onReset={resetFilters} />
           {!isLoadingData && benchmarkRows.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">

@@ -21,7 +21,7 @@ const Dashboard = () => {
   const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id);
   const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
     page: 1,
-    page_size: 10, // PRD requires 10 recent transactions (was 8)
+    page_size: 10,
   });
 
   const isLoading = assocLoading || statsLoading;
@@ -119,12 +119,8 @@ const Dashboard = () => {
               categoryBreakdown={stats?.category_breakdown ?? []}
               uncategorizedCount={stats?.uncategorized_count ?? 0}
               isLoading={isLoading}
-              associationId={association?.id}
             />
-            <BenchmarkWidget
-              numUnits={association?.num_units}
-              subscriptionTier={association?.subscription_tier}
-            />
+            <BenchmarkWidget numUnits={association?.num_units} />
           </div>
         </div>
       )}

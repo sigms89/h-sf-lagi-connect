@@ -45,32 +45,51 @@ export function BenchmarkFilters({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* City */}
+        {/* Building type */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Borg</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Tegund</Label>
           <Select
-            value={filters.city ?? 'all'}
-            onValueChange={(v) => onUpdate('city', v === 'all' ? undefined : v)}
+            value={filters.buildingType}
+            onValueChange={(v) => onUpdate('buildingType', v as BenchmarkFiltersType['buildingType'])}
           >
             <SelectTrigger className="h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Allar borgir</SelectItem>
-              <SelectItem value="Reykjavík">Reykjavík</SelectItem>
-              <SelectItem value="Kópavogur">Kópavogur</SelectItem>
-              <SelectItem value="Hafnarfjörður">Hafnarfjörður</SelectItem>
-              <SelectItem value="Akureyri">Akureyri</SelectItem>
+              <SelectItem value="all">Allar tegundir</SelectItem>
+              <SelectItem value="fjolbyli">Fjölbýlishús</SelectItem>
+              <SelectItem value="radhus">Raðhús</SelectItem>
+              <SelectItem value="parhus">Parhús</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Postal prefix */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Svæði (póstnúmer)</Label>
+          <Select
+            value={filters.postalPrefix}
+            onValueChange={(v) => onUpdate('postalPrefix', v)}
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Allt landið</SelectItem>
+              <SelectItem value="1">100-199 (Reykjavík)</SelectItem>
+              <SelectItem value="2">200-299 (Kópavogur/Seltjarnarnes)</SelectItem>
+              <SelectItem value="3">300-399 (Akranes/Borgarnes)</SelectItem>
+              <SelectItem value="6">600-699 (Akureyri)</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Units range */}
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
           <Label className="text-xs font-medium text-muted-foreground">
             Fjöldi íbúða:{' '}
             <span className="text-foreground font-semibold">
-              {filters.unitCountMin ?? 2} – {filters.unitCountMax ?? 200}
+              {filters.minUnits} – {filters.maxUnits}
             </span>
           </Label>
           <div className="px-1 pt-2">
@@ -78,10 +97,10 @@ export function BenchmarkFilters({
               min={2}
               max={200}
               step={1}
-              value={[filters.unitCountMin ?? 2, filters.unitCountMax ?? 200]}
+              value={[filters.minUnits, filters.maxUnits]}
               onValueChange={([min, max]) => {
-                onUpdate('unitCountMin', min);
-                onUpdate('unitCountMax', max);
+                onUpdate('minUnits', min);
+                onUpdate('maxUnits', max);
               }}
               className="w-full"
             />
