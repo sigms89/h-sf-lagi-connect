@@ -118,30 +118,44 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   // PARSE JSON TEXT
   // ============================================================
   const handleParseJson = () => {
-    const result = parseJsonTransactions(jsonText);
-    // If the JSON has a category hint, try to match it
-    const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
-      const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
-      if (hint) {
-        const cat = categories.find(
-          (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
-        );
-        if (cat) {
-          return {
-            ...tx,
-            categoryId: cat.id,
-            categoryName: cat.name_is,
-            categoryColor: cat.color ?? 'yellow',
-            isUncategorized: false,
-          };
-        }
+    try {
+      const result = parseJsonTransactions(jsonText);
+      if (result.transactions.length === 0 && result.errors.length > 0) {
+        setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
+        setEnriched([]);
+        setIsParsed(true);
+        setFileType('json');
+        return;
       }
-      return tx;
-    });
-    setEnriched(enrichedTx);
-    setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
-    setIsParsed(true);
-    setFileType('json');
+      // If the JSON has a category hint, try to match it
+      const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
+        const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
+        if (hint) {
+          const cat = categories.find(
+            (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
+          );
+          if (cat) {
+            return {
+              ...tx,
+              categoryId: cat.id,
+              categoryName: cat.name_is,
+              categoryColor: cat.color ?? 'yellow',
+              isUncategorized: false,
+            };
+          }
+        }
+        return tx;
+      });
+      setEnriched(enrichedTx);
+      setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
+      setIsParsed(true);
+      setFileType('json');
+    } catch (err) {
+      setParseErrors([`Villa við að lesa JSON: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
+      setEnriched([]);
+      setIsParsed(true);
+      setFileType('json');
+    }
   };
 
   // ============================================================
