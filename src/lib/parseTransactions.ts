@@ -126,26 +126,120 @@ export function parseTransactionText(text: string): ParseResult {
  * Parse JSON array of transactions.
  * Expected shape: [{ date, description, amount, balance?, category? }]
  */
-export function parseJsonTransactions(jsonText: string): ParseResult {
+export function parseJsonTransactions(jsonText: string): ParseResult & { warnings?: string[] } {
   const transactions: ParsedTransaction[] = [];
   const errors: ParseError[] = [];
+  const warnings: string[] = [];
 
   let arr: unknown[];
-  try {
-    // Try to auto-fix common JSON issues before parsing
-    let cleaned = jsonText.trim();
-    // Remove trailing commas before ] or }
-    cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
-    // If it doesn't start with [ or {, try wrapping in array
-    if (!cleaned.startsWith('[') && !cleaned.startsWith('{')) {
-      cleaned = '[' + cleaned + ']';
+
+  // ---- Stage A: strict parse on cleaned input ----
+  function strictParse(text: string): unknown | null {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
     }
-    const parsed = JSON.parse(cleaned);
+  }
+
+  // ---- Stage B: repair common copy-paste issues ----
+  function repairAndParse(text: string): unknown | null {
+    let t = text.trim();
+    // Remove trailing commas before ] or }
+    t = t.replace(/,\s*([\]}])/g, '$1');
+    // Wrap bare object in array
+    if (t.startsWith('{') && !t.startsWith('[')) {
+      t = '[' + t + ']';
+    }
+    // Auto-close: count unmatched brackets outside of strings
+    let inString = false;
+    let escape = false;
+    let openBrackets = 0;
+    let openBraces = 0;
+    for (const ch of t) {
+      if (escape) { escape = false; continue; }
+      if (ch === '\\' && inString) { escape = true; continue; }
+      if (ch === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (ch === '[') openBrackets++;
+      else if (ch === ']') openBrackets--;
+      else if (ch === '{') openBraces++;
+      else if (ch === '}') openBraces--;
+    }
+    // Remove dangling trailing comma at the very end of content
+    t = t.replace(/,\s*$/, '');
+    // Close any open braces/brackets
+    while (openBraces > 0) { t += '}'; openBraces--; }
+    while (openBrackets > 0) { t += ']'; openBrackets--; }
+    try {
+      return JSON.parse(t);
+    } catch {
+      return null;
+    }
+  }
+
+  // ---- Stage C: extract individual { ... } objects via regex ----
+  function extractObjects(text: string): unknown[] {
+    const results: unknown[] = [];
+    // Match top-level { ... } blocks (non-greedy, handles nesting poorly but catches simple cases)
+    const regex = /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(text)) !== null) {
+      try {
+        results.push(JSON.parse(m[0]));
+      } catch {
+        // skip unparseable fragment
+      }
+    }
+    return results;
+  }
+
+  // ---- Stage D: try NDJSON (one JSON object per line) ----
+  function tryNDJSON(text: string): unknown[] {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return [];
+    const results: unknown[] = [];
+    for (const line of lines) {
+      try { results.push(JSON.parse(line)); } catch { /* skip */ }
+    }
+    return results.length >= lines.length * 0.5 ? results : [];
+  }
+
+  // Run stages in order
+  let cleaned = jsonText.trim();
+  if (!cleaned) {
+    errors.push({ line: 1, message: 'Ekkert JSON inntak', raw: '' });
+    return { transactions, errors, warnings };
+  }
+
+  // Stage A
+  let parsed = strictParse(cleaned);
+  if (parsed !== null) {
     arr = Array.isArray(parsed) ? parsed : [parsed];
-  } catch (e) {
-    const errMsg = e instanceof SyntaxError ? e.message : 'Óþekkt villa';
-    errors.push({ line: 1, message: `Ógilt JSON snið: ${errMsg}`, raw: jsonText.slice(0, 200) });
-    return { transactions, errors };
+  } else {
+    // Stage B — repair
+    parsed = repairAndParse(cleaned);
+    if (parsed !== null) {
+      arr = Array.isArray(parsed) ? parsed : [parsed];
+      warnings.push('JSON var lagað sjálfvirkt (lokað vöntuðum svigum/hornklofum).');
+    } else {
+      // Stage C — extract objects
+      const extracted = extractObjects(cleaned);
+      if (extracted.length > 0) {
+        arr = extracted;
+        warnings.push(`Náði að lesa ${extracted.length} færslur úr ófullkomnu JSON. Hluti gagna gæti hafa tapast.`);
+      } else {
+        // Stage D — NDJSON
+        const ndjson = tryNDJSON(cleaned);
+        if (ndjson.length > 0) {
+          arr = ndjson;
+          warnings.push(`Lesið sem NDJSON (ein færsla per línu). ${ndjson.length} færslur fundust.`);
+        } else {
+          errors.push({ line: 1, message: 'Ógilt JSON snið. Athugaðu hvort vantar ] eða } í lok, eða hvort textinn er klipptur.', raw: cleaned.slice(0, 200) });
+          return { transactions, errors, warnings };
+        }
+      }
+    }
   }
 
   for (let i = 0; i < arr.length; i++) {
@@ -205,7 +299,7 @@ export function parseJsonTransactions(jsonText: string): ParseResult {
     } as ParsedTransaction & { categoryHint?: string });
   }
 
-  return { transactions, errors };
+  return { transactions, errors, warnings };
 }
 
 /**
