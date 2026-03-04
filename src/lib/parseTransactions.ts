@@ -6,6 +6,18 @@
 import { format, parse, isValid } from 'date-fns';
 import { is } from 'date-fns/locale';
 
+/**
+ * Detect if pasted text looks like JSON rather than tab/semicolon bank data.
+ */
+export function isLikelyJson(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.startsWith('[') || trimmed.startsWith('{')) return true;
+  // Check first few non-empty lines for JSON-like patterns
+  const lines = trimmed.split('\n').slice(0, 5).map(l => l.trim()).filter(Boolean);
+  const jsonIndicators = lines.filter(l => /"date"|"amount"|"description"|"dagsetning"|"upphaed"/.test(l));
+  return jsonIndicators.length >= 2;
+}
+
 export interface ParsedTransaction {
   date: string; // ISO format yyyy-MM-dd
   description: string;
@@ -75,10 +87,13 @@ function parseDate(str: string): string | null {
  * Expects tab or semicolon-separated values:
  * date \t description \t amount [\t balance]
  */
+const MAX_ERRORS = 200;
+
 export function parseTransactionText(text: string): ParseResult {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   const transactions: ParsedTransaction[] = [];
   const errors: ParseError[] = [];
+  let skippedErrors = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -90,7 +105,11 @@ export function parseTransactionText(text: string): ParseResult {
       if (i === 0 && (line.toLowerCase().includes('dagsetning') || line.toLowerCase().includes('date'))) {
         continue;
       }
-      errors.push({ line: i + 1, message: 'Of fáir dálkar', raw: line });
+      if (errors.length < MAX_ERRORS) {
+        errors.push({ line: i + 1, message: 'Of fáir dálkar', raw: line });
+      } else {
+        skippedErrors++;
+      }
       continue;
     }
 
@@ -98,25 +117,41 @@ export function parseTransactionText(text: string): ParseResult {
     if (!date) {
       // Skip lines that don't start with a date (likely headers)
       if (i === 0) continue;
-      errors.push({ line: i + 1, message: 'Ógild dagsetning', raw: line });
+      if (errors.length < MAX_ERRORS) {
+        errors.push({ line: i + 1, message: 'Ógild dagsetning', raw: line });
+      } else {
+        skippedErrors++;
+      }
       continue;
     }
 
     const description = parts[1]?.trim();
     if (!description) {
-      errors.push({ line: i + 1, message: 'Lýsing vantar', raw: line });
+      if (errors.length < MAX_ERRORS) {
+        errors.push({ line: i + 1, message: 'Lýsing vantar', raw: line });
+      } else {
+        skippedErrors++;
+      }
       continue;
     }
 
     const amount = parseIcelandicNumber(parts[2]);
     if (amount === null) {
-      errors.push({ line: i + 1, message: 'Ógild upphæð', raw: line });
+      if (errors.length < MAX_ERRORS) {
+        errors.push({ line: i + 1, message: 'Ógild upphæð', raw: line });
+      } else {
+        skippedErrors++;
+      }
       continue;
     }
 
     const balance = parts.length > 3 ? parseIcelandicNumber(parts[3]) : null;
 
     transactions.push({ date, description, amount, balance });
+  }
+
+  if (skippedErrors > 0) {
+    errors.push({ line: 0, message: `...og ${skippedErrors} villur til viðbótar (sýndar eru fyrstu ${MAX_ERRORS})`, raw: '' });
   }
 
   return { transactions, errors };
@@ -178,18 +213,48 @@ export function parseJsonTransactions(jsonText: string): ParseResult & { warning
     }
   }
 
-  // ---- Stage C: extract individual { ... } objects via regex ----
+  // ---- Stage C: extract individual { ... } objects (linear scan, safe for large input) ----
   function extractObjects(text: string): unknown[] {
+    // Size guard: skip regex on very large broken text to avoid hangs
+    if (text.length > 500_000) {
+      // Use simple line-based extraction instead
+      return extractObjectsLinear(text);
+    }
     const results: unknown[] = [];
-    // Match top-level { ... } blocks (non-greedy, handles nesting poorly but catches simple cases)
     const regex = /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g;
     let m: RegExpExecArray | null;
-    while ((m = regex.exec(text)) !== null) {
+    let safetyCounter = 0;
+    while ((m = regex.exec(text)) !== null && safetyCounter < 50_000) {
+      safetyCounter++;
       try {
         results.push(JSON.parse(m[0]));
       } catch {
         // skip unparseable fragment
       }
+    }
+    return results;
+  }
+
+  function extractObjectsLinear(text: string): unknown[] {
+    // Scan for lines that look like JSON objects
+    const results: unknown[] = [];
+    const lines = text.split('\n');
+    let buffer = '';
+    let depth = 0;
+    for (const line of lines) {
+      for (const ch of line) {
+        if (ch === '{') { if (depth === 0) buffer = ''; depth++; }
+        if (depth > 0) buffer += ch;
+        if (ch === '}') {
+          depth--;
+          if (depth === 0 && buffer) {
+            try { results.push(JSON.parse(buffer)); } catch { /* skip */ }
+            buffer = '';
+            if (results.length >= 50_000) return results;
+          }
+        }
+      }
+      if (depth > 0) buffer += '\n';
     }
     return results;
   }
