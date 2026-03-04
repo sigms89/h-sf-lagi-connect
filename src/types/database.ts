@@ -228,3 +228,32 @@ export interface Bid {
   updated_at: string | null;
   provider?: ServiceProvider | null;
 }
+
+// ============================================================
+// Bid Messages
+// ============================================================
+
+export interface BidMessage {
+  id: string;
+  bid_id: string;
+  sender_id: string;
+  message: string;
+  created_at: string | null;
+  sender_name?: string;
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  related_entity_type: string | null;
+  related_entity_id: string | null;
+  created_at: string;
+}
