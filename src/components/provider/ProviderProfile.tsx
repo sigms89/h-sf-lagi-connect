@@ -3,11 +3,11 @@
 // Edit form for service provider profile
 // ============================================================
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, MapPin } from 'lucide-react';
+import { ImagePlus, Loader2, MapPin, Upload } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -27,6 +27,8 @@ import type { ServiceProvider } from '@/types/database';
 import { useUpdateProvider } from '@/hooks/useServiceProvider';
 import { useCategories } from '@/hooks/useCategories';
 import { getCategoryColor } from '@/lib/categories';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const profileSchema = z.object({
   company_name: z.string().min(2, 'Nafn þarf að vera að minnsta kosti 2 stafir'),
@@ -67,6 +69,11 @@ export function ProviderProfile({ provider }: ProviderProfileProps) {
     provider.service_area ?? []
   );
 
+  // Logo upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(provider.logo_url ?? null);
+  const [uploading, setUploading] = useState(false);
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -78,6 +85,59 @@ export function ProviderProfile({ provider }: ProviderProfileProps) {
       website: provider.website ?? '',
     },
   });
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Mynd má ekki vera stærri en 2MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() ?? 'png';
+      const path = `provider-logos/${provider.id}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public')
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('public').getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+
+      // Update provider record
+      await supabase
+        .from('service_providers')
+        .update({ logo_url: publicUrl })
+        .eq('id', provider.id);
+
+      setLogoUrl(publicUrl);
+      toast.success('Merki uppfært');
+    } catch (err: any) {
+      toast.error(`Villa við upphleðslu: ${err.message}`);
+    } finally {
+      setUploading(false);
+      // Reset the input so the same file can be re-selected if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    try {
+      await supabase
+        .from('service_providers')
+        .update({ logo_url: null })
+        .eq('id', provider.id);
+      setLogoUrl(null);
+      toast.success('Merki fjarlægt');
+    } catch (err: any) {
+      toast.error(`Villa: ${err.message}`);
+    }
+  };
 
   const onSubmit = async (values: ProfileFormValues) => {
     await updateProvider.mutateAsync({
@@ -121,6 +181,51 @@ export function ProviderProfile({ provider }: ProviderProfileProps) {
             <CardTitle className="text-base">Upplýsingar um fyrirtæki</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Logo upload */}
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/30">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Merki fyrirtækis</p>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
+                    Hlaða upp
+                  </Button>
+                  {logoUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs text-destructive"
+                      onClick={handleRemoveLogo}
+                    >
+                      Fjarlægja
+                    </Button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

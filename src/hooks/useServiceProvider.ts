@@ -346,8 +346,11 @@ export function useMyBids(providerId: string | null | undefined) {
 // ============================================================
 // useProviderStats
 // Aggregated stats for the provider dashboard
+// Accepts the full provider object to compute openRequestsInArea
 // ============================================================
-export function useProviderStats(providerId: string | null | undefined) {
+export function useProviderStats(provider: ServiceProvider | null | undefined) {
+  const providerId = provider?.id ?? null;
+
   return useQuery({
     queryKey: PROVIDER_KEYS.stats(providerId ?? ''),
     queryFn: async (): Promise<ProviderStats> => {
@@ -360,8 +363,9 @@ export function useProviderStats(providerId: string | null | undefined) {
         acceptanceRate: 0,
       };
 
-      if (!providerId) return empty;
+      if (!providerId || !provider) return empty;
 
+      // Fetch bid statistics
       const { data, error } = await db
         .from('bids')
         .select('status')
@@ -377,12 +381,38 @@ export function useProviderStats(providerId: string | null | undefined) {
       const resolved = acceptedBids + rejectedBids;
       const acceptanceRate = resolved > 0 ? Math.round((acceptedBids / resolved) * 100) : 0;
 
+      // NEW: Count open requests matching provider's categories and service area
+      let openRequestsInArea = 0;
+      const categoryIds = provider.categories?.map((c) => c.id) ?? [];
+
+      if (categoryIds.length > 0) {
+        const { data: openRequests, error: reqError } = await db
+          .from('bid_requests')
+          .select('id, association:associations(postal_code)')
+          .eq('status', 'open')
+          .in('category_id', categoryIds);
+
+        if (!reqError && openRequests) {
+          const serviceAreas = provider.service_area ?? [];
+          if (serviceAreas.length === 0) {
+            openRequestsInArea = openRequests.length;
+          } else {
+            openRequestsInArea = openRequests.filter((req: any) => {
+              if (!req.association?.postal_code) return true;
+              return serviceAreas.some((area: string) =>
+                req.association.postal_code.startsWith(area)
+              );
+            }).length;
+          }
+        }
+      }
+
       return {
         totalBids,
         pendingBids,
         acceptedBids,
         rejectedBids,
-        openRequestsInArea: 0, // Computed via useProviderBidRequests
+        openRequestsInArea,
         acceptanceRate,
       };
     },

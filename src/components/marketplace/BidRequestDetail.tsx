@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Loader2,
   Mail,
+  MessageSquare,
   Phone,
   Users,
   XCircle,
@@ -43,6 +44,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { BidRequestStatus, BidStatus } from '@/types/database';
 import { getCategoryColor, formatIskAmount } from '@/lib/categories';
 import { useBidRequest, useAcceptBid, useCloseBidRequest } from '@/hooks/useMarketplace';
+import { BidMessageThread } from '@/components/marketplace/BidMessageThread';
 
 interface BidRequestDetailProps {
   bidRequestId: string;
@@ -89,6 +91,7 @@ export function BidRequestDetail({
   const acceptBid = useAcceptBid();
   const closeBidRequest = useCloseBidRequest();
   const [confirmBidId, setConfirmBidId] = useState<string | null>(null);
+  const [expandedBidId, setExpandedBidId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -219,6 +222,7 @@ export function BidRequestDetail({
                   <TableHead className="hidden sm:table-cell">Lýsing</TableHead>
                   <TableHead className="hidden md:table-cell">Gildistími</TableHead>
                   <TableHead>Staða</TableHead>
+                  <TableHead className="w-10"></TableHead>
                   {isAdmin && isOpen && !hasAccepted && <TableHead className="w-28">Aðgerðir</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -280,6 +284,17 @@ export function BidRequestDetail({
                           {BID_STATUS_LABELS[bid.status]}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => setExpandedBidId(expandedBidId === bid.id ? null : bid.id)}
+                          title="Skilaboð"
+                        >
+                          <MessageSquare className={`h-4 w-4 ${expandedBidId === bid.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                        </Button>
+                      </TableCell>
                       {isAdmin && isOpen && !hasAccepted && (
                         <TableCell>
                           <AlertDialog
@@ -328,6 +343,16 @@ export function BidRequestDetail({
                 })}
               </TableBody>
             </Table>
+          </div>
+        )}
+
+        {/* BidMessageThread for the expanded bid */}
+        {expandedBidId && (
+          <div className="mt-4">
+            <BidMessageThread
+              bidId={expandedBidId}
+              label={bids.find((b) => b.id === expandedBidId)?.provider?.company_name}
+            />
           </div>
         )}
       </div>

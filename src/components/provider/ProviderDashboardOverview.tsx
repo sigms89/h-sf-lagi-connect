@@ -38,7 +38,7 @@ function StatCard({ icon: Icon, label, value, iconBg, iconColor }: StatCardProps
 }
 
 export function ProviderDashboardOverview({ provider }: ProviderDashboardProps) {
-  const { data: stats, isLoading: isLoadingStats } = useProviderStats(provider.id);
+  const { data: stats, isLoading: isLoadingStats } = useProviderStats(provider);
   const { data: matchingRequests = [], isLoading: isLoadingRequests } = useProviderBidRequests(provider);
 
   if (isLoadingStats || isLoadingRequests) {
