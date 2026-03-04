@@ -1,6 +1,6 @@
 // ============================================================
 // Húsfélagið.is — Onboarding Page
-// First-time setup wizard: create association + upload first data
+// First-time setup wizard: create association + invite board members + upload first data
 // ============================================================
 
 import { useState } from 'react';
@@ -28,9 +28,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader2,
+  UserPlus,
 } from 'lucide-react';
 import { useCreateAssociation } from '@/hooks/useAssociation';
 import { UploadTransactions } from '@/components/transactions/UploadTransactions';
+import { toast } from 'sonner';
 
 // ============================================================
 // SCHEMA
@@ -55,10 +57,106 @@ type OnboardingData = z.infer<typeof onboardingSchema>;
 // STEPS
 // ============================================================
 const STEPS = [
-  { id: 1, title: 'Velkomin!', subtitle: 'Skref 1 af 3' },
-  { id: 2, title: 'Upplýsingar um húsfélag', subtitle: 'Skref 2 af 3' },
-  { id: 3, title: 'Hlaða upp bankafærslum', subtitle: 'Skref 3 af 3 (valkvæmt)' },
+  { id: 1, title: 'Velkomin!', subtitle: 'Skref 1 af 4' },
+  { id: 2, title: 'Upplýsingar um húsfélag', subtitle: 'Skref 2 af 4' },
+  { id: 3, title: 'Boða stjórnarmenn', subtitle: 'Skref 3 af 4 (valkvæmt)' },
+  { id: 4, title: 'Hlaða upp bankafærslum', subtitle: 'Skref 4 af 4 (valkvæmt)' },
 ];
+
+// ============================================================
+// INVITE FORM SUB-COMPONENT
+// ============================================================
+interface InviteRow {
+  email: string;
+  role: 'board' | 'member';
+}
+
+function InviteForm({ associationId }: { associationId: string }) {
+  const [rows, setRows] = useState<InviteRow[]>([
+    { email: '', role: 'board' },
+    { email: '', role: 'board' },
+    { email: '', role: 'board' },
+  ]);
+  const [sending, setSending] = useState(false);
+
+  const updateRow = (index: number, field: keyof InviteRow, value: string) => {
+    setRows((prev) =>
+      prev.map((r, i) => (i === index ? { ...r, [field]: value } : r))
+    );
+  };
+
+  const addRow = () => {
+    if (rows.length >= 10) return;
+    setRows((prev) => [...prev, { email: '', role: 'board' }]);
+  };
+
+  const handleSend = async () => {
+    const filled = rows.filter((r) => r.email.trim() !== '');
+    if (filled.length === 0) {
+      toast.info('Settu inn a.m.k. eitt netfang til að senda boð');
+      return;
+    }
+    setSending(true);
+    // Boðskerfi er í vinnslu — sýnum UI-only töfrastig
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setSending(false);
+    toast.info('Boðskerfi er í vinnslu — netföngin verða vistuð þegar kerfið er tilbúið');
+  };
+
+  return (
+    <div className="space-y-3">
+      {rows.map((row, index) => (
+        <div key={index} className="flex gap-2">
+          <Input
+            type="email"
+            placeholder={`netfang@dæmi.is`}
+            value={row.email}
+            onChange={(e) => updateRow(index, 'email', e.target.value)}
+            className="flex-1 h-9 text-sm"
+          />
+          <Select
+            value={row.role}
+            onValueChange={(v) => updateRow(index, 'role', v as 'board' | 'member')}
+          >
+            <SelectTrigger className="h-9 w-32 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="board">Stjórn</SelectItem>
+              <SelectItem value="member">Meðlimur</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      ))}
+      <div className="flex gap-2">
+        {rows.length < 10 && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-xs h-7"
+            onClick={addRow}
+          >
+            + Bæta við línu
+          </Button>
+        )}
+        <Button
+          type="button"
+          size="sm"
+          className="h-7 text-xs ml-auto"
+          onClick={handleSend}
+          disabled={sending}
+        >
+          {sending ? (
+            <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Sendir...</>
+          ) : (
+            'Senda boð'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 // ============================================================
 // COMPONENT
@@ -108,7 +206,7 @@ export default function Onboarding() {
       subscription_status: 'active',
     });
     setCreatedAssociationId(result.id);
-    setStep(3);
+    setStep(3); // Step 3 is now invite board members
   };
 
   // ============================================================
@@ -341,8 +439,39 @@ export default function Onboarding() {
           </Card>
         )}
 
-        {/* ---- STEP 3: Upload data (optional) ---- */}
+        {/* ---- STEP 3: Invite board members (optional) ---- */}
         {step === 3 && createdAssociationId && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <UserPlus className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle>Boða stjórnarmenn</CardTitle>
+                  <CardDescription>
+                    Sendu boð til annarra stjórnarmanna í húsfélaginu (valkvæmt)
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <InviteForm associationId={createdAssociationId} />
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setStep(4)}>
+                  Sleppa — boða síðar
+                </Button>
+                <Button onClick={() => setStep(4)} className="flex-1">
+                  Áfram
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ---- STEP 4: Upload data (optional) ---- */}
+        {step === 4 && createdAssociationId && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">

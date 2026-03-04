@@ -39,11 +39,13 @@ import {
   TrendingUp,
   TrendingDown,
   Filter,
+  FileText,
   X,
 } from 'lucide-react';
 import { useTransactions, useUpdateTransactionCategory } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentAssociation } from '@/hooks/useAssociation';
 import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categories';
 import { formatDateIs } from '@/lib/parseTransactions';
 import type { TransactionFilters } from '@/types/database';
@@ -58,6 +60,10 @@ export function TransactionList({ associationId }: TransactionListProps) {
   const { user } = useAuth();
   const { data: categories = [] } = useCategories();
   const updateCategory = useUpdateTransactionCategory();
+  const { data: association } = useCurrentAssociation();
+  const hasPaidTier =
+    association?.subscription_tier === 'plus' ||
+    association?.subscription_tier === 'pro';
 
   const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
@@ -109,7 +115,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
   // CSV EXPORT
   // ============================================================
   const handleExport = () => {
-    if (!transactions.length) return;
+    if (!transactions.length || !hasPaidTier) return;
     const headers = ['Dagsetning', 'Lýsing', 'Upphæð', 'Staða', 'Flokkur', 'Tegund'];
     const rows = transactions.map((tx) => [
       formatDateIs(tx.date),
@@ -127,6 +133,46 @@ export function TransactionList({ associationId }: TransactionListProps) {
     a.download = `husfelag-faerslur-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // ============================================================
+  // PDF EXPORT
+  // ============================================================
+  const handlePdfExport = () => {
+    if (!transactions.length || !hasPaidTier) return;
+    const rows = transactions
+      .map(
+        (tx) => `
+      <tr>
+        <td style="padding:4px 8px;border-bottom:1px solid #eee">${formatDateIs(tx.date)}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid #eee">${tx.description}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${formatIskAmount(tx.amount)}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid #eee">${tx.category?.name_is ?? 'Óflokkað'}</td>
+      </tr>
+    `
+      )
+      .join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html><head><title>Færslur — ${association?.name ?? 'Húsfélag'}</title>
+      <style>body{font-family:system-ui,sans-serif;padding:20px}table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:6px 8px;border-bottom:2px solid #333;font-weight:600}h1{font-size:16px;margin-bottom:4px}p{color:#666;font-size:12px;margin-bottom:16px}</style>
+      </head><body>
+      <h1>Færslur — ${association?.name ?? ''}</h1>
+      <p>Útflutningur ${new Date().toLocaleDateString('is-IS')}</p>
+      <table>
+        <thead><tr><th>Dagsetning</th><th>Lýsing</th><th style="text-align:right">Upphæð</th><th>Flokkur</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </body></html>
+    `;
+
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.print();
+    }
   };
 
   // ============================================================
@@ -257,17 +303,49 @@ export function TransactionList({ associationId }: TransactionListProps) {
           </Button>
         )}
 
-        {/* Export */}
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto h-9"
-          onClick={handleExport}
-          disabled={!transactions.length}
-        >
-          <Download className="h-4 w-4 mr-1.5" />
-          Sækja CSV
-        </Button>
+        {/* Export dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto h-9"
+              disabled={!transactions.length}
+            >
+              <Download className="h-4 w-4 mr-1.5" />
+              Sækja
+              <ChevronDown className="h-3 w-3 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={hasPaidTier ? handleExport : undefined}
+              disabled={!hasPaidTier}
+              className={!hasPaidTier ? 'opacity-50' : ''}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              CSV
+              {!hasPaidTier && (
+                <Badge variant="outline" className="ml-2 text-[10px] h-4 px-1">
+                  Plus+
+                </Badge>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={hasPaidTier ? handlePdfExport : undefined}
+              disabled={!hasPaidTier}
+              className={!hasPaidTier ? 'opacity-50' : ''}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              PDF
+              {!hasPaidTier && (
+                <Badge variant="outline" className="ml-2 text-[10px] h-4 px-1">
+                  Plus+
+                </Badge>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Count info */}
