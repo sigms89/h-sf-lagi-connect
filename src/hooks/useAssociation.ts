@@ -47,27 +47,52 @@ export function useCreateAssociation() {
     mutationFn: async (data: AssociationInsert): Promise<Association> => {
       if (!user) throw new Error('Notandi ekki skráður inn');
 
-      const { data: association, error: assocError } = await db
+      const associationId = crypto.randomUUID();
+
+      // Step 1: INSERT association WITHOUT .select() to avoid SELECT RLS check
+      const { error: assocError } = await db
         .from('associations')
-        .insert([data])
-        .select()
-        .single();
+        .insert([{ ...data, id: associationId }]);
 
       if (assocError) throw assocError;
 
+      // Step 2: INSERT membership so user becomes a member/admin
       const { error: memberError } = await db
         .from('association_members')
         .insert([{
           user_id: user.id,
-          association_id: association.id,
+          association_id: associationId,
           role: 'admin',
           is_active: true,
         }]);
 
       if (memberError) throw memberError;
-      return association as Association;
+
+      // Return constructed object (we can't SELECT yet until cache refreshes)
+      const association: Association = {
+        id: associationId,
+        name: data.name,
+        num_units: data.num_units ?? 1,
+        address: data.address ?? null,
+        building_year: data.building_year ?? null,
+        city: data.city ?? null,
+        created_at: new Date().toISOString(),
+        has_elevator: data.has_elevator ?? null,
+        has_parking: data.has_parking ?? null,
+        num_floors: data.num_floors ?? null,
+        postal_code: data.postal_code ?? null,
+        square_meters_total: data.square_meters_total ?? null,
+        subscription_status: data.subscription_status ?? 'active',
+        subscription_tier: data.subscription_tier ?? 'free',
+        type: data.type ?? 'fjolbyli',
+        updated_at: new Date().toISOString(),
+      };
+
+      return association;
     },
     onSuccess: (association) => {
+      // Set current association immediately to prevent redirect loop
+      queryClient.setQueryData(ASSOCIATION_KEYS.current(), association);
       queryClient.invalidateQueries({ queryKey: ASSOCIATION_KEYS.all });
       toast.success(`Húsfélagið "${association.name}" hefur verið stofnað`);
     },
