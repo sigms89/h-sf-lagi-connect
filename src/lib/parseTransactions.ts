@@ -123,6 +123,83 @@ export function parseTransactionText(text: string): ParseResult {
 }
 
 /**
+ * Parse JSON array of transactions.
+ * Expected shape: [{ date, description, amount, balance?, category? }]
+ */
+export function parseJsonTransactions(jsonText: string): ParseResult {
+  const transactions: ParsedTransaction[] = [];
+  const errors: ParseError[] = [];
+
+  let arr: unknown[];
+  try {
+    const parsed = JSON.parse(jsonText);
+    arr = Array.isArray(parsed) ? parsed : [parsed];
+  } catch (e) {
+    errors.push({ line: 1, message: 'Ógilt JSON snið', raw: jsonText.slice(0, 100) });
+    return { transactions, errors };
+  }
+
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i] as Record<string, unknown>;
+    if (!item || typeof item !== 'object') {
+      errors.push({ line: i + 1, message: 'Ekki hlutur', raw: JSON.stringify(item) });
+      continue;
+    }
+
+    // Date
+    const rawDate = String(item.date ?? item.dagsetning ?? '');
+    let date: string | null = null;
+    if (rawDate) {
+      // Try ISO format first
+      const d = new Date(rawDate);
+      if (!isNaN(d.getTime())) {
+        date = format(d, 'yyyy-MM-dd');
+      } else {
+        date = parseDate(rawDate);
+      }
+    }
+    if (!date) {
+      errors.push({ line: i + 1, message: 'Ógild dagsetning', raw: rawDate });
+      continue;
+    }
+
+    // Description
+    const description = String(item.description ?? item.lysing ?? item.lýsing ?? '').trim();
+    if (!description) {
+      errors.push({ line: i + 1, message: 'Lýsing vantar', raw: JSON.stringify(item) });
+      continue;
+    }
+
+    // Amount
+    const rawAmount = item.amount ?? item.upphaed ?? item.upphæð;
+    const amount = typeof rawAmount === 'number' ? rawAmount : parseIcelandicNumber(String(rawAmount ?? ''));
+    if (amount === null) {
+      errors.push({ line: i + 1, message: 'Ógild upphæð', raw: String(rawAmount) });
+      continue;
+    }
+
+    // Balance (optional)
+    const rawBalance = item.balance ?? item.staða ?? item.stada;
+    const balance = rawBalance != null
+      ? (typeof rawBalance === 'number' ? rawBalance : parseIcelandicNumber(String(rawBalance)))
+      : null;
+
+    // Category hint (optional — stored in description metadata for categorizer)
+    const categoryHint = String(item.category ?? item.flokkur ?? '').trim();
+
+    transactions.push({
+      date,
+      description,
+      amount,
+      balance,
+      ...(categoryHint ? { categoryHint } : {}),
+    } as ParsedTransaction & { categoryHint?: string });
+  }
+
+  return { transactions, errors };
+}
+
+/**
  * Format a date string for Icelandic display
  */
 export function formatDateIs(dateStr: string): string {

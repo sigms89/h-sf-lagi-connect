@@ -55,7 +55,7 @@ export function useUploadTransactions() {
       transactions: TransactionInsert[];
       uploadedBy: string;
       fileName?: string;
-      fileType?: 'csv' | 'xlsx' | 'paste';
+      fileType?: 'csv' | 'xlsx' | 'paste' | 'json';
     }): Promise<{ uploaded: number; batchId: string }> => {
       const { data: batch, error: batchError } = await db
         .from('upload_batches')

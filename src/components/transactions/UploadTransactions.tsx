@@ -36,7 +36,7 @@ import {
   Loader2,
   X,
 } from 'lucide-react';
-import { parseTransactionText, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
+import { parseTransactionText, parseJsonTransactions, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
 import { categorizeTransaction } from '@/lib/categorize';
 import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categories';
 import { useCategories, useVendorRules } from '@/hooks/useCategories';
@@ -70,7 +70,8 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [isParsed, setIsParsed] = useState(false);
   const [fileName, setFileName] = useState<string>('');
-  const [fileType, setFileType] = useState<'csv' | 'xlsx' | 'paste'>('paste');
+  const [fileType, setFileType] = useState<'csv' | 'xlsx' | 'paste' | 'json'>('paste');
+  const [jsonText, setJsonText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================================================
@@ -114,26 +115,78 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   };
 
   // ============================================================
+  // PARSE JSON TEXT
+  // ============================================================
+  const handleParseJson = () => {
+    const result = parseJsonTransactions(jsonText);
+    // If the JSON has a category hint, try to match it
+    const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
+      const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
+      if (hint) {
+        const cat = categories.find(
+          (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
+        );
+        if (cat) {
+          return {
+            ...tx,
+            categoryId: cat.id,
+            categoryName: cat.name_is,
+            categoryColor: cat.color ?? 'yellow',
+            isUncategorized: false,
+          };
+        }
+      }
+      return tx;
+    });
+    setEnriched(enrichedTx);
+    setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
+    setIsParsed(true);
+    setFileType('json');
+  };
+
+  // ============================================================
   // FILE UPLOAD
   // ============================================================
   const handleFile = useCallback(
     (file: File) => {
       setFileName(file.name);
-      const type = file.name.endsWith('.xlsx') ? 'xlsx' : 'csv';
+      const isJson = file.name.endsWith('.json');
+      const type = isJson ? 'json' : file.name.endsWith('.xlsx') ? 'xlsx' : 'csv';
       setFileType(type);
 
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        const result = parseTransactionText(text);
-        const enrichedTx = enrichTransactions(result.transactions);
-        setEnriched(enrichedTx);
-        setParseErrors(result.errors.map((err) => `Lína ${err.line}: ${err.message}`));
-        setIsParsed(true);
+        if (isJson) {
+          setJsonText(text);
+          // Auto-parse JSON files
+          const result = parseJsonTransactions(text);
+          const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
+            const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
+            if (hint) {
+              const cat = categories.find(
+                (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
+              );
+              if (cat) {
+                return { ...tx, categoryId: cat.id, categoryName: cat.name_is, categoryColor: cat.color ?? 'yellow', isUncategorized: false };
+              }
+            }
+            return tx;
+          });
+          setEnriched(enrichedTx);
+          setParseErrors(result.errors.map((err) => `Lína ${err.line}: ${err.message}`));
+          setIsParsed(true);
+        } else {
+          const result = parseTransactionText(text);
+          const enrichedTx = enrichTransactions(result.transactions);
+          setEnriched(enrichedTx);
+          setParseErrors(result.errors.map((err) => `Lína ${err.line}: ${err.message}`));
+          setIsParsed(true);
+        }
       };
       reader.readAsText(file, 'UTF-8');
     },
-    [enrichTransactions]
+    [enrichTransactions, categories]
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,6 +256,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
 
     // Reset
     setPasteText('');
+    setJsonText('');
     setEnriched([]);
     setParseErrors([]);
     setIsParsed(false);
@@ -228,7 +282,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
     <div className="space-y-6">
       {!isParsed ? (
         <Tabs defaultValue="paste">
-          <TabsList className="grid w-full grid-cols-2 max-w-sm">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="paste" className="flex items-center gap-2">
               <ClipboardPaste className="h-4 w-4" />
               Líma inn
@@ -236,6 +290,10 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
             <TabsTrigger value="csv" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               CSV skrá
+            </TabsTrigger>
+            <TabsTrigger value="json" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              JSON
             </TabsTrigger>
           </TabsList>
 
@@ -294,7 +352,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                 >
                   <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-sm font-medium">
-                    Dragðu .csv eða .xlsx skrá hingað
+                    Dragðu .csv, .xlsx eða .json skrá hingað
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     eða smelltu til að velja skrá
@@ -302,10 +360,38 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".csv,.xlsx,.xls"
+                    accept=".csv,.xlsx,.xls,.json"
                     className="hidden"
                     onChange={handleFileChange}
                   />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ---- JSON TAB ---- */}
+          <TabsContent value="json">
+            <Card>
+              <CardHeader>
+                <CardTitle>Líma inn JSON</CardTitle>
+                <CardDescription>
+                  Límdu JSON fylki af færslum. Hverjri færslu þarf date, description og amount. Einnig má hafa balance og category.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  value={jsonText}
+                  onChange={(e) => setJsonText(e.target.value)}
+                  placeholder={`[\n  {\n    "date": "2026-02-23",\n    "description": "HS Orka",\n    "amount": -45188,\n    "balance": 176383,\n    "category": "Rafmagn & Hiti"\n  }\n]`}
+                  className="min-h-[200px] font-mono text-sm"
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    JSON færslur
+                  </span>
+                  <Button onClick={handleParseJson} disabled={!jsonText.trim()}>
+                    Greina JSON
+                  </Button>
                 </div>
               </CardContent>
             </Card>
