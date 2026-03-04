@@ -184,10 +184,12 @@ export function AppSidebar() {
       {/* Footer — Dev tools + Settings + Admin */}
       <SidebarFooter>
         <SidebarMenu>
-          {/* Dev role switcher — always visible during development */}
-          <SidebarMenuItem>
-            <DevRoleSwitcher collapsed={collapsed} />
-          </SidebarMenuItem>
+          {/* Dev role switcher — only visible in development */}
+          {import.meta.env.DEV && (
+            <SidebarMenuItem>
+              <DevRoleSwitcher collapsed={collapsed} />
+            </SidebarMenuItem>
+          )}
 
           {bottomItems.map((item) => (
             <SidebarMenuItem key={item.title}>
