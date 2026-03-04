@@ -1,62 +1,46 @@
 
-Orsökin er ekki gagnagrunnurinn sjálfur heldur frammistöðuflæði í upload-skjánum:
+Vandinn er skýr: í session replay sést að JSON-ið sem er límt inn endar á kommu og vantar lokun (`]`), þannig að parser skilar `Unexpected end of JSON input`. Núverandi „auto-fix“ lagar aðeins kommur fyrir `]`/`}`, en lagar ekki ófullkominn endi.
 
-1) JSON + flokkun keyrir samstillt á UI þræði.
-2) Eftir parse er renderuð heil tafla með öllum færslum (`enriched.map(...)`) og `Select` í hverri línu.
-3) Fyrir mjög stór gagnasett (þúsundir/tugþúsundir lína) verður DOM risastórt og UI frýs/crashar.
-4) Session replay sýnir þetta skýrt (mjög stórar DOM breytingar og gríðarhá scroll-hæð), sem passar við „alveg löturhægt“.
+Áætlun til að laga þetta varanlega:
 
-Lausnaráætlun (almennileg og varanleg):
+1) Gera JSON parser þolnari fyrir ófullkomið input  
+- Skrá: `src/lib/parseTransactions.ts`  
+- Bæta við fjölþrepa parse-röð:
+  - Tilraun A: strict `JSON.parse` á hreinsuðu input.
+  - Tilraun B: „repair“ fyrir algeng copy/paste vandamál:
+    - fjarlægja trailing kommu í enda texta,
+    - loka vöntuðum `]`/`}` (með jafnvægisgreiningu utan strengja),
+    - reyna parse aftur.
+  - Tilraun C (fallback): ef enn mistekst, ná í alla heila `{ ... }` hluti úr texta og parse-a hvern hlut fyrir sig (sleppa ónýtum hala).
+- Niðurstaða: ef einhverjar færslur finnast, þá heldur appið áfram og sýnir viðvörun um slepptar línur í stað þess að stoppa allt.
 
-1. Endurhanna preview fyrir stór gagnasett
-- Breyta `src/components/transactions/UploadTransactions.tsx`.
-- Hætta að rendera allar línur í einu.
-- Bæta við client-side paging fyrir preview (t.d. 100 línur/síðu).
-- Sýna aðeins virka síðu í töflu.
-- Birta samt heildarsummu (fjöldi, innkoma, útgjöld, óflokkað) fyrir allt dataset.
+2) Bæta notendaskilaboð svo þetta sé ekki ruglingslegt  
+- Skrá: `src/components/transactions/UploadTransactions.tsx`  
+- Ef `transactions.length === 0` og parse klikkar:
+  - halda notanda í JSON-inntaki (ekki hoppa beint í „Forskoðun — 0 færslur“),
+  - sýna skýrt villuskilaboð beint við JSON reitinn:
+    - t.d. „JSON virðist ófullkomið (vantar `]` eða `}` í lok).“
+- Ef parser nær að bjarga hluta gagna:
+  - fara í forskoðun með þeim færslum,
+  - sýna „X línum sleppt“ sem viðvörun (ekki fatal villa).
 
-2. „Large dataset mode“ með varnargildum
-- Skilgreina mörk (t.d. `LARGE_DATASET_THRESHOLD = 1000`).
-- Ef yfir mörkum:
-  - Einfalda línu-UI (engin þung `Select` á öllum línum í einu).
-  - Nota léttari birtingu eða „breyta flokki“ aðeins fyrir valda línu.
-  - Sýna skýra tilkynningu: „stórt gagnasett – forskoðun er pagineruð til að halda appi hröðu“.
+3) Styrkja skráarflæði fyrir `.json`  
+- Sama parser-röð notuð bæði fyrir „Líma inn JSON“ og „Hlaða upp skrá“.  
+- Tryggja að notandi geti hlaðið upp skránni sinni beint og fengið sömu þolnu hegðun.
 
-3. Chunked processing (til að forðast freeze í parse/auðgun)
-- Gera parse+enrich skrefið ósamstillt í lotum (t.d. 300–500 færslur í lotu).
-- Yield milli lota (microtask/timeout) svo UI helst svarandi.
-- Sýna framvindu (`Progress`) meðan unnið er.
+4) Bæta við sjálfvirkum prófum til að koma í veg fyrir endurkomu  
+- Nýtt test, t.d. `src/test/parseTransactions.test.ts`:
+  - valid JSON array,
+  - array sem endar á `},` án lokunar (`]`) -> á að recovera,
+  - NDJSON/einstakir hlutir -> á að lesast,
+  - raunverulega brotið input -> á að skila gagnlegri villu.
 
-4. Prófunarhamur án vistunar í gagnagrunn
-- Bæta við toggle/ham í `UploadTransactions`:
-  - „Prófa aðeins (ekki vista)“ (sjálfgefið í onboarding).
-  - „Vista í gagnagrunn“ (valfrjálst).
-- Í prófunarham:
-  - Engin `uploadMutation.mutateAsync`.
-  - Engar POST beiðnir á transactions.
-  - Nota eingöngu local state fyrir parse/preview/greiningu.
-
-5. Minni og endurútreikningar
-- Reikna stats í einni umferð með `useMemo` (ekki margar `filter/reduce` yfir allt array á hverju renderi).
-- Hreinsa stór raw text state eftir parse þegar ekki þarf lengur (sérstaklega fyrir risastór JSON).
-- Halda villulista capped (nú þegar sýndar 5 línur; halda þeirri hegðun).
-
-6. Tenging við síður
-- `src/pages/Onboarding.tsx`: virkja prófunarham sjálfgefið í skrefi 3.
-- `src/pages/Upload.tsx`: hafa toggle svo notandi geti valið test vs save.
-
-7. Staðfesting (E2E)
-- Prófa með stórri JSON skrá (nokkur þúsund+ færslur):
-  - Parse klárast án crash.
-  - UI helst svarandi meðan unnið er.
-  - Preview sýnir pagineraðar línur, ekki allt í einu.
-- Prófa „Prófa aðeins“:
-  - Engar gagnagrunns-POST beiðnir.
-- Prófa „Vista í gagnagrunn“:
-  - Uppsending virkar áfram rétt.
-- Endurprófa onboarding-skref 3 með stóru gagni til að staðfesta að flæðið festist ekki.
+5) Staðfesting eftir innleiðingu  
+- Prófa nákvæmlega sama JSON dæmi og þú ert að nota núna.  
+- Prófa stórt JSON gagnasett (þúsundir lína) með copy/paste og file upload.  
+- Staðfesta að „Prófa aðeins“ virki áfram án vistunar.
 
 Tæknileg atriði (stutt):
-- Engar breytingar á gagnagrunnsskýma eða RLS þarf fyrir þessa lagfæringu.
-- Kjarni lagfæringar er UI/compute performance + non-persistent test mode.
-- Þetta leysir bæði „crash“ og „löturhægt“ með stórum færslusöfnum.
+- Engar breytingar á gagnagrunni eða backend þarf.
+- Þetta er alfarið parser + UI villumeðhöndlun.
+- Markmið: „graceful degradation“ — bjarga því sem hægt er, sýna skýra ástæðu fyrir því sem var sleppt.
