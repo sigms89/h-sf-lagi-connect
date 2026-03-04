@@ -57,6 +57,14 @@
     --sidebar-border: 213 40% 26%;
     --sidebar-ring: 175 84% 42%;
 
+    /* --- Alert/Warning: amber #f59e0b → hsl(38, 92%, 50%) --- */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* --- Success --- */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
     /* --- Chart colors --- */
     --chart-1: 213 52% 24%;
     --chart-2: 175 84% 32%;
@@ -111,6 +119,16 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    @apply font-bold tracking-tight;
+  }
+
+  /* Monospace for financial figures */
+  .font-mono, table td[data-type="number"], .tabular-nums {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
