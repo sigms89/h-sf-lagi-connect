@@ -1,6 +1,7 @@
 // ============================================================
-// Húsfélagið.is — Admin Hooks
+// Húsfélagið.is — Admin Hooks (REPLACE)
 // TanStack Query hooks for the super admin panel
+// Updated: real activeUsers count, MRR calculation, churn placeholder
 // ============================================================
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +25,9 @@ export interface AdminStats {
   freeTier: number;
   plusTier: number;
   proTier: number;
+  // New fields
+  mrr: number;
+  churn: number | null;
 }
 
 export interface NotificationPayload {
@@ -39,6 +43,12 @@ export interface VendorRuleInsert {
   is_global: boolean;
   association_id?: string | null;
 }
+
+// ============================================================
+// TIER PRICES (ISK)
+// ============================================================
+const TIER_PRICE_PLUS = 4990;
+const TIER_PRICE_PRO = 14990;
 
 // ============================================================
 // QUERY KEYS
@@ -65,6 +75,7 @@ export function useAdminStats() {
         providerResult,
         bidResult,
         openBidResult,
+        activeUsersResult,
       ] = await Promise.all([
         db.from('associations').select('id, subscription_tier', { count: 'exact' }),
         db.from('service_providers').select('id, is_approved', { count: 'exact' }),
@@ -73,6 +84,11 @@ export function useAdminStats() {
           .from('bid_requests')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'open'),
+        // Real active user count from association_members
+        db
+          .from('association_members')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_active', true),
       ]);
 
       const assocData = assocResult.data ?? [];
@@ -88,9 +104,12 @@ export function useAdminStats() {
         (a: { subscription_tier: string }) => a.subscription_tier === 'pro'
       ).length;
 
+      // MRR calculation (ISK)
+      const mrr = plusTier * TIER_PRICE_PLUS + proTier * TIER_PRICE_PRO;
+
       return {
         totalAssociations: assocResult.count ?? 0,
-        activeUsers: assocResult.count ?? 0, // proxy: one admin per association min
+        activeUsers: activeUsersResult.count ?? 0,
         approvedProviders: providerData.filter(
           (p: { is_approved: boolean }) => p.is_approved
         ).length,
@@ -102,6 +121,8 @@ export function useAdminStats() {
         freeTier,
         plusTier,
         proTier,
+        mrr,
+        churn: null,
       };
     },
     staleTime: 2 * 60 * 1000,
