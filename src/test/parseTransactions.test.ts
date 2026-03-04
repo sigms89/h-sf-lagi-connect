@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { parseJsonTransactions } from '@/lib/parseTransactions';
+import { parseJsonTransactions, parseTransactionText, isLikelyJson } from '@/lib/parseTransactions';
+
+describe('isLikelyJson', () => {
+  it('detects JSON array', () => {
+    expect(isLikelyJson('[{"date":"2026-01-01"}]')).toBe(true);
+  });
+  it('detects JSON object', () => {
+    expect(isLikelyJson('{"date":"2026-01-01","amount":-100}')).toBe(true);
+  });
+  it('rejects tab-separated bank data', () => {
+    expect(isLikelyJson('23.02.2026\tHS Orka\t-45188\t1234567')).toBe(false);
+  });
+  it('detects JSON-like content with "date" and "amount" keys', () => {
+    const input = `some header\n"date": "2026-01-01",\n"amount": -500,\n"description": "test"`;
+    expect(isLikelyJson(input)).toBe(true);
+  });
+});
 
 describe('parseJsonTransactions', () => {
   it('parses a valid JSON array', () => {
@@ -63,5 +79,25 @@ describe('parseJsonTransactions', () => {
     const result = parseJsonTransactions('');
     expect(result.transactions).toHaveLength(0);
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe('parseTransactionText', () => {
+  it('caps errors at max limit for large broken input', () => {
+    // Generate 500 lines of invalid data
+    const lines = Array.from({ length: 500 }, (_, i) => `invalid-line-${i}`);
+    const result = parseTransactionText(lines.join('\n'));
+    expect(result.transactions).toHaveLength(0);
+    // Should have capped errors + summary
+    expect(result.errors.length).toBeLessThanOrEqual(201); // MAX_ERRORS + summary
+    const lastError = result.errors[result.errors.length - 1];
+    expect(lastError.message).toContain('til viðbótar');
+  });
+
+  it('parses valid tab-separated lines', () => {
+    const input = '23.02.2026\tHS Orka\t-45.188\t1.234.567';
+    const result = parseTransactionText(input);
+    expect(result.transactions).toHaveLength(1);
+    expect(result.transactions[0].amount).toBe(-45188);
   });
 });

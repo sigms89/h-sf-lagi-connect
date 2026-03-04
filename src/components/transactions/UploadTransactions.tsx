@@ -22,7 +22,7 @@ import {
   Upload, ClipboardPaste, FileText, CheckCircle2, AlertTriangle,
   TrendingUp, TrendingDown, Loader2, X, ChevronLeft, ChevronRight, Info,
 } from 'lucide-react';
-import { parseTransactionText, parseJsonTransactions, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
+import { parseTransactionText, parseJsonTransactions, formatDateIs, isLikelyJson, type ParsedTransaction } from '@/lib/parseTransactions';
 import { categorizeTransaction } from '@/lib/categorize';
 import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categories';
 import { useCategories, useVendorRules } from '@/hooks/useCategories';
@@ -79,6 +79,9 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
   // Processing state for chunked parsing
   const [isProcessing, setIsProcessing] = useState(false);
   const [processProgress, setProcessProgress] = useState(0);
+
+  // Analyzing state — shows spinner immediately on button click
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Inline editing row (for large datasets we only show Select for the active row)
   const [editingRow, setEditingRow] = useState<number | null>(null);
@@ -170,7 +173,27 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
   };
 
   const handleParse = async () => {
+    setIsAnalyzing(true);
+    setParseErrors([]);
+    setParseWarnings([]);
     try {
+      // Auto-detect JSON in paste input
+      if (isLikelyJson(pasteText)) {
+        const result = parseJsonTransactions(pasteText);
+        const warns = [...(result.warnings ?? []), 'Textinn var greindur sem JSON og lesinn þannig.'];
+        const errorMsgs = result.errors.map((e) => `Lína ${e.line}: ${e.message}`);
+        if (result.transactions.length === 0 && result.errors.length > 0) {
+          finishParse([], errorMsgs, 'json', warns);
+          return;
+        }
+        const hints = result.transactions.map(
+          (tx) => (tx as ParsedTransaction & { categoryHint?: string }).categoryHint
+        );
+        const enrichedTx = await enrichChunked(result.transactions, hints);
+        finishParse(enrichedTx, errorMsgs, 'json', warns);
+        return;
+      }
+
       const result = parseTransactionText(pasteText);
       const enrichedTx = await enrichChunked(result.transactions);
       finishParse(enrichedTx, result.errors.map((e) => `Lína ${e.line}: ${e.message}`), 'paste');
@@ -178,10 +201,13 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
       setParseErrors([`Villa: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
       setEnriched([]);
       setIsParsed(true);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
   const handleParseJson = async () => {
+    setIsAnalyzing(true);
     setParseErrors([]);
     setParseWarnings([]);
     try {
@@ -199,6 +225,8 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
       finishParse(enrichedTx, errorMsgs, 'json', warns);
     } catch (err) {
       setParseErrors([`Villa við að lesa JSON: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -391,16 +419,53 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
               <CardContent className="space-y-4">
                 <Textarea
                   value={pasteText}
-                  onChange={(e) => setPasteText(e.target.value)}
-                  placeholder={`Límdu bankafærslur hér...\n\nDæmi:\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567`}
+                  onChange={(e) => { setPasteText(e.target.value); setParseErrors([]); setParseWarnings([]); }}
+                  placeholder={`Límdu bankafærslur eða JSON hér...\n\nDæmi (bankafærslur):\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567\n\nEða JSON fylki:\n[{"date":"2026-02-23","description":"HS Orka","amount":-45188}]`}
                   className="min-h-[200px] font-mono text-sm"
                 />
+
+                {/* Inline errors for paste tab */}
+                {parseErrors.length > 0 && (
+                  <div className="rounded-md border border-destructive/50 bg-destructive/5 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-destructive text-sm font-medium">
+                      <AlertTriangle className="h-4 w-4" />
+                      Villa við lestur
+                    </div>
+                    {parseErrors.slice(0, 5).map((e, i) => (
+                      <p key={i} className="text-xs text-destructive/80">{e}</p>
+                    ))}
+                    {parseErrors.length > 5 && (
+                      <p className="text-xs text-muted-foreground">...og {parseErrors.length - 5} villur til viðbótar</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Warnings */}
+                {parseWarnings.length > 0 && (
+                  <div className="rounded-md border border-yellow-300 bg-yellow-50/60 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-yellow-700 text-sm font-medium">
+                      <Info className="h-4 w-4" />
+                      Athugasemd
+                    </div>
+                    {parseWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-yellow-800">{w}</p>
+                    ))}
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     {pasteText.split('\n').filter((l) => l.trim()).length} línur
                   </span>
-                  <Button onClick={handleParse} disabled={!pasteText.trim() || isProcessing}>
-                    Greina færslur
+                  <Button onClick={handleParse} disabled={!pasteText.trim() || isProcessing || isAnalyzing}>
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Greini...
+                      </>
+                    ) : (
+                      'Greina færslur'
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -457,44 +522,54 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
               <CardContent className="space-y-4">
                 <Textarea
                   value={jsonText}
-                  onChange={(e) => setJsonText(e.target.value)}
+                  onChange={(e) => { setJsonText(e.target.value); setParseErrors([]); setParseWarnings([]); }}
                   placeholder={`[\n  {\n    "date": "2026-02-23",\n    "description": "HS Orka",\n    "amount": -45188\n  }\n]`}
                   className="min-h-[200px] font-mono text-sm"
                 />
-                {/* Inline error display — keeps user on input */}
+                {/* Inline error display */}
                 {parseErrors.length > 0 && (
                   <div className="rounded-md border border-destructive/50 bg-destructive/5 p-3 space-y-1">
                     <div className="flex items-center gap-2 text-destructive text-sm font-medium">
                       <AlertTriangle className="h-4 w-4" />
                       Villa við JSON lestur
                     </div>
-                    {parseErrors.slice(0, 3).map((e, i) => (
+                    {parseErrors.slice(0, 5).map((e, i) => (
                       <p key={i} className="text-xs text-destructive/80">{e}</p>
                     ))}
+                    {parseErrors.length > 5 && (
+                      <p className="text-xs text-muted-foreground">...og {parseErrors.length - 5} villur til viðbótar</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Athugaðu hvort JSON-ið sé klippt eða vantar lokun (] eða {'}'}).
                       Þú getur líka hlaðið upp .json skránni í CSV flipanum.
                     </p>
                   </div>
-          )}
+                )}
 
-          {/* Parse warnings (partial recovery) */}
-          {parseWarnings.length > 0 && (
-            <Card className="border-yellow-300 bg-yellow-50/60">
-              <CardContent className="pt-3 pb-3 flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
-                <div className="space-y-0.5">
-                  {parseWarnings.map((w, i) => (
-                    <p key={i} className="text-xs text-yellow-800">{w}</p>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                {/* Parse warnings */}
+                {parseWarnings.length > 0 && (
+                  <div className="rounded-md border border-yellow-300 bg-yellow-50/60 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-yellow-700 text-sm font-medium">
+                      <Info className="h-4 w-4" />
+                      Athugasemd
+                    </div>
+                    {parseWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-yellow-800">{w}</p>
+                    ))}
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">JSON færslur</span>
-                  <Button onClick={handleParseJson} disabled={!jsonText.trim() || isProcessing}>
-                    Greina JSON
+                  <Button onClick={handleParseJson} disabled={!jsonText.trim() || isProcessing || isAnalyzing}>
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Greini...
+                      </>
+                    ) : (
+                      'Greina JSON'
+                    )}
                   </Button>
                 </div>
               </CardContent>
