@@ -1,40 +1,26 @@
 // ============================================================
 // Húsfélagið.is — Upload Transactions Component
-// Tab interface: paste | CSV file upload
+// Performance-optimized: pagination, chunked processing, test mode
 // ============================================================
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Upload,
-  ClipboardPaste,
-  FileText,
-  CheckCircle2,
-  AlertTriangle,
-  TrendingUp,
-  TrendingDown,
-  Loader2,
-  X,
+  Upload, ClipboardPaste, FileText, CheckCircle2, AlertTriangle,
+  TrendingUp, TrendingDown, Loader2, X, ChevronLeft, ChevronRight, Info,
 } from 'lucide-react';
 import { parseTransactionText, parseJsonTransactions, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
 import { categorizeTransaction } from '@/lib/categorize';
@@ -43,6 +29,13 @@ import { useCategories, useVendorRules } from '@/hooks/useCategories';
 import { useUploadTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/hooks/useAuth';
 import type { TransactionInsert } from '@/types/database';
+
+// ============================================================
+// TYPES & CONSTANTS
+// ============================================================
+const PAGE_SIZE = 100;
+const LARGE_DATASET_THRESHOLD = 500;
+const CHUNK_SIZE = 400;
 
 interface EnrichedTransaction extends ParsedTransaction {
   categoryId: string | null;
@@ -56,9 +49,11 @@ interface EnrichedTransaction extends ParsedTransaction {
 interface UploadTransactionsProps {
   associationId: string;
   onSuccess?: () => void;
+  /** When true, "save to DB" is hidden — only preview/analysis */
+  testModeDefault?: boolean;
 }
 
-export function UploadTransactions({ associationId, onSuccess }: UploadTransactionsProps) {
+export function UploadTransactions({ associationId, onSuccess, testModeDefault = false }: UploadTransactionsProps) {
   const { user } = useAuth();
   const { data: categories = [] } = useCategories();
   const { data: vendorRules = [] } = useVendorRules(associationId);
@@ -69,87 +64,127 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   const [enriched, setEnriched] = useState<EnrichedTransaction[]>([]);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [isParsed, setIsParsed] = useState(false);
-  const [fileName, setFileName] = useState<string>('');
+  const [fileName, setFileName] = useState('');
   const [fileType, setFileType] = useState<'csv' | 'xlsx' | 'paste' | 'json'>('paste');
   const [jsonText, setJsonText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Test mode
+  const [testMode, setTestMode] = useState(testModeDefault);
+
+  // Processing state for chunked parsing
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processProgress, setProcessProgress] = useState(0);
+
+  // Inline editing row (for large datasets we only show Select for the active row)
+  const [editingRow, setEditingRow] = useState<number | null>(null);
+
+  const isLargeDataset = enriched.length > LARGE_DATASET_THRESHOLD;
+
   // ============================================================
-  // ENRICH with categorization
+  // ENRICH single transaction
   // ============================================================
-  const enrichTransactions = useCallback(
-    (transactions: ParsedTransaction[]): EnrichedTransaction[] => {
-      return transactions.map((tx) => {
-        const result = categorizeTransaction(
-          tx.description,
-          tx.amount,
-          vendorRules,
-          categories
+  const enrichOne = useCallback(
+    (tx: ParsedTransaction, hint?: string): EnrichedTransaction => {
+      const result = categorizeTransaction(tx.description, tx.amount, vendorRules, categories);
+      const cat = categories.find((c) => c.name_is === result.categoryNameIs);
+      let enrichedTx: EnrichedTransaction = {
+        ...tx,
+        categoryId: cat?.id ?? null,
+        categoryName: result.categoryNameIs,
+        categoryColor: cat?.color ?? 'yellow',
+        isIncome: result.isIncome,
+        isUncategorized: result.categoryNameIs === 'Óflokkað' || result.method === 'fallback',
+        isIndividualPayment: result.isIndividualPayment,
+      };
+      if (hint) {
+        const hintCat = categories.find(
+          (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
         );
-        const cat = categories.find((c) => c.name_is === result.categoryNameIs);
-        const isUncategorized = result.categoryNameIs === 'Óflokkað' || result.method === 'fallback';
-        return {
-          ...tx,
-          categoryId: cat?.id ?? null,
-          categoryName: result.categoryNameIs,
-          categoryColor: cat?.color ?? 'yellow',
-          isIncome: result.isIncome,
-          isUncategorized,
-          isIndividualPayment: result.isIndividualPayment,
-        };
-      });
+        if (hintCat) {
+          enrichedTx = {
+            ...enrichedTx,
+            categoryId: hintCat.id,
+            categoryName: hintCat.name_is,
+            categoryColor: hintCat.color ?? 'yellow',
+            isUncategorized: false,
+          };
+        }
+      }
+      return enrichedTx;
     },
     [categories, vendorRules]
   );
 
   // ============================================================
-  // PARSE PASTED TEXT
+  // CHUNKED ASYNC ENRICHMENT — keeps UI responsive
   // ============================================================
-  const handleParse = () => {
-    const result = parseTransactionText(pasteText);
-    const enrichedTx = enrichTransactions(result.transactions);
-    setEnriched(enrichedTx);
-    setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
-    setIsParsed(true);
-    setFileType('paste');
-  };
+  const enrichChunked = useCallback(
+    async (transactions: ParsedTransaction[], hints?: (string | undefined)[]): Promise<EnrichedTransaction[]> => {
+      if (transactions.length <= CHUNK_SIZE) {
+        // Small enough to do synchronously
+        return transactions.map((tx, i) => enrichOne(tx, hints?.[i]));
+      }
+      setIsProcessing(true);
+      setProcessProgress(0);
+      const results: EnrichedTransaction[] = [];
+      for (let i = 0; i < transactions.length; i += CHUNK_SIZE) {
+        const chunk = transactions.slice(i, i + CHUNK_SIZE);
+        const enrichedChunk = chunk.map((tx, j) => enrichOne(tx, hints?.[i + j]));
+        results.push(...enrichedChunk);
+        setProcessProgress(Math.round((results.length / transactions.length) * 100));
+        // Yield to UI
+        await new Promise((r) => setTimeout(r, 0));
+      }
+      setIsProcessing(false);
+      setProcessProgress(100);
+      return results;
+    },
+    [enrichOne]
+  );
 
   // ============================================================
-  // PARSE JSON TEXT
+  // PARSE helpers
   // ============================================================
-  const handleParseJson = () => {
+  const finishParse = (txs: EnrichedTransaction[], errors: string[], type: 'paste' | 'csv' | 'xlsx' | 'json') => {
+    setEnriched(txs);
+    setParseErrors(errors);
+    setIsParsed(true);
+    setFileType(type);
+    setCurrentPage(0);
+    setEditingRow(null);
+    // Clear raw text to free memory
+    if (type === 'paste') setPasteText('');
+    if (type === 'json') setJsonText('');
+  };
+
+  const handleParse = async () => {
+    try {
+      const result = parseTransactionText(pasteText);
+      const enrichedTx = await enrichChunked(result.transactions);
+      finishParse(enrichedTx, result.errors.map((e) => `Lína ${e.line}: ${e.message}`), 'paste');
+    } catch (err) {
+      setParseErrors([`Villa: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
+      setEnriched([]);
+      setIsParsed(true);
+    }
+  };
+
+  const handleParseJson = async () => {
     try {
       const result = parseJsonTransactions(jsonText);
       if (result.transactions.length === 0 && result.errors.length > 0) {
-        setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
-        setEnriched([]);
-        setIsParsed(true);
-        setFileType('json');
+        finishParse([], result.errors.map((e) => `Lína ${e.line}: ${e.message}`), 'json');
         return;
       }
-      // If the JSON has a category hint, try to match it
-      const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
-        const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
-        if (hint) {
-          const cat = categories.find(
-            (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
-          );
-          if (cat) {
-            return {
-              ...tx,
-              categoryId: cat.id,
-              categoryName: cat.name_is,
-              categoryColor: cat.color ?? 'yellow',
-              isUncategorized: false,
-            };
-          }
-        }
-        return tx;
-      });
-      setEnriched(enrichedTx);
-      setParseErrors(result.errors.map((e) => `Lína ${e.line}: ${e.message}`));
-      setIsParsed(true);
-      setFileType('json');
+      const hints = result.transactions.map(
+        (tx) => (tx as ParsedTransaction & { categoryHint?: string }).categoryHint
+      );
+      const enrichedTx = await enrichChunked(result.transactions, hints);
+      finishParse(enrichedTx, result.errors.map((e) => `Lína ${e.line}: ${e.message}`), 'json');
     } catch (err) {
       setParseErrors([`Villa við að lesa JSON: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
       setEnriched([]);
@@ -169,38 +204,31 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
       setFileType(type);
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
-        if (isJson) {
-          setJsonText(text);
-          // Auto-parse JSON files
-          const result = parseJsonTransactions(text);
-          const enrichedTx = enrichTransactions(result.transactions).map((tx, i) => {
-            const hint = (result.transactions[i] as ParsedTransaction & { categoryHint?: string }).categoryHint;
-            if (hint) {
-              const cat = categories.find(
-                (c) => c.name_is.toLowerCase() === hint.toLowerCase() || c.name_en?.toLowerCase() === hint.toLowerCase()
-              );
-              if (cat) {
-                return { ...tx, categoryId: cat.id, categoryName: cat.name_is, categoryColor: cat.color ?? 'yellow', isUncategorized: false };
-              }
-            }
-            return tx;
-          });
-          setEnriched(enrichedTx);
-          setParseErrors(result.errors.map((err) => `Lína ${err.line}: ${err.message}`));
-          setIsParsed(true);
-        } else {
-          const result = parseTransactionText(text);
-          const enrichedTx = enrichTransactions(result.transactions);
-          setEnriched(enrichedTx);
-          setParseErrors(result.errors.map((err) => `Lína ${err.line}: ${err.message}`));
+        try {
+          if (isJson) {
+            setJsonText(text);
+            const result = parseJsonTransactions(text);
+            const hints = result.transactions.map(
+              (tx) => (tx as ParsedTransaction & { categoryHint?: string }).categoryHint
+            );
+            const enrichedTx = await enrichChunked(result.transactions, hints);
+            finishParse(enrichedTx, result.errors.map((err) => `Lína ${err.line}: ${err.message}`), 'json');
+          } else {
+            const result = parseTransactionText(text);
+            const enrichedTx = await enrichChunked(result.transactions);
+            finishParse(enrichedTx, result.errors.map((err) => `Lína ${err.line}: ${err.message}`), type as 'csv' | 'xlsx');
+          }
+        } catch (err) {
+          setParseErrors([`Villa: ${err instanceof Error ? err.message : 'Óþekkt villa'}`]);
+          setEnriched([]);
           setIsParsed(true);
         }
       };
       reader.readAsText(file, 'UTF-8');
     },
-    [enrichTransactions, categories]
+    [enrichChunked]
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,13 +264,14 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
           : tx
       )
     );
+    setEditingRow(null);
   };
 
   // ============================================================
   // SAVE ALL
   // ============================================================
   const handleSave = async () => {
-    if (!user || enriched.length === 0) return;
+    if (!user || enriched.length === 0 || testMode) return;
 
     const transactions: TransactionInsert[] = enriched.map((tx) => ({
       association_id: associationId,
@@ -257,7 +286,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
       manually_categorized: false,
       categorized_by_user_id: null,
       notes: null,
-      uploaded_batch_id: null, // Will be set by the hook
+      uploaded_batch_id: null,
     }));
 
     await uploadMutation.mutateAsync({
@@ -268,7 +297,6 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
       fileType,
     });
 
-    // Reset
     setPasteText('');
     setJsonText('');
     setEnriched([]);
@@ -279,13 +307,30 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   };
 
   // ============================================================
-  // STATS
+  // STATS — computed once via useMemo
   // ============================================================
-  const uncategorizedCount = enriched.filter((t) => t.isUncategorized).length;
-  const incomeCount = enriched.filter((t) => t.isIncome).length;
-  const expenseCount = enriched.filter((t) => !t.isIncome).length;
-  const totalIncome = enriched.filter((t) => t.isIncome).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const totalExpenses = enriched.filter((t) => !t.isIncome).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const stats = useMemo(() => {
+    let incomeCount = 0, expenseCount = 0, totalIncome = 0, totalExpenses = 0, uncategorizedCount = 0;
+    for (const tx of enriched) {
+      if (tx.isIncome) {
+        incomeCount++;
+        totalIncome += Math.abs(tx.amount);
+      } else {
+        expenseCount++;
+        totalExpenses += Math.abs(tx.amount);
+      }
+      if (tx.isUncategorized) uncategorizedCount++;
+    }
+    return { incomeCount, expenseCount, totalIncome, totalExpenses, uncategorizedCount };
+  }, [enriched]);
+
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+  const totalPages = Math.max(1, Math.ceil(enriched.length / PAGE_SIZE));
+  const pageStart = currentPage * PAGE_SIZE;
+  const pageEnd = Math.min(pageStart + PAGE_SIZE, enriched.length);
+  const visibleRows = enriched.slice(pageStart, pageEnd);
 
   const uploadProgress = uploadMutation.isPending ? 50 : uploadMutation.isSuccess ? 100 : 0;
 
@@ -294,7 +339,21 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
   // ============================================================
   return (
     <div className="space-y-6">
-      {!isParsed ? (
+      {/* Processing overlay */}
+      {isProcessing && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm font-medium">Greini færslur...</span>
+            </div>
+            <Progress value={processProgress} className="h-1.5" />
+            <p className="text-xs text-muted-foreground">{processProgress}%</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isParsed && !isProcessing ? (
         <Tabs defaultValue="paste">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="paste" className="flex items-center gap-2">
@@ -317,21 +376,21 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
               <CardHeader>
                 <CardTitle>Líma inn bankafærslur</CardTitle>
                 <CardDescription>
-                  Opnaðu netbanka, veldu allar færslurnar og límdu þær inn hér. Kerfið sér sjálfkrafa um dálkaskiptingu.
+                  Opnaðu netbanka, veldu allar færslurnar og límdu þær inn hér.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
-                  placeholder={`Límdu bankafærslur hér...\n\nDæmi:\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567\n15.02.2026\tJón Jónsson\t15.000\t1.279.755`}
+                  placeholder={`Límdu bankafærslur hér...\n\nDæmi:\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567`}
                   className="min-h-[200px] font-mono text-sm"
                 />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     {pasteText.split('\n').filter((l) => l.trim()).length} línur
                   </span>
-                  <Button onClick={handleParse} disabled={!pasteText.trim()}>
+                  <Button onClick={handleParse} disabled={!pasteText.trim() || isProcessing}>
                     Greina færslur
                   </Button>
                 </div>
@@ -345,15 +404,13 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
               <CardHeader>
                 <CardTitle>Hlaða upp CSV skrá</CardTitle>
                 <CardDescription>
-                  Sæktu CSV skrá úr netbanka og dragðu hana hingað. Stutt er við UTF-8 skrár með íslenskum stöfum.
+                  Sæktu CSV skrá úr netbanka og dragðu hana hingað.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div
                   className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                    dragOver
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
+                    dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                   }`}
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
@@ -365,12 +422,8 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                   aria-label="Hlaða upp skrá"
                 >
                   <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-                  <p className="text-sm font-medium">
-                    Dragðu .csv, .xlsx eða .json skrá hingað
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    eða smelltu til að velja skrá
-                  </p>
+                  <p className="text-sm font-medium">Dragðu .csv, .xlsx eða .json skrá hingað</p>
+                  <p className="text-xs text-muted-foreground mt-1">eða smelltu til að velja skrá</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -389,21 +442,19 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
               <CardHeader>
                 <CardTitle>Líma inn JSON</CardTitle>
                 <CardDescription>
-                  Límdu JSON fylki af færslum. Hverjri færslu þarf date, description og amount. Einnig má hafa balance og category.
+                  Límdu JSON fylki af færslum. Hverjri færslu þarf date, description og amount.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
                   value={jsonText}
                   onChange={(e) => setJsonText(e.target.value)}
-                  placeholder={`[\n  {\n    "date": "2026-02-23",\n    "description": "HS Orka",\n    "amount": -45188,\n    "balance": 176383,\n    "category": "Rafmagn & Hiti"\n  }\n]`}
+                  placeholder={`[\n  {\n    "date": "2026-02-23",\n    "description": "HS Orka",\n    "amount": -45188\n  }\n]`}
                   className="min-h-[200px] font-mono text-sm"
                 />
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    JSON færslur
-                  </span>
-                  <Button onClick={handleParseJson} disabled={!jsonText.trim()}>
+                  <span className="text-sm text-muted-foreground">JSON færslur</span>
+                  <Button onClick={handleParseJson} disabled={!jsonText.trim() || isProcessing}>
                     Greina JSON
                   </Button>
                 </div>
@@ -411,11 +462,23 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
             </Card>
           </TabsContent>
         </Tabs>
-      ) : (
+      ) : isParsed && (
         /* ============================================================
-           PREVIEW TABLE
+           PREVIEW TABLE — paginated
         ============================================================ */
         <div className="space-y-4">
+          {/* Large dataset notice */}
+          {isLargeDataset && (
+            <Card className="border-blue-200 bg-blue-50/60">
+              <CardContent className="pt-3 pb-3 flex items-start gap-2">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-blue-800">
+                  Stórt gagnasett ({enriched.length} færslur) — forskoðun er síðuð ({PAGE_SIZE} línur/síðu) til að halda appi hröðu. Smelltu á flokk til að breyta honum.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Stats summary */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Card className="p-3">
@@ -427,7 +490,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                 <TrendingUp className="h-3 w-3 text-green-600" /> Innkoma
               </p>
               <p className="text-lg font-semibold text-green-600">
-                {formatIskAmount(totalIncome)}
+                {formatIskAmount(stats.totalIncome)}
               </p>
             </Card>
             <Card className="p-3">
@@ -435,14 +498,14 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                 <TrendingDown className="h-3 w-3 text-red-600" /> Útgjöld
               </p>
               <p className="text-lg font-semibold text-red-600">
-                {formatIskAmount(totalExpenses)}
+                {formatIskAmount(stats.totalExpenses)}
               </p>
             </Card>
             <Card className="p-3">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertTriangle className="h-3 w-3 text-yellow-600" /> Óflokkað
               </p>
-              <p className="text-2xl font-bold text-yellow-700">{uncategorizedCount}</p>
+              <p className="text-2xl font-bold text-yellow-700">{stats.uncategorizedCount}</p>
             </Card>
           </div>
 
@@ -476,9 +539,26 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
           {/* Transaction preview table */}
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Forskoðun — {enriched.length} færslur</CardTitle>
-                <div className="flex gap-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="text-base">
+                  Forskoðun — {enriched.length} færslur
+                  {testMode && (
+                    <Badge variant="outline" className="ml-2 text-xs font-normal">Prófunarhamur</Badge>
+                  )}
+                </CardTitle>
+                <div className="flex gap-2 items-center">
+                  {/* Test mode toggle */}
+                  <div className="flex items-center gap-1.5 mr-2">
+                    <Switch
+                      id="test-mode"
+                      checked={testMode}
+                      onCheckedChange={setTestMode}
+                      className="scale-90"
+                    />
+                    <Label htmlFor="test-mode" className="text-xs text-muted-foreground cursor-pointer">
+                      Prófa aðeins
+                    </Label>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -486,32 +566,39 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                       setIsParsed(false);
                       setEnriched([]);
                       setPasteText('');
+                      setJsonText('');
+                      setCurrentPage(0);
                     }}
                   >
                     <X className="h-4 w-4 mr-1" />
                     Hætta við
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={uploadMutation.isPending || enriched.length === 0}
-                  >
-                    {uploadMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Hleð upp...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Vista {enriched.length} færslur
-                      </>
-                    )}
-                  </Button>
+                  {!testMode && (
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={uploadMutation.isPending || enriched.length === 0}
+                    >
+                      {uploadMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Hleð upp...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Vista {enriched.length} færslur
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                {incomeCount} innkomur · {expenseCount} útgjöld · {uncategorizedCount} óflokkuð
+                {stats.incomeCount} innkomur · {stats.expenseCount} útgjöld · {stats.uncategorizedCount} óflokkuð
+                {enriched.length > PAGE_SIZE && (
+                  <> · Síða {currentPage + 1} af {totalPages}</>
+                )}
               </p>
             </CardHeader>
             <CardContent className="p-0">
@@ -519,6 +606,7 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10 text-center">#</TableHead>
                       <TableHead className="w-24">Dagsetning</TableHead>
                       <TableHead>Lýsing</TableHead>
                       <TableHead className="text-right w-28">Upphæð</TableHead>
@@ -526,65 +614,116 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {enriched.map((tx, index) => (
-                      <TableRow
-                        key={index}
-                        className={tx.isUncategorized ? 'bg-yellow-50/60' : undefined}
-                      >
-                        <TableCell className="text-xs font-mono text-muted-foreground whitespace-nowrap">
-                          {formatDateIs(tx.date)}
-                        </TableCell>
-                        <TableCell className="text-sm max-w-[200px]">
-                          <span className="truncate block" title={tx.description}>
-                            {tx.description}
-                          </span>
-                        </TableCell>
-                        <TableCell
-                          className={`text-right text-sm font-medium whitespace-nowrap ${
-                            tx.isIncome ? 'text-green-600' : 'text-red-600'
-                          }`}
+                    {visibleRows.map((tx, i) => {
+                      const globalIndex = pageStart + i;
+                      const showSelect = !isLargeDataset || editingRow === globalIndex;
+                      return (
+                        <TableRow
+                          key={globalIndex}
+                          className={tx.isUncategorized ? 'bg-yellow-50/60' : undefined}
                         >
-                          {tx.isIncome ? '+' : '-'}
-                          {formatIskAmount(Math.abs(tx.amount))}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={tx.categoryId ?? ''}
-                            onValueChange={(val) => handleCategoryChange(index, val)}
+                          <TableCell className="text-xs text-muted-foreground text-center">
+                            {globalIndex + 1}
+                          </TableCell>
+                          <TableCell className="text-xs font-mono text-muted-foreground whitespace-nowrap">
+                            {formatDateIs(tx.date)}
+                          </TableCell>
+                          <TableCell className="text-sm max-w-[200px]">
+                            <span className="truncate block" title={tx.description}>
+                              {tx.description}
+                            </span>
+                          </TableCell>
+                          <TableCell
+                            className={`text-right text-sm font-medium whitespace-nowrap ${
+                              tx.isIncome ? 'text-green-600' : 'text-red-600'
+                            }`}
                           >
-                            <SelectTrigger className="h-7 text-xs border-0 shadow-none p-0 pl-1">
-                              <SelectValue>
+                            {tx.isIncome ? '+' : '-'}
+                            {formatIskAmount(Math.abs(tx.amount))}
+                          </TableCell>
+                          <TableCell>
+                            {showSelect ? (
+                              <Select
+                                value={tx.categoryId ?? ''}
+                                onValueChange={(val) => handleCategoryChange(globalIndex, val)}
+                              >
+                                <SelectTrigger className="h-7 text-xs border-0 shadow-none p-0 pl-1">
+                                  <SelectValue>
+                                    <Badge
+                                      className={`text-xs ${getCategoryColor(tx.categoryColor).badge}`}
+                                      variant="secondary"
+                                    >
+                                      {tx.isUncategorized && <AlertTriangle className="h-3 w-3 mr-1" />}
+                                      {tx.categoryName}
+                                    </Badge>
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map((cat) => (
+                                    <SelectItem key={cat.id} value={cat.id}>
+                                      <span className="flex items-center gap-2">
+                                        <span
+                                          className="inline-block w-2 h-2 rounded-full"
+                                          style={{ backgroundColor: getCategoryHex(cat.color) }}
+                                        />
+                                        {cat.name_is}
+                                      </span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <button
+                                type="button"
+                                className="text-left w-full"
+                                onClick={() => setEditingRow(globalIndex)}
+                              >
                                 <Badge
-                                  className={`text-xs ${getCategoryColor(tx.categoryColor).badge}`}
+                                  className={`text-xs cursor-pointer hover:opacity-80 ${getCategoryColor(tx.categoryColor).badge}`}
                                   variant="secondary"
                                 >
-                                  {tx.isUncategorized && (
-                                    <AlertTriangle className="h-3 w-3 mr-1" />
-                                  )}
+                                  {tx.isUncategorized && <AlertTriangle className="h-3 w-3 mr-1" />}
                                   {tx.categoryName}
                                 </Badge>
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  <span className="flex items-center gap-2">
-                                    <span
-                                      className="inline-block w-2 h-2 rounded-full"
-                                      style={{ backgroundColor: getCategoryHex(cat.color) }}
-                                    />
-                                    {cat.name_is}
-                                  </span>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                              </button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Sýni {pageStart + 1}–{pageEnd} af {enriched.length}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === 0}
+                      onClick={() => { setCurrentPage((p) => p - 1); setEditingRow(null); }}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground px-2">
+                      {currentPage + 1} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages - 1}
+                      onClick={() => { setCurrentPage((p) => p + 1); setEditingRow(null); }}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

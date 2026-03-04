@@ -26,6 +26,7 @@ export default function UploadPage() {
       <UploadTransactions
         associationId={association.id}
         onSuccess={() => navigate('/transactions')}
+        testModeDefault={false}
       />
     </div>
   );

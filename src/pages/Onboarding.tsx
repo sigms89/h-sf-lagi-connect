@@ -361,6 +361,7 @@ export default function Onboarding() {
               <UploadTransactions
                 associationId={createdAssociationId}
                 onSuccess={() => navigate('/')}
+                testModeDefault={true}
               />
               <div className="text-center">
                 <Button
