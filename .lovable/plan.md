@@ -1,46 +1,55 @@
 
-Vandinn er skýr: í session replay sést að JSON-ið sem er límt inn endar á kommu og vantar lokun (`]`), þannig að parser skilar `Unexpected end of JSON input`. Núverandi „auto-fix“ lagar aðeins kommur fyrir `]`/`}`, en lagar ekki ófullkominn endi.
+Greining (rót vandans)
+- Þú ert að ýta á **„Greina færslur“ í „Líma inn bankafærslur“ flipanum**, en textinn er í JSON-sniði.
+- Sá flipi keyrir `parseTransactionText(...)` (tab/semicolon parser), ekki JSON parser.
+- Þegar parsing skilar 0 færslum + mörgum villum, er notandi haldinn á input-skjá — en villurnar sjást ekki í þessum flipa. Útkoman lítur út eins og „ekkert gerist“.
+- Með mjög stórt inntak (t.d. 60k+ línur) getur villulisti orðið mjög stór og gert UI tregt.
+- Do I know what the issue is? **Já.**
 
-Áætlun til að laga þetta varanlega:
+Innleiðingaráætlun
+1) Sameina „analyze“ flæði og greina inntakstegund sjálfkrafa
+- Í `src/components/transactions/UploadTransactions.tsx` bæta við sameiginlegri `analyzeInput(text, source)` leið.
+- Bæta við „likely JSON“ greiningu fyrir paste texta (t.d. byrjar á `{`/`[` eða inniheldur endurtekið `"date"`/`"amount"` mynstur).
+- Ef paste lítur út eins og JSON:
+  - keyra JSON parser beint (án þess að notandi þurfi að skipta flipa),
+  - sýna skýrt info/warning: „Textinn var greindur sem JSON og lesinn þannig“.
 
-1) Gera JSON parser þolnari fyrir ófullkomið input  
-- Skrá: `src/lib/parseTransactions.ts`  
-- Bæta við fjölþrepa parse-röð:
-  - Tilraun A: strict `JSON.parse` á hreinsuðu input.
-  - Tilraun B: „repair“ fyrir algeng copy/paste vandamál:
-    - fjarlægja trailing kommu í enda texta,
-    - loka vöntuðum `]`/`}` (með jafnvægisgreiningu utan strengja),
-    - reyna parse aftur.
-  - Tilraun C (fallback): ef enn mistekst, ná í alla heila `{ ... }` hluti úr texta og parse-a hvern hlut fyrir sig (sleppa ónýtum hala).
-- Niðurstaða: ef einhverjar færslur finnast, þá heldur appið áfram og sýnir viðvörun um slepptar línur í stað þess að stoppa allt.
+2) Sýna villur/viðvaranir í öllum inntaksflipum (ekki bara JSON)
+- Setja sameiginlegt feedback-box undir textarea/dropzone fyrir:
+  - parse villur,
+  - parse viðvaranir,
+  - „x línur sleppt“ samantekt.
+- Þannig fær notandi strax skýr skilaboð í paste/csv/json.
 
-2) Bæta notendaskilaboð svo þetta sé ekki ruglingslegt  
-- Skrá: `src/components/transactions/UploadTransactions.tsx`  
-- Ef `transactions.length === 0` og parse klikkar:
-  - halda notanda í JSON-inntaki (ekki hoppa beint í „Forskoðun — 0 færslur“),
-  - sýna skýrt villuskilaboð beint við JSON reitinn:
-    - t.d. „JSON virðist ófullkomið (vantar `]` eða `}` í lok).“
-- Ef parser nær að bjarga hluta gagna:
-  - fara í forskoðun með þeim færslum,
-  - sýna „X línum sleppt“ sem viðvörun (ekki fatal villa).
+3) Gera „Greina færslur“ með skýra viðbragðshegðun
+- Bæta við `isAnalyzing` state sem fer í `true` strax við click (áður en parse/enrich klárast).
+- Sýna spinner/texta á hnappi og hindra tvísmelli.
+- Þetta leysir „hnappurinn virðist dauður“ upplifun.
 
-3) Styrkja skráarflæði fyrir `.json`  
-- Sama parser-röð notuð bæði fyrir „Líma inn JSON“ og „Hlaða upp skrá“.  
-- Tryggja að notandi geti hlaðið upp skránni sinni beint og fengið sömu þolnu hegðun.
+4) Takmarka villumagn fyrir stór gögn
+- Í `src/lib/parseTransactions.ts` bæta við öryggisþaki á villusöfnun (t.d. max 100–300 villur + teljari á slepptar villur).
+- Í UI sýna:
+  - fyrstu N villur,
+  - heildarfjölda slepptra lína.
+- Þetta kemur í veg fyrir að risastór villulisti hægi á appinu.
 
-4) Bæta við sjálfvirkum prófum til að koma í veg fyrir endurkomu  
-- Nýtt test, t.d. `src/test/parseTransactions.test.ts`:
-  - valid JSON array,
-  - array sem endar á `},` án lokunar (`]`) -> á að recovera,
-  - NDJSON/einstakir hlutir -> á að lesast,
-  - raunverulega brotið input -> á að skila gagnlegri villu.
+5) Herða JSON fallback fyrir stórt input
+- Forðast þunga regex-fallback keyrslu á mjög löngum texta; nota línulega/öruggari extraction leið eða „size guard“ áður en fallback keyrir.
+- Markmið: engin löng frysting þegar JSON er brotið og mjög stórt.
 
-5) Staðfesting eftir innleiðingu  
-- Prófa nákvæmlega sama JSON dæmi og þú ert að nota núna.  
-- Prófa stórt JSON gagnasett (þúsundir lína) með copy/paste og file upload.  
-- Staðfesta að „Prófa aðeins“ virki áfram án vistunar.
+6) Prófanir
+- Uppfæra `src/test/parseTransactions.test.ts` með tilfellum fyrir:
+  - stórt brotið JSON,
+  - mörg villuatriði með capped error list,
+  - unicode mínus (`−`) og íslenskt talnasnið.
+- Bæta við component-level prófi (ef test setup leyfir) eða lágmarks logic-prófi fyrir inntaksgreiningu (JSON vs banka-texti).
 
-Tæknileg atriði (stutt):
-- Engar breytingar á gagnagrunni eða backend þarf.
-- Þetta er alfarið parser + UI villumeðhöndlun.
-- Markmið: „graceful degradation“ — bjarga því sem hægt er, sýna skýra ástæðu fyrir því sem var sleppt.
+Skrár sem verða uppfærðar
+- `src/components/transactions/UploadTransactions.tsx` (aðal UX + parsing orchestration + feedback)
+- `src/lib/parseTransactions.ts` (error capping + fallback guard/performance)
+- `src/test/parseTransactions.test.ts` (ný regression test tilfelli)
+
+Tæknileg atriði
+- Engar breytingar á gagnagrunni eða backend.
+- Þetta er UI + parser robustness/performance lagfæring.
+- Niðurstaða: „Greina færslur“ verður áreiðanlegt, skýrt og svarandi jafnvel með mjög stórt JSON inntak.
