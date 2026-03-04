@@ -32,6 +32,8 @@ export type AssociationInsert = Omit<Association, 'id' | 'created_at' | 'updated
 
 export type AssociationUpdate = Partial<Omit<Association, 'id'>>;
 
+export type SubscriptionTier = 'free' | 'plus' | 'pro';
+
 export interface AssociationMember {
   id: string;
   user_id: string;
