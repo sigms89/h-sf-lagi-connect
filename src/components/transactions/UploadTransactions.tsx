@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { parseTransactionText, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
 import { categorizeTransaction } from '@/lib/categorize';
-import { getCategoryColor, formatIskAmount } from '@/lib/categories';
+import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categories';
 import { useCategories, useVendorRules } from '@/hooks/useCategories';
 import { useUploadTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/hooks/useAuth';
@@ -470,7 +470,8 @@ export function UploadTransactions({ associationId, onSuccess }: UploadTransacti
                                 <SelectItem key={cat.id} value={cat.id}>
                                   <span className="flex items-center gap-2">
                                     <span
-                                      className={`inline-block w-2 h-2 rounded-full bg-${cat.color ?? 'gray'}-400`}
+                                      className="inline-block w-2 h-2 rounded-full"
+                                      style={{ backgroundColor: getCategoryHex(cat.color) }}
                                     />
                                     {cat.name_is}
                                   </span>

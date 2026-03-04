@@ -44,7 +44,7 @@ import {
 import { useTransactions, useUpdateTransactionCategory } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
-import { getCategoryColor, formatIskAmount } from '@/lib/categories';
+import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categories';
 import { formatDateIs } from '@/lib/parseTransactions';
 import type { TransactionFilters } from '@/types/database';
 
@@ -387,7 +387,8 @@ export function TransactionList({ associationId }: TransactionListProps) {
                                 className="text-sm"
                               >
                                 <span
-                                  className={`inline-block w-2.5 h-2.5 rounded-full mr-2 bg-${cat.color ?? 'gray'}-400`}
+                                  className="inline-block w-2.5 h-2.5 rounded-full mr-2"
+                                  style={{ backgroundColor: getCategoryHex(cat.color) }}
                                 />
                                 {cat.name_is}
                               </DropdownMenuItem>

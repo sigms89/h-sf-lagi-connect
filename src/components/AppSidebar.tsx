@@ -67,7 +67,7 @@ export function AppSidebar() {
       const { data, error } = await db
         .from("profiles")
         .select("role_type")
-        .eq("id", user.id)
+        .eq("user_id", user.id)
         .maybeSingle();
       if (error) return null;
       return data as Profile | null;
@@ -87,19 +87,19 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       {/* Logo / Association name */}
       <div
-        className={`flex items-center gap-2.5 h-14 border-b px-4 flex-shrink-0 ${
+        className={`flex items-center gap-2.5 h-14 border-b border-sidebar-border px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-0" : ""
         }`}
       >
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-          <Building2 className="h-4 w-4 text-primary-foreground" />
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-sidebar-primary flex items-center justify-center">
+          <Building2 className="h-4 w-4 text-sidebar-primary-foreground" />
         </div>
         {!collapsed && (
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-tight truncate">
               {association?.name ?? "Húsfélagið.is"}
             </p>
-            <p className="text-[10px] text-muted-foreground leading-tight truncate">
+            <p className="text-[10px] text-sidebar-foreground/50 leading-tight truncate">
               {association?.address ?? "Fjármálagreining"}
             </p>
           </div>
