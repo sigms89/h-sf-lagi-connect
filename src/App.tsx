@@ -9,39 +9,156 @@ import AppLayout from "@/layouts/AppLayout";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Transactions from "@/pages/Transactions";
-import UploadPage from "@/pages/Upload";
-import Settings from "@/pages/Settings";
-import Onboarding from "@/pages/Onboarding";
+import Upload from "@/pages/Upload";
 import Analytics from "@/pages/Analytics";
 import Benchmarking from "@/pages/Benchmarking";
 import Marketplace from "@/pages/Marketplace";
+import Settings from "@/pages/Settings";
+import Onboarding from "@/pages/Onboarding";
+import Admin from "@/pages/Admin";
+import ProviderDashboard from "@/pages/ProviderDashboard";
+import ProviderRegister from "@/pages/ProviderRegister";
 import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
-
-const ProtectedPage = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>
-    <AppLayout>{children}</AppLayout>
-  </ProtectedRoute>
-);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 2 * 60 * 1000, // 2 minutes default
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner richColors closeButton />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
-            <Route path="/transactions" element={<ProtectedPage><Transactions /></ProtectedPage>} />
-            <Route path="/upload" element={<ProtectedPage><UploadPage /></ProtectedPage>} />
-            <Route path="/settings" element={<ProtectedPage><Settings /></ProtectedPage>} />
-            <Route path="/analytics" element={<ProtectedPage><Analytics /></ProtectedPage>} />
-            <Route path="/benchmarking" element={<ProtectedPage><Benchmarking /></ProtectedPage>} />
-            <Route path="/marketplace" element={<ProtectedPage><Marketplace /></ProtectedPage>} />
+
+            {/* Onboarding — protected but outside AppLayout (full page wizard) */}
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Provider registration — protected but outside AppLayout */}
+            <Route
+              path="/provider/register"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ProviderRegister />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected app routes — inside AppLayout */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Dashboard />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Transactions />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/upload"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Upload />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Analytics />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benchmarking"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Benchmarking />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Marketplace />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Settings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin panel — protected, role check done inside Admin component */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Admin />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Provider dashboard */}
+            <Route
+              path="/provider"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ProviderDashboard />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -2,6 +2,30 @@
 // Category color helpers and ISK formatting
 // ============================================================
 
+export interface CategoryConfig {
+  nameIs: string;
+  nameEn: string;
+  icon: string;
+  color: string;
+}
+
+export const CATEGORIES: CategoryConfig[] = [
+  { nameIs: 'Rafmagn', nameEn: 'Electricity', icon: 'Zap', color: 'yellow' },
+  { nameIs: 'Hitaveita', nameEn: 'Heating', icon: 'Flame', color: 'red' },
+  { nameIs: 'Vatnsveita', nameEn: 'Water', icon: 'Droplets', color: 'blue' },
+  { nameIs: 'Tryggingar', nameEn: 'Insurance', icon: 'Shield', color: 'indigo' },
+  { nameIs: 'Viðhald', nameEn: 'Maintenance', icon: 'Wrench', color: 'orange' },
+  { nameIs: 'Ræsting', nameEn: 'Cleaning', icon: 'Sparkles', color: 'cyan' },
+  { nameIs: 'Lyfta', nameEn: 'Elevator', icon: 'ArrowUpDown', color: 'purple' },
+  { nameIs: 'Sameiginlegur kostnaður', nameEn: 'Common costs', icon: 'Users', color: 'teal' },
+  { nameIs: 'Fjarskipti', nameEn: 'Telecom', icon: 'Wifi', color: 'green' },
+  { nameIs: 'Bókhaldsþjónusta', nameEn: 'Accounting', icon: 'Calculator', color: 'gray' },
+  { nameIs: 'Snjómokstur', nameEn: 'Snow removal', icon: 'Snowflake', color: 'blue' },
+  { nameIs: 'Garðvinna', nameEn: 'Gardening', icon: 'Flower2', color: 'green' },
+  { nameIs: 'Sorpþjónusta', nameEn: 'Waste', icon: 'Trash2', color: 'gray' },
+  { nameIs: 'Annað', nameEn: 'Other', icon: 'HelpCircle', color: 'neutral' },
+];
+
 const COLOR_MAP: Record<string, { badge: string; bg: string }> = {
   blue: { badge: 'bg-blue-100 text-blue-800', bg: 'bg-blue-400' },
   red: { badge: 'bg-red-100 text-red-800', bg: 'bg-red-400' },

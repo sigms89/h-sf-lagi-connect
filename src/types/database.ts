@@ -46,6 +46,16 @@ export interface AssociationMember {
   } | null;
 }
 
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  housing_association: string | null;
+  role_type: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Category {
   id: string;
   name_is: string;
@@ -155,4 +165,64 @@ export interface TransactionStats {
   monthly_data: MonthlyData[];
   category_breakdown: CategoryBreakdown[];
   current_balance: number | null;
+}
+
+// ============================================================
+// Service Provider Types
+// ============================================================
+
+export interface ServiceProvider {
+  id: string;
+  user_id: string;
+  company_name: string;
+  kennitala: string | null;
+  description_is: string | null;
+  description_en: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  logo_url: string | null;
+  service_area: string[];
+  is_approved: boolean;
+  subscription_status: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  categories?: Array<{ id: string; name_is: string; color: string; icon?: string }>;
+}
+
+// ============================================================
+// Bid / Marketplace Types
+// ============================================================
+
+export type BidRequestStatus = 'open' | 'closed' | 'awarded' | 'cancelled';
+export type BidStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+
+export interface BidRequest {
+  id: string;
+  association_id: string;
+  created_by: string;
+  category_id: string;
+  title: string;
+  description: string | null;
+  deadline: string | null;
+  status: BidRequestStatus;
+  created_at: string | null;
+  updated_at: string | null;
+  category?: Category | null;
+  bids?: Bid[];
+  bid_count?: number;
+  association?: Partial<Association> | null;
+}
+
+export interface Bid {
+  id: string;
+  bid_request_id: string;
+  provider_id: string;
+  amount: number;
+  description: string | null;
+  status: BidStatus;
+  valid_until: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  provider?: ServiceProvider | null;
 }
