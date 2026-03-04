@@ -1,36 +1,18 @@
-// ============================================================
-// Húsfélagið.is — BenchmarkFilters
-// Filter bar for the benchmarking page
-// ============================================================
-
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { RotateCcw, Users } from 'lucide-react';
-import type { BenchmarkFilters } from '@/hooks/useBenchmarking';
+import type { BenchmarkFilters as BenchmarkFiltersType } from '@/hooks/useBenchmarking';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface BenchmarkFiltersProps {
-  filters: BenchmarkFilters;
+  filters: BenchmarkFiltersType;
   comparableCount: number | undefined;
   isLoadingCount: boolean;
-  onUpdate: <K extends keyof BenchmarkFilters>(key: K, value: BenchmarkFilters[K]) => void;
+  onUpdate: <K extends keyof BenchmarkFiltersType>(key: K, value: BenchmarkFiltersType[K]) => void;
   onReset: () => void;
 }
-
-const POSTAL_AREAS = [
-  { value: 'all', label: 'Allt landið' },
-  { value: '1', label: 'Höfuðborgarsvæði (100–199)' },
-  { value: '2', label: 'Suðurnes (200–299)' },
-  { value: '3', label: 'Vesturland (300–399)' },
-  { value: '4', label: 'Vestfirðir (400–499)' },
-  { value: '5', label: 'Norðurland vestra (500–599)' },
-  { value: '6', label: 'Norðurland eystra (600–699)' },
-  { value: '7', label: 'Austurland (700–799)' },
-  { value: '8', label: 'Suðurland (800–899)' },
-  { value: '9', label: 'Suðurland / Ísafjarðarbær (900–999)' },
-];
 
 export function BenchmarkFilters({
   filters,
@@ -62,44 +44,23 @@ export function BenchmarkFilters({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Building type */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* City */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Tegund húss</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Borg</Label>
           <Select
-            value={filters.buildingType}
-            onValueChange={(v) =>
-              onUpdate('buildingType', v as BenchmarkFilters['buildingType'])
-            }
+            value={filters.city ?? 'all'}
+            onValueChange={(v) => onUpdate('city', v === 'all' ? undefined : v)}
           >
             <SelectTrigger className="h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Allar tegundir</SelectItem>
-              <SelectItem value="fjolbyli">Fjölbýlishús</SelectItem>
-              <SelectItem value="radhus">Raðhús</SelectItem>
-              <SelectItem value="parhus">Parhús</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Area */}
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Svæði</Label>
-          <Select
-            value={filters.postalPrefix}
-            onValueChange={(v) => onUpdate('postalPrefix', v)}
-          >
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POSTAL_AREAS.map((area) => (
-                <SelectItem key={area.value} value={area.value}>
-                  {area.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Allar borgir</SelectItem>
+              <SelectItem value="Reykjavík">Reykjavík</SelectItem>
+              <SelectItem value="Kópavogur">Kópavogur</SelectItem>
+              <SelectItem value="Hafnarfjörður">Hafnarfjörður</SelectItem>
+              <SelectItem value="Akureyri">Akureyri</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -109,7 +70,7 @@ export function BenchmarkFilters({
           <Label className="text-xs font-medium text-muted-foreground">
             Fjöldi íbúða:{' '}
             <span className="text-foreground font-semibold">
-              {filters.minUnits} – {filters.maxUnits}
+              {filters.unitCountMin ?? 2} – {filters.unitCountMax ?? 200}
             </span>
           </Label>
           <div className="px-1 pt-2">
@@ -117,10 +78,10 @@ export function BenchmarkFilters({
               min={2}
               max={200}
               step={1}
-              value={[filters.minUnits, filters.maxUnits]}
+              value={[filters.unitCountMin ?? 2, filters.unitCountMax ?? 200]}
               onValueChange={([min, max]) => {
-                onUpdate('minUnits', min);
-                onUpdate('maxUnits', max);
+                onUpdate('unitCountMin', min);
+                onUpdate('unitCountMax', max);
               }}
               className="w-full"
             />

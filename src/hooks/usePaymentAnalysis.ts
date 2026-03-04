@@ -3,7 +3,7 @@ import { db } from '@/integrations/supabase/db';
 import { format, subMonths } from 'date-fns';
 import { is } from 'date-fns/locale';
 
-interface MonthlyPaymentData {
+export interface PaymentMonthlyData {
   month: string;
   month_label: string;
   individual: number;
@@ -11,46 +11,61 @@ interface MonthlyPaymentData {
 }
 
 export interface PaymentAnalysisData {
-  individualTotal: number;
   individualCount: number;
-  otherIncomeTotal: number;
+  individualTotal: number;
   otherIncomeCount: number;
+  otherIncomeTotal: number;
   totalIncome: number;
-  monthlyData: MonthlyPaymentData[];
+  monthlyData: PaymentMonthlyData[];
 }
 
-export function usePaymentAnalysis(associationId: string | null | undefined) {
+export function usePaymentAnalysis(
+  associationId: string | null | undefined
+) {
   return useQuery({
     queryKey: ['payment-analysis', associationId],
-    queryFn: async (): Promise<PaymentAnalysisData | null> => {
-      if (!associationId) return null;
+    queryFn: async (): Promise<PaymentAnalysisData> => {
+      if (!associationId) {
+        return {
+          individualCount: 0,
+          individualTotal: 0,
+          otherIncomeCount: 0,
+          otherIncomeTotal: 0,
+          totalIncome: 0,
+          monthlyData: [],
+        };
+      }
 
       const twelveMonthsAgo = format(subMonths(new Date(), 12), 'yyyy-MM-dd');
 
       const { data, error } = await db
         .from('transactions')
-        .select('date, amount, is_income, is_individual_payment')
+        .select('date, amount, is_individual_payment, is_income')
         .eq('association_id', associationId)
         .eq('is_income', true)
         .gte('date', twelveMonthsAgo)
-        .order('date', { ascending: true });
+        .order('date', { ascending: false });
 
       if (error) throw error;
 
       const txList = (data ?? []) as Array<{
         date: string;
         amount: number;
-        is_income: boolean;
         is_individual_payment: boolean | null;
+        is_income: boolean;
       }>;
 
-      let individualTotal = 0;
+      // Aggregate totals
       let individualCount = 0;
-      let otherIncomeTotal = 0;
+      let individualTotal = 0;
       let otherIncomeCount = 0;
+      let otherIncomeTotal = 0;
 
-      // Build monthly buckets
-      const monthlyMap = new Map<string, { individual: number; other: number }>();
+      // Build monthly map
+      const monthlyMap = new Map<
+        string,
+        { individual: number; other: number }
+      >();
       for (let i = 11; i >= 0; i--) {
         const d = subMonths(new Date(), i);
         monthlyMap.set(format(d, 'yyyy-MM'), { individual: 0, other: 0 });
@@ -58,34 +73,39 @@ export function usePaymentAnalysis(associationId: string | null | undefined) {
 
       for (const tx of txList) {
         const amt = Math.abs(tx.amount);
+        if (tx.is_individual_payment) {
+          individualCount += 1;
+          individualTotal += amt;
+        } else {
+          otherIncomeCount += 1;
+          otherIncomeTotal += amt;
+        }
+
         const monthKey = tx.date.slice(0, 7);
         const entry = monthlyMap.get(monthKey);
-
-        if (tx.is_individual_payment) {
-          individualTotal += amt;
-          individualCount++;
-          if (entry) entry.individual += amt;
-        } else {
-          otherIncomeTotal += amt;
-          otherIncomeCount++;
-          if (entry) entry.other += amt;
+        if (entry) {
+          if (tx.is_individual_payment) {
+            entry.individual += amt;
+          } else {
+            entry.other += amt;
+          }
         }
       }
 
-      const monthlyData: MonthlyPaymentData[] = Array.from(monthlyMap.entries()).map(
-        ([month, vals]) => ({
-          month,
-          month_label: format(new Date(month + '-01'), 'MMM yy', { locale: is }),
-          individual: vals.individual,
-          other: vals.other,
-        })
-      );
+      const monthlyData: PaymentMonthlyData[] = Array.from(
+        monthlyMap.entries()
+      ).map(([month, v]) => ({
+        month,
+        month_label: format(new Date(month + '-01'), 'MMM yy', { locale: is }),
+        individual: v.individual,
+        other: v.other,
+      }));
 
       return {
-        individualTotal,
         individualCount,
-        otherIncomeTotal,
+        individualTotal,
         otherIncomeCount,
+        otherIncomeTotal,
         totalIncome: individualTotal + otherIncomeTotal,
         monthlyData,
       };

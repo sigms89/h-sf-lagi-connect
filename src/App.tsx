@@ -11,6 +11,8 @@ import Dashboard from "@/pages/Dashboard";
 import Transactions from "@/pages/Transactions";
 import Upload from "@/pages/Upload";
 import Analytics from "@/pages/Analytics";
+import CategoryDetail from "@/pages/CategoryDetail";
+import VendorView from "@/pages/VendorView";
 import Benchmarking from "@/pages/Benchmarking";
 import Marketplace from "@/pages/Marketplace";
 import Settings from "@/pages/Settings";
@@ -19,8 +21,6 @@ import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
 import NotFound from "@/pages/NotFound";
-import VendorView from "@/pages/VendorView";
-import CategoryDetail from "@/pages/CategoryDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -105,22 +105,24 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/analytics/vendors"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <VendorView />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+            {/* NEW: Category drill-down page */}
             <Route
               path="/analytics/category/:categoryId"
               element={
                 <ProtectedRoute>
                   <AppLayout>
                     <CategoryDetail />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            {/* NEW: Vendor aggregation view */}
+            <Route
+              path="/analytics/vendors"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <VendorView />
                   </AppLayout>
                 </ProtectedRoute>
               }

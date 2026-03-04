@@ -1,8 +1,4 @@
-// ============================================================
-// Húsfélagið.is — Benchmarking Page
-// Dev bypass: skips paywall when profile.role_type is super_admin
-// ============================================================
-
+import { useState } from 'react';
 import { Lock, Scale, TrendingDown, Bug } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,8 +11,8 @@ import { db } from '@/integrations/supabase/db';
 import type { Profile } from '@/types/database';
 import {
   useBenchmarkData,
-  useBenchmarkFilters,
-  useComparableCount,
+  DEFAULT_FILTERS,
+  type BenchmarkFilters as BenchmarkFiltersType,
 } from '@/hooks/useBenchmarking';
 import { BenchmarkFilters } from '@/components/benchmarking/BenchmarkFilters';
 import { BenchmarkChart } from '@/components/benchmarking/BenchmarkChart';
@@ -24,19 +20,19 @@ import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 
 export default function Benchmarking() {
   const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
-  const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
+  const [filters, setFilters] = useState<BenchmarkFiltersType>(DEFAULT_FILTERS);
   const { user } = useAuth();
 
-  // Fetch profile to check role for dev bypass
+  const updateFilter = <K extends keyof BenchmarkFiltersType>(key: K, value: BenchmarkFiltersType[K]) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+  const resetFilters = () => setFilters(DEFAULT_FILTERS);
+
   const { data: profile } = useQuery({
     queryKey: ['profile-benchmarking', user?.id],
     queryFn: async (): Promise<Profile | null> => {
       if (!user) return null;
-      const { data, error } = await db
-        .from('profiles')
-        .select('role_type')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data, error } = await db.from('profiles').select('role_type').eq('user_id', user.id).maybeSingle();
       if (error) return null;
       return data as Profile | null;
     },
@@ -45,25 +41,21 @@ export default function Benchmarking() {
   });
 
   const isSuperAdmin = profile?.role_type === 'super_admin';
-
-  // Normal subscription check
-  const hasPaidTier =
-    association?.subscription_tier === 'plus' ||
-    association?.subscription_tier === 'pro';
-
-  // Dev bypass: super_admin always gets access
+  const hasPaidTier = association?.subscription_tier === 'plus' || association?.subscription_tier === 'pro';
   const isUnlocked = hasPaidTier || isSuperAdmin;
 
-  const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(
-    association?.id,
-    association?.num_units,
-    filters
-  );
+  const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(association?.id, filters);
 
-  const { data: comparableCount, isLoading: isLoadingCount } = useComparableCount(
-    association?.id,
-    filters
-  );
+  // Compute comparable count from the data
+  const comparableCount = benchmarkRows.length > 0 ? benchmarkRows[0].participantCount : 0;
+
+  function getStatus(row: { yourAvg: number | null; marketAvg: number | null }) {
+    if (row.yourAvg == null || row.marketAvg == null || row.marketAvg === 0) return 'average';
+    const diff = ((row.yourAvg - row.marketAvg) / row.marketAvg) * 100;
+    if (diff < -10) return 'below';
+    if (diff > 10) return 'above';
+    return 'average';
+  }
 
   if (isLoadingAssoc) {
     return (
@@ -77,45 +69,31 @@ export default function Benchmarking() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">Samanburður</h1>
           <Badge variant="secondary" className="text-xs">Beta</Badge>
           {isSuperAdmin && !hasPaidTier && (
             <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 gap-1">
-              <Bug className="h-3 w-3" />
-              Dev bypass
+              <Bug className="h-3 w-3" />Dev bypass
             </Badge>
           )}
         </div>
         {isUnlocked && benchmarkRows.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingDown className="h-4 w-4 text-green-600" />
-            <span>
-              {benchmarkRows.filter((r) => r.status === 'below').length} flokkar undir meðaltali
-            </span>
+            <span>{benchmarkRows.filter((r) => getStatus(r) === 'below').length} flokkar undir meðaltali</span>
           </div>
         )}
       </div>
 
-      {/* Upgrade prompt for free tier (hidden for dev bypass) */}
       {!isUnlocked ? (
         <div className="relative">
-          {/* Blurred preview */}
           <div className="blur-sm pointer-events-none select-none space-y-4" aria-hidden>
-            <BenchmarkFilters
-              filters={filters}
-              comparableCount={0}
-              isLoadingCount={false}
-              onUpdate={updateFilter}
-              onReset={resetFilters}
-            />
+            <BenchmarkFilters filters={filters} comparableCount={0} isLoadingCount={false} onUpdate={updateFilter} onReset={resetFilters} />
             <div className="rounded-lg border bg-card h-64" />
             <div className="rounded-lg border h-48" />
           </div>
-
-          {/* Overlay */}
           <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-[2px] rounded-lg">
             <Card className="w-full max-w-sm mx-4 shadow-lg">
               <CardContent className="flex flex-col items-center text-center py-10 gap-4">
@@ -124,60 +102,29 @@ export default function Benchmarking() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Uppfærðu í Plús</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Sjáðu hvernig kostnaður þíns húsfélags ber saman við sambærileg húsfélög á
-                    landsvísu.
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Sjáðu hvernig kostnaður þíns húsfélags ber saman við sambærileg húsfélög á landsvísu.</p>
                 </div>
-                <Button size="sm" className="bg-primary hover:bg-primary/90">
-                  Uppfærðu í Plús til að sjá samanburð
-                </Button>
+                <Button size="sm" className="bg-primary hover:bg-primary/90">Uppfærðu í Plús til að sjá samanburð</Button>
               </CardContent>
             </Card>
           </div>
         </div>
       ) : (
         <>
-          {/* Filters */}
-          <BenchmarkFilters
-            filters={filters}
-            comparableCount={comparableCount}
-            isLoadingCount={isLoadingCount}
-            onUpdate={updateFilter}
-            onReset={resetFilters}
-          />
-
-          {/* No data state */}
+          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingData} onUpdate={updateFilter} onReset={resetFilters} />
           {!isLoadingData && benchmarkRows.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                  <Scale className="h-6 w-6 text-muted-foreground" />
-                </div>
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center"><Scale className="h-6 w-6 text-muted-foreground" /></div>
                 <div>
                   <h3 className="font-semibold">Ekki nóg gögn enn</h3>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                    Þegar fleiri húsfélög eru skráð og hlaðið upp gögnum verður samanburður
-                    mögulegur. Reyndu einnig að víkka skilyrði síunnar.
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-sm">Þegar fleiri húsfélög eru skráð og hlaðið upp gögnum verður samanburður mögulegur.</p>
                 </div>
               </CardContent>
             </Card>
           )}
-
-          {/* Chart */}
-          {(isLoadingData || benchmarkRows.length > 0) && (
-            <BenchmarkChart rows={benchmarkRows} isLoading={isLoadingData} />
-          )}
-
-          {/* Table */}
-          {(isLoadingData || benchmarkRows.length > 0) && (
-            <BenchmarkTable
-              rows={benchmarkRows}
-              isLoading={isLoadingData}
-              associationId={association?.id}
-            />
-          )}
+          {(isLoadingData || benchmarkRows.length > 0) && <BenchmarkChart rows={benchmarkRows} isLoading={isLoadingData} />}
+          {(isLoadingData || benchmarkRows.length > 0) && <BenchmarkTable rows={benchmarkRows} isLoading={isLoadingData} associationId={association?.id} />}
         </>
       )}
     </div>
