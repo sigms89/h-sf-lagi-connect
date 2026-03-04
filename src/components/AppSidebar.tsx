@@ -7,6 +7,7 @@ import {
   Store,
   Settings,
   Shield,
+  Briefcase,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -59,7 +60,7 @@ export function AppSidebar() {
   const { data: association } = useCurrentAssociation();
   const { user } = useAuth();
 
-  // Check if current user is super_admin
+  // Profile query — staleTime: 0 so it refreshes when DevRoleSwitcher invalidates
   const { data: profile } = useQuery({
     queryKey: ["profile-sidebar", user?.id],
     queryFn: async (): Promise<Profile | null> => {
@@ -73,10 +74,12 @@ export function AppSidebar() {
       return data as Profile | null;
     },
     enabled: !!user,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0, // Important: refetch on invalidation so role switch works instantly
   });
 
-  const isSuperAdmin = profile?.role_type === "super_admin";
+  const roleType = profile?.role_type ?? "member";
+  const isSuperAdmin = roleType === "super_admin";
+  const isServiceProvider = roleType === "service_provider";
 
   const isActive = (url: string) => {
     if (url === "/") return location.pathname === "/";
@@ -153,12 +156,35 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Provider section — visible when role is service_provider */}
+        {isServiceProvider && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Þjónustuaðili</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/provider")} tooltip="Þjónustugátt">
+                    <NavLink
+                      to="/provider"
+                      className="flex items-center gap-2.5"
+                      activeClassName=""
+                    >
+                      <Briefcase className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span>Þjónustugátt</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       {/* Footer — Dev tools + Settings + Admin */}
       <SidebarFooter>
         <SidebarMenu>
-          {/* Dev role switcher */}
+          {/* Dev role switcher — always visible during development */}
           <SidebarMenuItem>
             <DevRoleSwitcher collapsed={collapsed} />
           </SidebarMenuItem>
@@ -178,18 +204,18 @@ export function AppSidebar() {
             </SidebarMenuItem>
           ))}
 
-          {/* Super admin link — only shown to super_admin users */}
+          {/* Super admin link — shown when role is super_admin */}
           {isSuperAdmin && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Stjórnborð">
+              <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Kerfisstjórnun">
                 <NavLink
                   to="/admin"
                   className="flex items-center gap-2.5"
                   activeClassName=""
                 >
-                  <Shield className="h-4 w-4 flex-shrink-0 text-primary" />
+                  <Shield className="h-4 w-4 flex-shrink-0" />
                   {!collapsed && (
-                    <span className="font-medium text-primary">Stjórnborð</span>
+                    <span className="font-medium">Kerfisstjórnun</span>
                   )}
                 </NavLink>
               </SidebarMenuButton>

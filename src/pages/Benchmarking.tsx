@@ -1,13 +1,18 @@
 // ============================================================
-// Húsfélagið.is — Benchmarking Page (Full Implementation)
+// Húsfélagið.is — Benchmarking Page
+// Dev bypass: skips paywall when profile.role_type is super_admin
 // ============================================================
 
-import { Lock, Scale, TrendingDown } from 'lucide-react';
+import { Lock, Scale, TrendingDown, Bug } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
+import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { db } from '@/integrations/supabase/db';
+import type { Profile } from '@/types/database';
 import {
   useBenchmarkData,
   useBenchmarkFilters,
@@ -20,10 +25,34 @@ import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 export default function Benchmarking() {
   const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
   const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
+  const { user } = useAuth();
 
-  const isPlus =
+  // Fetch profile to check role for dev bypass
+  const { data: profile } = useQuery({
+    queryKey: ['profile-benchmarking', user?.id],
+    queryFn: async (): Promise<Profile | null> => {
+      if (!user) return null;
+      const { data, error } = await db
+        .from('profiles')
+        .select('role_type')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (error) return null;
+      return data as Profile | null;
+    },
+    enabled: !!user,
+    staleTime: 0,
+  });
+
+  const isSuperAdmin = profile?.role_type === 'super_admin';
+
+  // Normal subscription check
+  const hasPaidTier =
     association?.subscription_tier === 'plus' ||
     association?.subscription_tier === 'pro';
+
+  // Dev bypass: super_admin always gets access
+  const isUnlocked = hasPaidTier || isSuperAdmin;
 
   const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(
     association?.id,
@@ -53,8 +82,14 @@ export default function Benchmarking() {
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">Samanburður</h1>
           <Badge variant="secondary" className="text-xs">Beta</Badge>
+          {isSuperAdmin && !hasPaidTier && (
+            <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 gap-1">
+              <Bug className="h-3 w-3" />
+              Dev bypass
+            </Badge>
+          )}
         </div>
-        {isPlus && benchmarkRows.length > 0 && (
+        {isUnlocked && benchmarkRows.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingDown className="h-4 w-4 text-green-600" />
             <span>
@@ -64,8 +99,8 @@ export default function Benchmarking() {
         )}
       </div>
 
-      {/* Upgrade prompt for free tier */}
-      {!isPlus ? (
+      {/* Upgrade prompt for free tier (hidden for dev bypass) */}
+      {!isUnlocked ? (
         <div className="relative">
           {/* Blurred preview */}
           <div className="blur-sm pointer-events-none select-none space-y-4" aria-hidden>
