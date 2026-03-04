@@ -1,48 +1,150 @@
 // ============================================================
-// Húsfélagið.is — Benchmarking Page (placeholder)
+// Húsfélagið.is — Benchmarking Page (Full Implementation)
 // ============================================================
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Scale, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Lock, Scale, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { BenchmarkWidget } from '@/components/dashboard/BenchmarkWidget';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
+import {
+  useBenchmarkData,
+  useBenchmarkFilters,
+  useComparableCount,
+} from '@/hooks/useBenchmarking';
+import { BenchmarkFilters } from '@/components/benchmarking/BenchmarkFilters';
+import { BenchmarkChart } from '@/components/benchmarking/BenchmarkChart';
+import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 
 export default function Benchmarking() {
-  const { data: association } = useCurrentAssociation();
+  const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
+  const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
+
+  const isPlus =
+    association?.subscription_tier === 'plus' ||
+    association?.subscription_tier === 'pro';
+
+  const { data: benchmarkRows = [], isLoading: isLoadingData } = useBenchmarkData(
+    association?.id,
+    association?.num_units,
+    filters
+  );
+
+  const { data: comparableCount, isLoading: isLoadingCount } = useComparableCount(
+    association?.id,
+    filters
+  );
+
+  if (isLoadingAssoc) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">Samanburður</h1>
-        <Badge variant="secondary">Beta</Badge>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Samanburður</h1>
+          <Badge variant="secondary" className="text-xs">Beta</Badge>
+        </div>
+        {isPlus && benchmarkRows.length > 0 && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <TrendingDown className="h-4 w-4 text-green-600" />
+            <span>
+              {benchmarkRows.filter((r) => r.status === 'below').length} flokkar undir meðaltali
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="max-w-lg">
-        <BenchmarkWidget numUnits={association?.num_units} />
-      </div>
+      {/* Upgrade prompt for free tier */}
+      {!isPlus ? (
+        <div className="relative">
+          {/* Blurred preview */}
+          <div className="blur-sm pointer-events-none select-none space-y-4" aria-hidden>
+            <BenchmarkFilters
+              filters={filters}
+              comparableCount={0}
+              isLoadingCount={false}
+              onUpdate={updateFilter}
+              onReset={resetFilters}
+            />
+            <div className="rounded-lg border bg-card h-64" />
+            <div className="rounded-lg border h-48" />
+          </div>
 
-      <Card className="border-dashed max-w-lg">
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-            <Scale className="h-6 w-6 text-muted-foreground" />
+          {/* Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-[2px] rounded-lg">
+            <Card className="w-full max-w-sm mx-4 shadow-lg">
+              <CardContent className="flex flex-col items-center text-center py-10 gap-4">
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                  <Lock className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Uppfærðu í Plús</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Sjáðu hvernig kostnaður þíns húsfélags ber saman við sambærileg húsfélög á
+                    landsvísu.
+                  </p>
+                </div>
+                <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  Uppfærðu í Plús til að sjá samanburð
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-          <div>
-            <h3 className="font-semibold">Fullur samanburður í vinnslu</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Nafnlaus samanburður við öll húsfélög á landsvísu. Sjáðu hvar þið getið sparað.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
-            Fáanlegt í Plus og Pro áskrift
-          </div>
-          <Button variant="outline" size="sm" disabled>
-            Tilkynna mér þegar tilbúið
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <>
+          {/* Filters */}
+          <BenchmarkFilters
+            filters={filters}
+            comparableCount={comparableCount}
+            isLoadingCount={isLoadingCount}
+            onUpdate={updateFilter}
+            onReset={resetFilters}
+          />
+
+          {/* No data state */}
+          {!isLoadingData && benchmarkRows.length === 0 && (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                  <Scale className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Ekki nóg gögn enn</h3>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                    Þegar fleiri húsfélög eru skráð og hlaðið upp gögnum verður samanburður
+                    mögulegur. Reyndu einnig að víkka skilyrði síunnar.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Chart */}
+          {(isLoadingData || benchmarkRows.length > 0) && (
+            <BenchmarkChart rows={benchmarkRows} isLoading={isLoadingData} />
+          )}
+
+          {/* Table */}
+          {(isLoadingData || benchmarkRows.length > 0) && (
+            <BenchmarkTable
+              rows={benchmarkRows}
+              isLoading={isLoadingData}
+              associationId={association?.id}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
