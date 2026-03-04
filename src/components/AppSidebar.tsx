@@ -28,6 +28,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { db } from "@/integrations/supabase/db";
 import type { Profile } from "@/types/database";
+import { DevRoleSwitcher } from "@/components/DevRoleSwitcher";
 
 // ============================================================
 // NAV ITEMS
@@ -154,9 +155,14 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer — Settings + Admin (if super_admin) */}
+      {/* Footer — Dev tools + Settings + Admin */}
       <SidebarFooter>
         <SidebarMenu>
+          {/* Dev role switcher */}
+          <SidebarMenuItem>
+            <DevRoleSwitcher collapsed={collapsed} />
+          </SidebarMenuItem>
+
           {bottomItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
