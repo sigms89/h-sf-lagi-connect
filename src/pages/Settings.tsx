@@ -457,8 +457,7 @@ export default function Settings() {
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {/* Auth email is not stored on profiles — show user_id hint */}
-                        {member.user_id.slice(0, 8)}...
+                        {isCurrentUser ? user?.email : (member.user_id.slice(0, 8) + '...')}
                       </TableCell>
                       <TableCell>
                         <Select

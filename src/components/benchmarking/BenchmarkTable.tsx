@@ -6,33 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowUpDown, ArrowUp, ArrowDown, TrendingDown, Minus, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
-import type { BenchmarkCategory } from '@/hooks/useBenchmarking';
+import type { BenchmarkRow, BenchmarkStatus } from '@/hooks/useBenchmarking';
 import { formatIskAmount } from '@/lib/categories';
 import { cn } from '@/lib/utils';
 import { BenchmarkTrendChart } from './BenchmarkTrendChart';
 
-type SortKey = 'categoryName' | 'yourAvg' | 'marketAvg' | 'diffPct';
+type SortKey = 'categoryName' | 'yourCostPerUnit' | 'avgCostPerUnit' | 'diffPercent';
 type SortDir = 'asc' | 'desc';
 
 interface BenchmarkTableProps {
-  rows: BenchmarkCategory[];
+  rows: BenchmarkRow[];
   isLoading: boolean;
   associationId: string | undefined;
-}
-
-type BenchmarkStatus = 'below' | 'above' | 'average';
-
-function getStatus(row: BenchmarkCategory): BenchmarkStatus {
-  if (row.yourAvg == null || row.marketAvg == null) return 'average';
-  const diff = ((row.yourAvg - row.marketAvg) / row.marketAvg) * 100;
-  if (diff < -10) return 'below';
-  if (diff > 10) return 'above';
-  return 'average';
-}
-
-function getDiffPct(row: BenchmarkCategory): number {
-  if (!row.yourAvg || !row.marketAvg || row.marketAvg === 0) return 0;
-  return ((row.yourAvg - row.marketAvg) / row.marketAvg) * 100;
 }
 
 function StatusBadge({ status }: { status: BenchmarkStatus }) {
@@ -51,7 +36,7 @@ function SortIcon({ column, sortKey, sortDir }: { column: SortKey; sortKey: Sort
 }
 
 export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('diffPct');
+  const [sortKey, setSortKey] = useState<SortKey>('diffPercent');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
@@ -60,9 +45,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
     else { setSortKey(key); setSortDir('desc'); }
   };
 
-  const enriched = rows.map((r) => ({ ...r, diffPct: getDiffPct(r), status: getStatus(r) }));
-
-  const sorted = [...enriched].sort((a, b) => {
+  const sorted = [...rows].sort((a, b) => {
     const aVal = sortKey === 'categoryName' ? a.categoryName : a[sortKey];
     const bVal = sortKey === 'categoryName' ? b.categoryName : b[sortKey];
     const cmp = typeof aVal === 'string' ? aVal.localeCompare(bVal as string, 'is') : (aVal as number) - (bVal as number);
@@ -90,9 +73,9 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
         <TableHeader>
           <TableRow className="bg-muted/40">
             <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('categoryName')}>Flokkur<SortIcon column="categoryName" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
-            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('yourAvg')}>Þitt (kr/mán)<SortIcon column="yourAvg" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
-            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('marketAvg')}>Meðaltal (kr/mán)<SortIcon column="marketAvg" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
-            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('diffPct')}>Munur (%)<SortIcon column="diffPct" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
+            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('yourCostPerUnit')}>Þitt (kr/mán)<SortIcon column="yourCostPerUnit" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
+            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('avgCostPerUnit')}>Meðaltal (kr/mán)<SortIcon column="avgCostPerUnit" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
+            <TableHead><Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-semibold p-0 hover:bg-transparent" onClick={() => handleSort('diffPercent')}>Munur (%)<SortIcon column="diffPercent" sortKey={sortKey} sortDir={sortDir} /></Button></TableHead>
             <TableHead>Staða</TableHead>
             <TableHead className="w-10" />
           </TableRow>
@@ -109,11 +92,11 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                       <span className="text-sm font-medium">{row.categoryName}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm tabular-nums">{formatIskAmount(row.yourAvg ?? 0, true)}</TableCell>
-                  <TableCell className="text-sm tabular-nums text-muted-foreground">{row.marketAvg != null ? formatIskAmount(row.marketAvg, true) : '—'}</TableCell>
+                  <TableCell className="text-sm tabular-nums">{formatIskAmount(row.yourCostPerUnit, true)}</TableCell>
+                  <TableCell className="text-sm tabular-nums text-muted-foreground">{formatIskAmount(row.avgCostPerUnit, true)}</TableCell>
                   <TableCell>
-                    <span className={cn('text-sm font-semibold tabular-nums', row.diffPct < -10 ? 'text-green-700' : row.diffPct > 10 ? 'text-red-700' : 'text-yellow-700')}>
-                      {row.diffPct > 0 ? '+' : ''}{row.diffPct.toFixed(1)}%
+                    <span className={cn('text-sm font-semibold tabular-nums', row.diffPercent < -10 ? 'text-green-700' : row.diffPercent > 10 ? 'text-red-700' : 'text-yellow-700')}>
+                      {row.diffPercent > 0 ? '+' : ''}{row.diffPercent.toFixed(1)}%
                     </span>
                   </TableCell>
                   <TableCell><StatusBadge status={row.status} /></TableCell>

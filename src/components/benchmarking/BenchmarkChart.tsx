@@ -9,11 +9,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { BenchmarkCategory } from '@/hooks/useBenchmarking';
+import type { BenchmarkRow } from '@/hooks/useBenchmarking';
 import { formatIskAmount } from '@/lib/categories';
 
 interface BenchmarkChartProps {
-  rows: BenchmarkCategory[];
+  rows: BenchmarkRow[];
   isLoading: boolean;
 }
 
@@ -48,8 +48,8 @@ export function BenchmarkChart({ rows, isLoading }: BenchmarkChartProps) {
 
   const chartData = rows.slice(0, 12).map((row) => ({
     name: shortenName(row.categoryName),
-    'Þitt húsfélag': Math.round(row.yourAvg ?? 0),
-    'Meðaltal': Math.round(row.marketAvg ?? 0),
+    'Þitt húsfélag': Math.round(row.yourCostPerUnit ?? 0),
+    'Meðaltal': Math.round(row.avgCostPerUnit ?? 0),
   }));
 
   return (
