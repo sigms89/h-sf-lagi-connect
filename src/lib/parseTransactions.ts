@@ -132,10 +132,19 @@ export function parseJsonTransactions(jsonText: string): ParseResult {
 
   let arr: unknown[];
   try {
-    const parsed = JSON.parse(jsonText);
+    // Try to auto-fix common JSON issues before parsing
+    let cleaned = jsonText.trim();
+    // Remove trailing commas before ] or }
+    cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
+    // If it doesn't start with [ or {, try wrapping in array
+    if (!cleaned.startsWith('[') && !cleaned.startsWith('{')) {
+      cleaned = '[' + cleaned + ']';
+    }
+    const parsed = JSON.parse(cleaned);
     arr = Array.isArray(parsed) ? parsed : [parsed];
   } catch (e) {
-    errors.push({ line: 1, message: 'Ógilt JSON snið', raw: jsonText.slice(0, 100) });
+    const errMsg = e instanceof SyntaxError ? e.message : 'Óþekkt villa';
+    errors.push({ line: 1, message: `Ógilt JSON snið: ${errMsg}`, raw: jsonText.slice(0, 200) });
     return { transactions, errors };
   }
 
