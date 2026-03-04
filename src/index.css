@@ -122,13 +122,16 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  h1, h2, h3, h4 {
-    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-    @apply font-bold tracking-tight;
+  h1 {
+    @apply font-display font-bold tracking-tight;
   }
-
-  /* Monospace for financial figures */
-  .font-mono, table td[data-type="number"], .tabular-nums {
-    font-family: 'JetBrains Mono', monospace;
+  h2 {
+    @apply font-display font-bold tracking-tight;
+  }
+  h3 {
+    @apply font-display font-bold tracking-tight;
+  }
+  h4 {
+    @apply font-display font-bold tracking-tight;
   }
 }
