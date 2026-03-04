@@ -1,37 +1,108 @@
-import type { AdminStats } from '@/hooks/useAdmin';
-import { Skeleton } from '@/components/ui/skeleton';
+// ============================================================
+// Húsfélagið.is — AdminStatsGrid
+// KPI cards for the super admin dashboard
+// ============================================================
+
+import {
+  Building2,
+  CheckCircle2,
+  Clock,
+  FileText,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { AdminStats } from '@/hooks/useAdmin';
 
-interface Props { stats: AdminStats | undefined; isLoading: boolean; }
+interface StatCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+  sub?: string;
+  iconClass?: string;
+  bgClass?: string;
+}
 
-export function AdminStatsGrid({ stats, isLoading }: Props) {
-  if (isLoading || !stats) {
+function StatCard({ icon: Icon, label, value, sub, iconClass, bgClass }: StatCardProps) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${bgClass ?? 'bg-primary/10'}`}>
+            <Icon className={`h-[18px] w-[18px] ${iconClass ?? 'text-primary'}`} />
+          </div>
+          <div className="text-right min-w-0">
+            <div className="text-2xl font-bold tabular-nums leading-tight">{value}</div>
+            {sub && <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>}
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3 font-medium">{label}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface AdminStatsGridProps {
+  stats: AdminStats | undefined;
+  isLoading: boolean;
+}
+
+export function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps) {
+  if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 rounded-lg" />
+        ))}
       </div>
     );
   }
-  const items = [
-    { label: 'Húsfélög', value: stats.totalAssociations },
-    { label: 'Samþykktir aðilar', value: stats.approvedProviders },
-    { label: 'Bíða samþykktar', value: stats.pendingProviders },
-    { label: 'Tilboðsbeiðnir', value: stats.totalBidRequests },
-    { label: 'Opnar beiðnir', value: stats.openBidRequests },
-    { label: 'Free', value: stats.freeTier },
-    { label: 'Plus', value: stats.plusTier },
-    { label: 'Pro', value: stats.proTier },
-  ];
+
+  if (!stats) return null;
+
+  const tierBreakdown = `${stats.freeTier} frí / ${stats.plusTier} plus / ${stats.proTier} pro`;
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      {items.map((item) => (
-        <Card key={item.label}>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">{item.label}</p>
-            <p className="text-2xl font-bold mt-1">{item.value}</p>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <StatCard
+        icon={Building2}
+        label="Húsfélög"
+        value={stats.totalAssociations}
+        sub={tierBreakdown}
+        bgClass="bg-blue-50"
+        iconClass="text-blue-600"
+      />
+      <StatCard
+        icon={Users}
+        label="Virkir notendur"
+        value={stats.activeUsers}
+        bgClass="bg-indigo-50"
+        iconClass="text-indigo-600"
+      />
+      <StatCard
+        icon={CheckCircle2}
+        label="Þjónustuaðilar"
+        value={stats.approvedProviders}
+        sub={`${stats.pendingProviders} í bið`}
+        bgClass="bg-green-50"
+        iconClass="text-green-600"
+      />
+      <StatCard
+        icon={Clock}
+        label="Bíður samþykktar"
+        value={stats.pendingProviders}
+        bgClass={stats.pendingProviders > 0 ? 'bg-orange-50' : 'bg-muted'}
+        iconClass={stats.pendingProviders > 0 ? 'text-orange-600' : 'text-muted-foreground'}
+      />
+      <StatCard
+        icon={FileText}
+        label="Tilboðsferlar"
+        value={stats.totalBidRequests}
+        sub={`${stats.openBidRequests} opin`}
+        bgClass="bg-teal-50"
+        iconClass="text-teal-600"
+      />
     </div>
   );
 }
