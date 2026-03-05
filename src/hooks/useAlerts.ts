@@ -508,7 +508,8 @@ export function useFinancialAlerts(associationId: string | null | undefined) {
           category:categories(id, name_is, color)
         `)
         .eq('association_id', associationId)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .limit(10000);
 
       if (error) throw error;
 

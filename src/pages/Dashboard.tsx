@@ -22,12 +22,12 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { data: association, isLoading: assocLoading } = useCurrentAssociation();
-  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id);
+  const { range, label } = useTimeRange();
+  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
   const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
     page: 1,
     page_size: 8,
   });
-  const { label } = useTimeRange();
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;

@@ -1,6 +1,7 @@
 // ============================================================
 // Húsfélagið.is — Upload Transactions Component
 // Performance-optimized: pagination, chunked processing, test mode
+// Includes duplicate detection before saving
 // ============================================================
 
 import { useState, useRef, useCallback, useMemo } from 'react';
@@ -19,8 +20,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Upload, ClipboardPaste, FileText, CheckCircle2, AlertTriangle,
-  TrendingUp, TrendingDown, Loader2, X, ChevronLeft, ChevronRight, Info,
+  TrendingUp, TrendingDown, Loader2, X, ChevronLeft, ChevronRight, Info, Copy,
 } from 'lucide-react';
 import { parseTransactionText, parseJsonTransactions, formatDateIs, type ParsedTransaction } from '@/lib/parseTransactions';
 import { categorizeTransaction } from '@/lib/categorize';
@@ -28,6 +32,8 @@ import { getCategoryColor, getCategoryHex, formatIskAmount } from '@/lib/categor
 import { useCategories, useVendorRules } from '@/hooks/useCategories';
 import { useUploadTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/hooks/useAuth';
+import { db } from '@/integrations/supabase/db';
+import { format, subDays } from 'date-fns';
 import type { TransactionInsert } from '@/types/database';
 
 // ============================================================
@@ -44,6 +50,7 @@ interface EnrichedTransaction extends ParsedTransaction {
   isIncome: boolean;
   isUncategorized: boolean;
   isIndividualPayment: boolean;
+  isDuplicate?: boolean;
 }
 
 interface UploadTransactionsProps {
@@ -82,6 +89,11 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
 
   // Inline editing row (for large datasets we only show Select for the active row)
   const [editingRow, setEditingRow] = useState<number | null>(null);
+
+  // Duplicate detection state
+  const [duplicateCount, setDuplicateCount] = useState(0);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
 
   const isLargeDataset = enriched.length > LARGE_DATASET_THRESHOLD;
 
@@ -300,12 +312,69 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
   };
 
   // ============================================================
+  // DUPLICATE DETECTION
+  // ============================================================
+  const checkDuplicates = useCallback(async () => {
+    if (!associationId || enriched.length === 0) return;
+    setIsCheckingDuplicates(true);
+    try {
+      const ninetyDaysAgo = format(subDays(new Date(), 90), 'yyyy-MM-dd');
+      const { data: existing } = await db
+        .from('transactions')
+        .select('date, description, amount')
+        .eq('association_id', associationId)
+        .gte('date', ninetyDaysAgo)
+        .limit(10000);
+
+      if (!existing || existing.length === 0) {
+        setIsCheckingDuplicates(false);
+        return 0;
+      }
+
+      // Build a set of fingerprints from existing transactions
+      const existingFingerprints = new Set(
+        existing.map((t: any) => `${t.date}|${t.description?.trim()}|${t.amount}`)
+      );
+
+      // Mark duplicates on enriched transactions
+      let dupes = 0;
+      setEnriched((prev) =>
+        prev.map((tx) => {
+          const fingerprint = `${tx.date}|${tx.description.trim()}|${tx.amount}`;
+          const isDup = existingFingerprints.has(fingerprint);
+          if (isDup) dupes++;
+          return { ...tx, isDuplicate: isDup };
+        })
+      );
+      setDuplicateCount(dupes);
+      setIsCheckingDuplicates(false);
+      return dupes;
+    } catch {
+      setIsCheckingDuplicates(false);
+      return 0;
+    }
+  }, [associationId, enriched.length]);
+
+  // ============================================================
   // SAVE ALL
   // ============================================================
   const handleSave = async () => {
     if (!user || enriched.length === 0 || testMode) return;
 
-    const transactions: TransactionInsert[] = enriched.map((tx) => ({
+    // Check for duplicates first
+    const dupes = await checkDuplicates();
+    if (dupes && dupes > 0) {
+      setShowDuplicateWarning(true);
+      return;
+    }
+
+    await doSave(enriched);
+  };
+
+  const doSave = async (txsToSave: EnrichedTransaction[]) => {
+    if (!user || txsToSave.length === 0) return;
+
+    const transactions: TransactionInsert[] = txsToSave.map((tx) => ({
       association_id: associationId,
       date: tx.date,
       description: tx.description,
@@ -335,7 +404,25 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
     setParseErrors([]);
     setIsParsed(false);
     setFileName('');
+    setDuplicateCount(0);
+    setShowDuplicateWarning(false);
     onSuccess?.();
+  };
+
+  const handleSaveSkippingDuplicates = async () => {
+    setShowDuplicateWarning(false);
+    const nonDuplicates = enriched.filter((tx) => !tx.isDuplicate);
+    if (nonDuplicates.length === 0) {
+      setIsParsed(false);
+      setEnriched([]);
+      return;
+    }
+    await doSave(nonDuplicates);
+  };
+
+  const handleSaveAll = async () => {
+    setShowDuplicateWarning(false);
+    await doSave(enriched);
   };
 
   // ============================================================
@@ -682,7 +769,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                       return (
                         <TableRow
                           key={globalIndex}
-                          className={tx.isUncategorized ? 'bg-yellow-50/60' : undefined}
+                          className={tx.isDuplicate ? 'bg-orange-50/80' : tx.isUncategorized ? 'bg-yellow-50/60' : undefined}
                         >
                           <TableCell className="text-xs text-muted-foreground text-center">
                             {globalIndex + 1}
@@ -694,6 +781,12 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                             <span className="truncate block" title={tx.description}>
                               {tx.description}
                             </span>
+                            {tx.isDuplicate && (
+                              <Badge variant="outline" className="text-[10px] mt-0.5 border-orange-300 text-orange-700 bg-orange-50">
+                                <Copy className="h-2.5 w-2.5 mr-0.5" />
+                                Tvítekning
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell
                             className={`text-right text-sm font-medium whitespace-nowrap ${
@@ -787,6 +880,46 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                 </div>
               )}
             </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Duplicate warning dialog */}
+      <Dialog open={showDuplicateWarning} onOpenChange={setShowDuplicateWarning}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Tvíteknar færslur fundust
+            </DialogTitle>
+            <DialogDescription>
+              {duplicateCount} af {enriched.length} færslum líta út fyrir að vera þegar í kerfinu
+              (sama dagsetning, lýsing og upphæð). Hvað viltu gera?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowDuplicateWarning(false)}>
+              Hætta við
+            </Button>
+            <Button variant="secondary" onClick={handleSaveSkippingDuplicates}>
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Sleppa tvíteknum ({enriched.length - duplicateCount} færslur)
+            </Button>
+            <Button variant="destructive" onClick={handleSaveAll}>
+              Vista allar ({enriched.length} færslur)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Checking duplicates overlay */}
+      {isCheckingDuplicates && (
+        <div className="fixed inset-0 bg-background/50 flex items-center justify-center z-50">
+          <Card className="p-6">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span className="text-sm font-medium">Athuga tvítekningar...</span>
+            </div>
           </Card>
         </div>
       )}

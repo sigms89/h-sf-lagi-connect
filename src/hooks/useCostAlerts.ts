@@ -27,7 +27,8 @@ export function useCostAlerts(associationId: string | null | undefined) {
         .eq('association_id', associationId)
         .eq('is_income', false)
         .lt('amount', 0)
-        .gte('date', sixMonthsAgo);
+        .gte('date', sixMonthsAgo)
+        .limit(10000);
 
       if (error) throw error;
 

@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { useTimeRange } from '@/hooks/useTimeRange';
 import { Link } from 'react-router-dom';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
 import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
@@ -468,8 +469,10 @@ export default function AnalyticsPage() {
   const associationId = association?.id;
   const numUnits = association?.num_units ?? 1;
 
+  const { range } = useTimeRange();
+
   // Core stats (KPI + charts)
-  const { data: stats, isLoading: statsLoading } = useTransactionStats(associationId);
+  const { data: stats, isLoading: statsLoading } = useTransactionStats(associationId, range.from);
 
   // Alerts count
   const { data: alerts = [], isLoading: alertsLoading } = useFinancialAlerts(associationId);
