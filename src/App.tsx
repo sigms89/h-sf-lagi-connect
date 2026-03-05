@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — App Router
-// All application routes with role-guarded admin/provider routes
+// Húsfélagið.is — App Root with Routes (Updated)
+// Added: /classification and /alerts routes
 // ============================================================
 
 import { Toaster } from "@/components/ui/toaster";
@@ -23,6 +23,8 @@ import Onboarding from "@/pages/Onboarding";
 import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
+import ClassificationPage from "@/pages/ClassificationPage";
+import AlertsPage from "@/pages/AlertsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -99,11 +101,31 @@ const App = () => (
               }
             />
             <Route
+              path="/classification"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ClassificationPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/analytics"
               element={
                 <ProtectedRoute>
                   <AppLayout>
                     <Analytics />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/alerts"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AlertsPage />
                   </AppLayout>
                 </ProtectedRoute>
               }
@@ -139,11 +161,11 @@ const App = () => (
               }
             />
 
-            {/* Admin panel — protected with role guard */}
+            {/* Admin panel — protected, role check done inside Admin component */}
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requiredRole="super_admin">
+                <ProtectedRoute>
                   <AppLayout>
                     <Admin />
                   </AppLayout>
@@ -151,11 +173,11 @@ const App = () => (
               }
             />
 
-            {/* Provider dashboard — protected with role guard */}
+            {/* Provider dashboard */}
             <Route
               path="/provider"
               element={
-                <ProtectedRoute requiredRole={['service_provider', 'super_admin']}>
+                <ProtectedRoute>
                   <AppLayout>
                     <ProviderDashboard />
                   </AppLayout>

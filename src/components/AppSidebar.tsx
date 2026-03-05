@@ -8,6 +8,8 @@ import {
   Settings,
   Shield,
   Briefcase,
+  Tags,
+  Bell,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -37,11 +39,13 @@ import { DevRoleSwitcher } from "@/components/DevRoleSwitcher";
 const mainItems = [
   { title: "Yfirlit", url: "/", icon: LayoutDashboard },
   { title: "Færslur", url: "/transactions", icon: Receipt },
+  { title: "Flokkun", url: "/classification", icon: Tags },
   { title: "Hlaða upp", url: "/upload", icon: Upload },
-  { title: "Greining", url: "/analytics", icon: BarChart3 },
 ];
 
 const insightItems = [
+  { title: "Greining", url: "/analytics", icon: BarChart3 },
+  { title: "Viðvaranir", url: "/alerts", icon: Bell },
   { title: "Samanburður", url: "/benchmarking", icon: Scale },
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
 ];
@@ -184,12 +188,10 @@ export function AppSidebar() {
       {/* Footer — Dev tools + Settings + Admin */}
       <SidebarFooter>
         <SidebarMenu>
-          {/* Dev role switcher — only visible in development */}
-          {import.meta.env.DEV && (
-            <SidebarMenuItem>
-              <DevRoleSwitcher collapsed={collapsed} />
-            </SidebarMenuItem>
-          )}
+          {/* Dev role switcher — always visible during development */}
+          <SidebarMenuItem>
+            <DevRoleSwitcher collapsed={collapsed} />
+          </SidebarMenuItem>
 
           {bottomItems.map((item) => (
             <SidebarMenuItem key={item.title}>

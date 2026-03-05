@@ -1,6 +1,7 @@
 // ============================================================
-// Húsfélagið.is — Dashboard Page
+// Húsfélagið.is — Dashboard Page (Updated)
 // KPI cards, monthly chart, category pie, recent transactions
+// Now uses AlertsWidgetNew instead of old AlertsWidget
 // ============================================================
 
 import { useCurrentAssociation } from '@/hooks/useAssociation';
@@ -9,7 +10,7 @@ import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
-import { AlertsWidget } from '@/components/dashboard/AlertsWidget';
+import { AlertsWidgetNew } from '@/components/dashboard/AlertsWidgetNew';
 import { BenchmarkWidget } from '@/components/dashboard/BenchmarkWidget';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -21,7 +22,7 @@ const Dashboard = () => {
   const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id);
   const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
     page: 1,
-    page_size: 10,
+    page_size: 8,
   });
 
   const isLoading = assocLoading || statsLoading;
@@ -115,11 +116,9 @@ const Dashboard = () => {
             />
           </div>
           <div className="space-y-6">
-            <AlertsWidget
-              categoryBreakdown={stats?.category_breakdown ?? []}
-              uncategorizedCount={stats?.uncategorized_count ?? 0}
-              isLoading={isLoading}
-            />
+            {association?.id && (
+              <AlertsWidgetNew associationId={association.id} maxAlerts={3} />
+            )}
             <BenchmarkWidget numUnits={association?.num_units} />
           </div>
         </div>
