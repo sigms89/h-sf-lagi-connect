@@ -224,7 +224,8 @@ export default function ReportsPage() {
   const { data: association } = useCurrentAssociation();
   const associationId = association?.id;
 
-  const { data: stats } = useTransactionStats(associationId);
+  const { range } = useTimeRange();
+  const { data: stats } = useTransactionStats(associationId, range.from);
   const { data: healthScore } = useHealthScore(associationId) as {
     data: HealthScoreResult | null | undefined;
   };

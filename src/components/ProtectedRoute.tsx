@@ -35,7 +35,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
       const { data: profile } = await db
         .from('profiles')
         .select('role_type')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (profile?.role_type === 'super_admin') return 'super_admin';

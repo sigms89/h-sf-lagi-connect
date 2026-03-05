@@ -472,15 +472,17 @@ export default function Settings() {
                           }
                         >
                           <SelectTrigger className="h-7 w-40 text-xs">
-                            <SelectValue>
-                              <Badge
-                                variant="secondary"
-                                className={`text-xs ${ROLE_COLORS[member.role]}`}
-                              >
-                                {ROLE_LABELS[member.role]}
-                              </Badge>
-                            </SelectValue>
-                          </SelectTrigger>
+                             <SelectValue>
+                               <span>
+                                 <Badge
+                                   variant="secondary"
+                                   className={`text-xs ${ROLE_COLORS[member.role]}`}
+                                 >
+                                   {ROLE_LABELS[member.role]}
+                                 </Badge>
+                               </span>
+                             </SelectValue>
+                           </SelectTrigger>
                           <SelectContent>
                             {(Object.keys(ROLE_LABELS) as MemberRole[]).map((role) => (
                               <SelectItem key={role} value={role}>

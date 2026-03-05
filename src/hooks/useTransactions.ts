@@ -111,22 +111,28 @@ export function useUpdateTransactionCategory() {
   });
 }
 
-export function useTransactionStats(associationId: string | null | undefined) {
+export function useTransactionStats(associationId: string | null | undefined, dateFrom?: string | null) {
   return useQuery({
-    queryKey: TRANSACTION_KEYS.stats(associationId ?? ''),
+    queryKey: [...TRANSACTION_KEYS.stats(associationId ?? ''), dateFrom ?? '12m'],
     queryFn: async (): Promise<TransactionStats> => {
       if (!associationId) {
         return { total_income: 0, total_expenses: 0, net_balance: 0, uncategorized_count: 0, monthly_data: [], category_breakdown: [], current_balance: null };
       }
 
-      const twelveMonthsAgo = format(subMonths(new Date(), 12), 'yyyy-MM-dd');
+      const effectiveFrom = dateFrom ?? format(subMonths(new Date(), 12), 'yyyy-MM-dd');
 
-      const { data: transactions, error } = await db
+      let query = db
         .from('transactions')
         .select(`id, date, amount, is_income, category_id, category:categories(id, name_is, color)`)
         .eq('association_id', associationId)
-        .gte('date', twelveMonthsAgo)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .limit(10000);
+
+      if (effectiveFrom) {
+        query = query.gte('date', effectiveFrom);
+      }
+
+      const { data: transactions, error } = await query;
 
       if (error) throw error;
 

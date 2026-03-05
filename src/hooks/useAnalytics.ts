@@ -57,7 +57,8 @@ export function useVendorAnalytics(associationId: string | null | undefined) {
         .select('id, date, description, amount, is_income')
         .eq('association_id', associationId)
         .eq('is_income', false)
-        .order('date', { ascending: true });
+        .order('date', { ascending: true })
+        .limit(10000);
 
       if (error) throw error;
 
@@ -136,7 +137,8 @@ export function useYearOverYear(associationId: string | null | undefined) {
         .eq('is_income', false)
         .gte('date', lastYearStart)
         .lte('date', thisYearEnd)
-        .order('date', { ascending: true });
+        .order('date', { ascending: true })
+        .limit(10000);
 
       if (error) throw error;
 
@@ -211,7 +213,8 @@ export function useFeeAdequacy(
         .from('transactions')
         .select('date, amount, is_income')
         .eq('association_id', associationId)
-        .gte('date', twelveMonthsAgo);
+        .gte('date', twelveMonthsAgo)
+        .limit(10000);
 
       if (error) throw error;
 
