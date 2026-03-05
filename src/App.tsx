@@ -1,6 +1,5 @@
 // ============================================================
-// Húsfélagið.is — App Root with Routes (Updated)
-// Added: /classification and /alerts routes
+// Húsfélagið.is — App Root with Routes (Updated: Fasi 4)
 // ============================================================
 
 import { Toaster } from "@/components/ui/toaster";
@@ -26,6 +25,7 @@ import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
 import ClassificationPage from "@/pages/ClassificationPage";
 import AlertsPage from "@/pages/AlertsPage";
+import ReportsPage from "@/pages/ReportsPage";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import NotFound from "@/pages/NotFound";
 
@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 2 * 60 * 1000, // 2 minutes default
+      staleTime: 2 * 60 * 1000,
     },
   },
 });
@@ -44,167 +44,29 @@ const App = () => (
       <Toaster />
       <Sonner richColors closeButton />
       <BrowserRouter>
+        <TimeRangeProvider>
         <AuthProvider>
-          <TimeRangeProvider>
           <Routes>
-            {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
-
-            {/* Onboarding — protected but outside AppLayout (full page wizard) */}
-            <Route
-              path="/onboarding"
-              element={
-                <ProtectedRoute>
-                  <Onboarding />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Provider registration — protected but outside AppLayout */}
-            <Route
-              path="/provider/register"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ProviderRegister />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Protected app routes — inside AppLayout */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Dashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transactions"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Transactions />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/upload"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Upload />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/classification"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ClassificationPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/analytics"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Analytics />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/alerts"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <AlertsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benchmarking"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Benchmarking />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/marketplace"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Marketplace />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Settings />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Admin panel — protected, role check done inside Admin component */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Admin />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Provider dashboard */}
-            <Route
-              path="/provider"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ProviderDashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Vendor detail */}
-            <Route
-              path="/vendors/:vendorName"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <VendorDetailPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* 404 */}
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route path="/provider/register" element={<ProtectedRoute><AppLayout><ProviderRegister /></AppLayout></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+            <Route path="/transactions" element={<ProtectedRoute><AppLayout><Transactions /></AppLayout></ProtectedRoute>} />
+            <Route path="/upload" element={<ProtectedRoute><AppLayout><Upload /></AppLayout></ProtectedRoute>} />
+            <Route path="/classification" element={<ProtectedRoute><AppLayout><ClassificationPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><AppLayout><Analytics /></AppLayout></ProtectedRoute>} />
+            <Route path="/alerts" element={<ProtectedRoute><AppLayout><AlertsPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
+            <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
+            <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute><AppLayout><ReportsPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/vendors/:vendorName" element={<ProtectedRoute><AppLayout><VendorDetailPage /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </TimeRangeProvider>
         </AuthProvider>
+        </TimeRangeProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

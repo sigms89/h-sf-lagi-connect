@@ -1,11 +1,14 @@
 // ============================================================
-// Húsfélagið.is — VendorOverview
+// Húsfélagið.is — VendorOverview (Updated: Fasi 4)
 // Full-page smart vendor/payer overview. Groups all transactions
 // by description, shows current vs. suggested category, and
 // allows bulk reclassification with optional rule creation.
+// Added: MergeSuggestionBar at top, clickable vendor name links.
 // ============================================================
 
 import { useState, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { MergeSuggestionBar } from '@/components/shared/MergeSuggestionBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -240,10 +243,14 @@ function VendorTable({
                         <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 flex-shrink-0" />
                       )}
                       <span
-                        className="truncate font-medium"
+                        className="truncate font-medium hover:underline hover:text-[#0d9488] transition-colors cursor-pointer"
                         title={item.vendor}
                       >
-                        {item.vendor || (
+                        {item.vendor ? (
+                          <Link to={`/vendors/${encodeURIComponent(item.vendor)}`}>
+                            {item.vendor}
+                          </Link>
+                        ) : (
                           <span className="text-muted-foreground italic">
                             (Engin lýsing)
                           </span>
@@ -478,6 +485,9 @@ export function VendorOverview({ associationId }: VendorOverviewProps) {
           </div>
         )}
       </div>
+
+      {/* MergeSuggestionBar */}
+      <MergeSuggestionBar associationId={associationId} />
 
       {/* Auto-classify bar */}
       <AutoClassifyBar associationId={associationId} />

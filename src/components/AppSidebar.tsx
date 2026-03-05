@@ -1,3 +1,8 @@
+// ============================================================
+// Húsfélagið.is — AppSidebar (Updated: Fasi 4)
+// Added: Skýrslur nav item (FileText icon) in insightItems,
+// between Viðvaranir and Samanburður.
+// ============================================================
 import {
   LayoutDashboard,
   Receipt,
@@ -10,6 +15,7 @@ import {
   Briefcase,
   Tags,
   Bell,
+  FileText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -46,6 +52,7 @@ const mainItems = [
 const insightItems = [
   { title: "Greining", url: "/analytics", icon: BarChart3 },
   { title: "Viðvaranir", url: "/alerts", icon: Bell },
+  { title: "Skýrslur", url: "/reports", icon: FileText },
   { title: "Samanburður", url: "/benchmarking", icon: Scale },
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
 ];
