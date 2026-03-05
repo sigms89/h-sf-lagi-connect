@@ -1,11 +1,16 @@
 // ============================================================
-// Húsfélagið.is — AnalyticsPage: Rebuilt Analytics Page
+// Húsfélagið.is — AnalyticsPage (Updated: Fasi 4)
 // Replaces the old Analytics.tsx with KPI cards, alert
 // banner, monthly chart, category pie, vendor analysis,
 // year-over-year comparison, and fee adequacy summary.
+// Added: TimeRangeSelector in header, HealthScoreCard (full)
+// between alerts and monthly chart, clickable vendor names.
 // ============================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
+import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -212,9 +217,12 @@ function VendorTable({
                       <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">
                         {i + 1}.
                       </span>
-                      <span className="text-sm font-medium truncate max-w-[180px]">
-                        {row.vendor}
-                      </span>
+                      <Link
+                          to={`/vendors/${encodeURIComponent(row.vendor)}`}
+                          className="text-sm font-medium truncate max-w-[180px] hover:underline hover:text-[#0d9488] transition-colors"
+                        >
+                          {row.vendor}
+                        </Link>
                     </div>
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
@@ -479,9 +487,12 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">Greining</h1>
-        <Badge variant="secondary">Beta</Badge>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Greining</h1>
+          <Badge variant="secondary">Beta</Badge>
+        </div>
+        <TimeRangeSelector />
       </div>
 
       {/* ── Section 1: KPI Cards ─────────────────────────────────── */}
@@ -576,6 +587,11 @@ export default function AnalyticsPage() {
             </Button>
           </a>
         </div>
+      )}
+
+      {/* ── Section 2b: Health Score ─────────────────────────────── */}
+      {associationId && (
+        <HealthScoreCard associationId={associationId} variant="full" />
       )}
 
       {/* ── Section 3: Monthly Trend Chart ──────────────────────── */}
