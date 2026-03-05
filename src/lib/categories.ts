@@ -35,6 +35,9 @@ export const CATEGORIES: CategoryConfig[] = [
   { nameIs: 'Sameign & Sameiginlegur kostnaður', nameEn: 'Common Expenses', icon: 'Building', color: 'sky', slug: 'sameign' },
   { nameIs: 'Annað', nameEn: 'Other', icon: 'HelpCircle', color: 'neutral', slug: 'annad' },
   { nameIs: 'Óflokkað', nameEn: 'Uncategorized', icon: 'AlertTriangle', color: 'yellow', slug: 'oflokkad' },
+  // ---- NEW ----
+  { nameIs: 'Bankakostnaður', nameEn: 'Bank Fees', icon: 'Landmark', color: 'rose', slug: 'bankakostnadur' },
+  { nameIs: 'Innheimtukostnaður', nameEn: 'Collection Fees', icon: 'Receipt', color: 'fuchsia', slug: 'innheimtukostnadur' },
 ];
 
 /**
@@ -42,24 +45,27 @@ export const CATEGORIES: CategoryConfig[] = [
  * Uses hardcoded Tailwind classes to avoid dynamic class purging.
  */
 const COLOR_MAP: Record<string, { badge: string; bg: string; text: string; hex: string }> = {
-  amber:   { badge: 'bg-amber-100 text-amber-800',   bg: 'bg-amber-400',   text: 'text-amber-100',   hex: '#f59e0b' },
-  blue:    { badge: 'bg-blue-100 text-blue-800',     bg: 'bg-blue-400',    text: 'text-blue-100',    hex: '#3b82f6' },
-  indigo:  { badge: 'bg-indigo-100 text-indigo-800', bg: 'bg-indigo-400',  text: 'text-indigo-100',  hex: '#6366f1' },
-  orange:  { badge: 'bg-orange-100 text-orange-800', bg: 'bg-orange-400',  text: 'text-orange-100',  hex: '#f97316' },
-  green:   { badge: 'bg-green-100 text-green-800',   bg: 'bg-green-400',   text: 'text-green-100',   hex: '#22c55e' },
-  red:     { badge: 'bg-red-100 text-red-800',       bg: 'bg-red-400',     text: 'text-red-100',     hex: '#ef4444' },
-  purple:  { badge: 'bg-purple-100 text-purple-800', bg: 'bg-purple-400',  text: 'text-purple-100',  hex: '#a855f7' },
-  gray:    { badge: 'bg-gray-100 text-gray-800',     bg: 'bg-gray-400',    text: 'text-gray-100',    hex: '#9ca3af' },
-  emerald: { badge: 'bg-emerald-100 text-emerald-800', bg: 'bg-emerald-400', text: 'text-emerald-100', hex: '#10b981' },
-  slate:   { badge: 'bg-slate-100 text-slate-800',   bg: 'bg-slate-400',   text: 'text-slate-100',   hex: '#64748b' },
-  teal:    { badge: 'bg-teal-100 text-teal-800',     bg: 'bg-teal-400',    text: 'text-teal-100',    hex: '#14b8a6' },
-  lime:    { badge: 'bg-lime-100 text-lime-800',     bg: 'bg-lime-400',    text: 'text-lime-100',    hex: '#84cc16' },
-  cyan:    { badge: 'bg-cyan-100 text-cyan-800',     bg: 'bg-cyan-400',    text: 'text-cyan-100',    hex: '#06b6d4' },
-  pink:    { badge: 'bg-pink-100 text-pink-800',     bg: 'bg-pink-400',    text: 'text-pink-100',    hex: '#ec4899' },
-  stone:   { badge: 'bg-stone-100 text-stone-800',   bg: 'bg-stone-400',   text: 'text-stone-100',   hex: '#a8a29e' },
-  sky:     { badge: 'bg-sky-100 text-sky-800',       bg: 'bg-sky-400',     text: 'text-sky-100',     hex: '#38bdf8' },
-  yellow:  { badge: 'bg-yellow-100 text-yellow-800', bg: 'bg-yellow-400',  text: 'text-yellow-100',  hex: '#eab308' },
-  neutral: { badge: 'bg-gray-100 text-gray-800',     bg: 'bg-gray-400',    text: 'text-gray-100',    hex: '#9ca3af' },
+  amber:   { badge: 'bg-amber-100 text-amber-800',     bg: 'bg-amber-400',     text: 'text-amber-100',     hex: '#f59e0b' },
+  blue:    { badge: 'bg-blue-100 text-blue-800',       bg: 'bg-blue-400',      text: 'text-blue-100',      hex: '#3b82f6' },
+  indigo:  { badge: 'bg-indigo-100 text-indigo-800',   bg: 'bg-indigo-400',    text: 'text-indigo-100',    hex: '#6366f1' },
+  orange:  { badge: 'bg-orange-100 text-orange-800',   bg: 'bg-orange-400',    text: 'text-orange-100',    hex: '#f97316' },
+  green:   { badge: 'bg-green-100 text-green-800',     bg: 'bg-green-400',     text: 'text-green-100',     hex: '#22c55e' },
+  red:     { badge: 'bg-red-100 text-red-800',         bg: 'bg-red-400',       text: 'text-red-100',       hex: '#ef4444' },
+  purple:  { badge: 'bg-purple-100 text-purple-800',   bg: 'bg-purple-400',    text: 'text-purple-100',    hex: '#a855f7' },
+  gray:    { badge: 'bg-gray-100 text-gray-800',       bg: 'bg-gray-400',      text: 'text-gray-100',      hex: '#9ca3af' },
+  emerald: { badge: 'bg-emerald-100 text-emerald-800', bg: 'bg-emerald-400',   text: 'text-emerald-100',   hex: '#10b981' },
+  slate:   { badge: 'bg-slate-100 text-slate-800',     bg: 'bg-slate-400',     text: 'text-slate-100',     hex: '#64748b' },
+  teal:    { badge: 'bg-teal-100 text-teal-800',       bg: 'bg-teal-400',      text: 'text-teal-100',      hex: '#14b8a6' },
+  lime:    { badge: 'bg-lime-100 text-lime-800',       bg: 'bg-lime-400',      text: 'text-lime-100',      hex: '#84cc16' },
+  cyan:    { badge: 'bg-cyan-100 text-cyan-800',       bg: 'bg-cyan-400',      text: 'text-cyan-100',      hex: '#06b6d4' },
+  pink:    { badge: 'bg-pink-100 text-pink-800',       bg: 'bg-pink-400',      text: 'text-pink-100',      hex: '#ec4899' },
+  stone:   { badge: 'bg-stone-100 text-stone-800',     bg: 'bg-stone-400',     text: 'text-stone-100',     hex: '#a8a29e' },
+  sky:     { badge: 'bg-sky-100 text-sky-800',         bg: 'bg-sky-400',       text: 'text-sky-100',       hex: '#38bdf8' },
+  yellow:  { badge: 'bg-yellow-100 text-yellow-800',   bg: 'bg-yellow-400',    text: 'text-yellow-100',    hex: '#eab308' },
+  neutral: { badge: 'bg-gray-100 text-gray-800',       bg: 'bg-gray-400',      text: 'text-gray-100',      hex: '#9ca3af' },
+  // ---- NEW ----
+  rose:    { badge: 'bg-rose-100 text-rose-800',       bg: 'bg-rose-400',      text: 'text-rose-100',      hex: '#f43f5e' },
+  fuchsia: { badge: 'bg-fuchsia-100 text-fuchsia-800', bg: 'bg-fuchsia-400',   text: 'text-fuchsia-100',   hex: '#d946ef' },
 };
 
 export function getCategoryColor(color: string | null | undefined): { badge: string; bg: string; text: string; hex: string } {

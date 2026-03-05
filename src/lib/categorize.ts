@@ -1,94 +1,221 @@
 // ============================================================
-// Húsfélagið.is — Transaction Categorization Engine
-// Rule-based categorization of bank transactions
+// Húsfélagið.is — Transaction Categorization Engine (v2)
+// Enhanced rule-based categorization with 5-tier priority system:
+//   1. Vendor rules (DB) — highest priority, regex match
+//   2. Smart individual detection — Icelandic person name heuristic
+//   3. Bank fee detection — exact ±360 amount
+//   4. Known vendor keywords — expanded list
+//   5. Fallback — "Óflokkað"
+//
 // Category names MUST match the DB seed in migration exactly.
 // ============================================================
 
 import type { Category, VendorRule } from '@/types/database';
 
-interface CategorizeResult {
+// ============================================================
+// TYPES
+// ============================================================
+
+export interface CategorizeResult {
   categoryNameIs: string;
-  method: 'vendor_rule' | 'keyword' | 'fallback';
+  method: 'vendor_rule' | 'individual_detection' | 'bank_fee' | 'keyword' | 'fallback';
   isIncome: boolean;
   isIndividualPayment: boolean;
+  confidence: number; // 0–1 confidence score
 }
 
-// Built-in keyword patterns for common Icelandic housing expenses
-// Category names here match the DB categories table exactly
-const KEYWORD_RULES: Array<{
+// ============================================================
+// ICELANDIC NAME DETECTION
+// Matches: "Jón Jónsson", "Guðrún Ósk Óskarsdóttir", "Axel Ingi Eiríksson"
+// Must NOT match entities ending in company suffixes (ehf, hf, sf, ses, ohf, slhf)
+// Strategy: every word is capitalised, contains Icelandic chars, ends in -son/-dóttir
+//   OR is just 2–4 capitalised Icelandic words with no company suffix anywhere.
+// ============================================================
+
+// Icelandic character set in word chars
+const IS_UPPER = 'A-ZÁÉÍÓÚÝÞÐÆÖ';
+const IS_LOWER = 'a-záéíóúýþðæö';
+const IS_WORD  = `[${IS_UPPER}${IS_LOWER}]`;
+
+// A single Icelandic capitalised word (incl. hyphenated, e.g. "Anna-Margrét")
+const CAP_WORD = `[${IS_UPPER}]${IS_WORD}{1,}(?:-[${IS_UPPER}]${IS_WORD}+)*`;
+
+// Company suffix patterns to EXCLUDE
+const COMPANY_SUFFIX_RE = /\b(ehf|hf|sf|ses|ohf|slhf|lhf|ásb|bs)\b\.?$/i;
+
+// Strong indicator: last word ends in -son, -dóttir, -sen (Icelandic patronymics)
+const PATRONYMIC_RE = /(son|dóttir|sen)\s*$/i;
+
+/**
+ * Returns true if the description looks like an Icelandic person name:
+ *   - 2 to 4 words, all capitalised
+ *   - No company suffixes
+ *   - Amount must be positive (incoming payment)
+ */
+function isIcelandicPersonName(description: string): boolean {
+  const trimmed = description.trim();
+
+  // Reject if company suffix present
+  if (COMPANY_SUFFIX_RE.test(trimmed)) return false;
+
+  // Reject if it contains digits (kennitala, account numbers, etc.)
+  if (/\d/.test(trimmed)) return false;
+
+  // Reject common non-name keywords
+  const nonNameKeywords = /\b(millifærsla|innborgun|greiðsla|reikningur|gjald|kostnaður|þjónusta|kaup|sala|endurgreiðsla|leiga|lán)\b/i;
+  if (nonNameKeywords.test(trimmed)) return false;
+
+  // Build regex: 2 to 4 capitalised Icelandic words, nothing else
+  const fullNameRe = new RegExp(
+    `^(${CAP_WORD})(?:\\s+(${CAP_WORD})){1,3}$`
+  );
+
+  if (!fullNameRe.test(trimmed)) return false;
+
+  // Boost confidence: at least one word ends in a patronymic suffix
+  // We still return true even without it — 2+ cap words is sufficient
+  return true;
+}
+
+// ============================================================
+// KEYWORD RULES
+// Ordered: first match wins within this tier.
+// ============================================================
+
+interface KeywordRule {
   pattern: RegExp;
   category: string;
   isIncome?: boolean;
   isIndividualPayment?: boolean;
-}> = [
-  // Utilities — "Rafmagn & Hiti"
-  { pattern: /hs\s*orka|orkuveita|rarik|rafmagn/i, category: 'Rafmagn & Hiti' },
-  { pattern: /veitur|hitaveita|heitt\s*vatn/i, category: 'Rafmagn & Hiti' },
+  confidence?: number;
+}
 
-  // Water — "Vatnsveita"
-  { pattern: /vatnsveita|vatnsverk|kaldt\s*vatn/i, category: 'Vatnsveita' },
-
-  // Telecom — maps to "Annað" (no dedicated telecom category in DB)
-  { pattern: /hringdu|síminn|vodafone|nova/i, category: 'Annað' },
-
-  // Maintenance — "Viðhald & Viðgerðir"
-  { pattern: /viðhald|málning|múr|þak|viðgerð/i, category: 'Viðhald & Viðgerðir' },
-
-  // Cleaning — "Ræsting & Þrif"
-  { pattern: /ræsting|þrif|hreins/i, category: 'Ræsting & Þrif' },
-
-  // Landscaping — "Garðyrkja & Umhverfi"
-  { pattern: /garð|garðyrkj|slátt|snjómokstur/i, category: 'Garðyrkja & Umhverfi' },
-
-  // Elevator — "Lyftuþjónusta"
-  { pattern: /lyfta|lyftutækni/i, category: 'Lyftuþjónusta' },
-
-  // Plumbing — "Pípulagnir"
-  { pattern: /pípulagn|pípari|klósett/i, category: 'Pípulagnir' },
-
-  // Painting — "Málning & Frágangsvinna"
-  { pattern: /málningarverk|málari|lakk/i, category: 'Málning & Frágangsvinna' },
-
-  // Electrical (maps to Viðhald)
-  { pattern: /rafvirkj|raflögn/i, category: 'Viðhald & Viðgerðir' },
-
-  // Insurance — "Tryggingar"
-  { pattern: /trygging|vátrygging|sjóvá|tg/i, category: 'Tryggingar' },
-
-  // Property tax — "Lóðaleiga / Fasteignagjöld"
-  { pattern: /fasteignagjöld|sveitarsjóð|útsvar|lóðaleig/i, category: 'Lóðaleiga / Fasteignagjöld' },
-
-  // Waste — "Sorpmeðhöndlun"
-  { pattern: /sorphirða|sorpgjald|sorp/i, category: 'Sorpmeðhöndlun' },
-
-  // Accounting / Admin — "Umsýsla & Stjórnun"
-  { pattern: /bókhal|endurskoð|umsýsl/i, category: 'Umsýsla & Stjórnun' },
-
-  // Common expenses — "Sameign & Sameiginlegur kostnaður"
-  { pattern: /sameign|sameiginleg/i, category: 'Sameign & Sameiginlegur kostnaður' },
-
-  // Interest — "Vaxtakostnaður"
-  { pattern: /vextir|vaxtakostn/i, category: 'Vaxtakostnaður' },
-
-  // Security — "Öryggisgæsla"
-  { pattern: /örygg|eftirlitsm/i, category: 'Öryggisgæsla' },
-
-  // Income — "Húsfélagsgjöld (innborgun)"
+const KEYWORD_RULES: KeywordRule[] = [
+  // ---- Utilities ----
   {
-    pattern: /husfélagsgjald|húsfélagsgjald|gjaldgreiðsl/i,
-    category: 'Húsfélagsgjöld (innborgun)',
-    isIncome: true,
-    isIndividualPayment: true,
+    pattern: /orka\s*náttúrunnar|íslensk\s*orkumiðlun|n1\s*ehf|orkuveita|rarik|hs\s*orka|veitur/i,
+    category: 'Rafmagn & Hiti',
+    confidence: 0.95,
   },
 
-  // Individual payments (likely residents paying fees)
+  // ---- Water ----
   {
-    pattern: /millifærsla.*frá|innborgun/i,
+    pattern: /vatnsveita|vatnsverk/i,
+    category: 'Vatnsveita',
+    confidence: 0.95,
+  },
+
+  // ---- Insurance ----
+  {
+    pattern: /tm\s*trygging|vís\s*trygging|sjóvá|tryggingarfélag/i,
+    category: 'Tryggingar',
+    confidence: 0.95,
+  },
+
+  // ---- Elevator ----
+  {
+    pattern: /schindler|lyftu|kone/i,
+    category: 'Lyftuþjónusta',
+    confidence: 0.92,
+  },
+
+  // ---- Cleaning ----
+  {
+    pattern: /b\.?g\.?\s*þjónust|ræsting|þrif|hreins/i,
+    category: 'Ræsting & Þrif',
+    confidence: 0.93,
+  },
+
+  // ---- Administration ----
+  {
+    pattern: /eignaumsjón|hússjóð|klar\s*ehf|húsfélagsþjón/i,
+    category: 'Umsýsla & Stjórnun',
+    confidence: 0.93,
+  },
+
+  // ---- Collection fees ----
+  {
+    pattern: /kröfumiðlun/i,
+    category: 'Innheimtukostnaður',
+    confidence: 0.97,
+  },
+
+  // ---- Landscaping ----
+  {
+    pattern: /glaðir\s*garðar|garð|slátt|snjómokstur/i,
+    category: 'Garðyrkja & Umhverfi',
+    confidence: 0.90,
+  },
+
+  // ---- Security ----
+  {
+    pattern: /varnir\s*og\s*eftirlit|örygg/i,
+    category: 'Öryggisgæsla',
+    confidence: 0.93,
+  },
+
+  // ---- Property tax / land lease ----
+  {
+    pattern: /fasteignagjöld|sveitarsjóð|lóðaleig/i,
+    category: 'Lóðaleiga / Fasteignagjöld',
+    confidence: 0.95,
+  },
+
+  // ---- Waste ----
+  {
+    pattern: /sorphirð|sorpgjald/i,
+    category: 'Sorpmeðhöndlun',
+    confidence: 0.95,
+  },
+
+  // ---- Plumbing ----
+  {
+    pattern: /pípulagn|pípari/i,
+    category: 'Pípulagnir',
+    confidence: 0.93,
+  },
+
+  // ---- Painting ----
+  {
+    pattern: /málning|málari|lakk/i,
+    category: 'Málning & Frágangsvinna',
+    confidence: 0.92,
+  },
+
+  // ---- Maintenance (broad — keep after painting/plumbing) ----
+  {
+    pattern: /viðhald|þakviðgerð|múr|viðgerð|héðinshurð|rafinn|bílar\s*og\s*varahlutir/i,
+    category: 'Viðhald & Viðgerðir',
+    confidence: 0.88,
+  },
+
+  // ---- Interest ----
+  {
+    pattern: /vextir|vaxtakostn/i,
+    category: 'Vaxtakostnaður',
+    confidence: 0.95,
+  },
+
+  // ---- Accounting / Admin ----
+  {
+    pattern: /bókhal|endurskoð/i,
+    category: 'Umsýsla & Stjórnun',
+    confidence: 0.92,
+  },
+
+  // ---- Company paying HOA fees ----
+  {
+    pattern: /félagsbústaðir/i,
     category: 'Húsfélagsgjöld (innborgun)',
     isIncome: true,
-    isIndividualPayment: true,
+    isIndividualPayment: false,
+    confidence: 0.90,
   },
 ];
+
+// ============================================================
+// MAIN FUNCTION
+// ============================================================
 
 export function categorizeTransaction(
   description: string,
@@ -97,9 +224,13 @@ export function categorizeTransaction(
   categories: Category[]
 ): CategorizeResult {
   const isIncome = amount > 0;
-  const desc = description.toLowerCase();
+  // Use original casing for name detection; lowercase for keyword matching
+  const desc = description.trim();
+  const descLower = desc.toLowerCase();
 
-  // 1. Try vendor rules first (highest priority)
+  // ----------------------------------------------------------------
+  // TIER 1: Vendor rules from DB (highest priority)
+  // ----------------------------------------------------------------
   for (const rule of vendorRules) {
     try {
       const pattern = new RegExp(rule.keyword_pattern, 'i');
@@ -110,31 +241,67 @@ export function categorizeTransaction(
           method: 'vendor_rule',
           isIncome,
           isIndividualPayment: false,
+          confidence: 1.0,
         };
       }
     } catch {
-      // Skip invalid regex patterns
+      // Skip invalid regex
       continue;
     }
   }
 
-  // 2. Try built-in keyword rules
+  // ----------------------------------------------------------------
+  // TIER 2: Smart individual detection
+  // Positive amount + description looks like an Icelandic person name
+  // ----------------------------------------------------------------
+  if (amount > 0 && isIcelandicPersonName(desc)) {
+    return {
+      categoryNameIs: 'Húsfélagsgjöld (innborgun)',
+      method: 'individual_detection',
+      isIncome: true,
+      isIndividualPayment: true,
+      confidence: 0.85,
+    };
+  }
+
+  // ----------------------------------------------------------------
+  // TIER 3: Bank fee detection — exact amount of ±360
+  // ----------------------------------------------------------------
+  if (amount === 360 || amount === -360) {
+    return {
+      categoryNameIs: 'Bankakostnaður',
+      method: 'bank_fee',
+      isIncome: false,
+      isIndividualPayment: false,
+      confidence: 0.99,
+    };
+  }
+
+  // ----------------------------------------------------------------
+  // TIER 4: Known vendor keyword matching
+  // ----------------------------------------------------------------
   for (const rule of KEYWORD_RULES) {
-    if (rule.pattern.test(desc)) {
+    if (rule.pattern.test(descLower)) {
+      // Determine income: rule override, else infer from amount sign
+      const resolvedIsIncome = rule.isIncome !== undefined ? rule.isIncome : isIncome;
       return {
         categoryNameIs: rule.category,
         method: 'keyword',
-        isIncome: rule.isIncome ?? isIncome,
+        isIncome: resolvedIsIncome,
         isIndividualPayment: rule.isIndividualPayment ?? false,
+        confidence: rule.confidence ?? 0.80,
       };
     }
   }
 
-  // 3. Fallback
+  // ----------------------------------------------------------------
+  // TIER 5: Fallback
+  // ----------------------------------------------------------------
   return {
     categoryNameIs: 'Óflokkað',
     method: 'fallback',
     isIncome,
     isIndividualPayment: false,
+    confidence: 0.0,
   };
 }
