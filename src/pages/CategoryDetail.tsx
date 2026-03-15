@@ -345,7 +345,7 @@ export default function CategoryDetail() {
                     <TableCell className="text-sm text-muted-foreground">
                       {tx.vendor_name || '—'}
                     </TableCell>
-                    <TableCell className="text-right text-sm font-medium text-red-600">
+                    <TableCell className="text-right text-sm font-medium text-rose-600">
                       -{formatISK(Math.abs(tx.amount))}
                     </TableCell>
                   </TableRow>
