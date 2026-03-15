@@ -82,7 +82,7 @@ function getHealthScoreRingClass(color: "green" | "yellow" | "red"): string {
 
 function TrendIcon({ trend }: { trend: VendorStat["trend"] }) {
   if (trend === "up")
-    return <TrendingUp className="inline h-3.5 w-3.5 text-red-500 ml-1" />;
+    return <TrendingUp className="inline h-3.5 w-3.5 text-rose-500 ml-1" />;
   if (trend === "down")
     return <TrendingDown className="inline h-3.5 w-3.5 text-teal-600 ml-1" />;
   return <Minus className="inline h-3.5 w-3.5 text-gray-400 ml-1" />;
