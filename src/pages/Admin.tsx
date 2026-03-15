@@ -105,7 +105,7 @@ export default function Admin() {
           <Shield className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Kerfisstjórnun</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Kerfisstjórnun</h1>
           <p className="text-xs text-muted-foreground">Stjórnborð Húsfélagið.is</p>
         </div>
         <Badge variant="outline" className="text-xs ml-2">Super Admin</Badge>

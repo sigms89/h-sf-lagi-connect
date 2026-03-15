@@ -273,7 +273,7 @@ export default function ReportsPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-6 mb-8">
         <div className="max-w-4xl mx-auto">
           <h1
-            className="text-2xl font-bold text-[#1e3a5f] tracking-tight"
+            className="text-xl font-semibold text-[#1e3a5f] tracking-tight"
             style={{ fontFamily: "ui-serif, Georgia, serif" }}
           >
             Aðalfundarskýrsla

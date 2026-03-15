@@ -267,7 +267,7 @@ function VendorTable({
                   {/* Total */}
                   <TableCell
                     className={`text-right text-sm font-medium tabular-nums whitespace-nowrap ${
-                      amountNeg ? 'text-red-600' : 'text-green-600'
+                      amountNeg ? 'text-rose-600' : 'text-teal-600'
                     }`}
                   >
                     {amountNeg ? '−' : '+'}

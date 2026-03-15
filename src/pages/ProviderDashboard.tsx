@@ -71,7 +71,7 @@ export default function ProviderDashboard() {
           </Badge>
         )}
         {provider.is_approved && (
-          <Badge className="text-xs bg-green-100 text-green-800 border-green-200">
+          <Badge className="text-xs bg-teal-100 text-teal-800 border-teal-200">
             Samþykkt
           </Badge>
         )}

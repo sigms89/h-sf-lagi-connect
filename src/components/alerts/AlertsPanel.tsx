@@ -250,7 +250,7 @@ export function AlertsPanel({ associationId }: AlertsPanelProps) {
         ) : filteredAlerts.length === 0 && activeFilter === 'all' ? (
           // Empty state
           <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
-            <CheckCircle2 className="h-10 w-10 text-green-500 mb-1" />
+            <CheckCircle2 className="h-10 w-10 text-teal-500 mb-1" />
             <p className="text-sm font-medium text-foreground">Ekkert athugavert</p>
             <p className="text-xs text-muted-foreground">
               Engar viðvaranir eða tillögur eru til staðar

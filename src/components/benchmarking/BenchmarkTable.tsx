@@ -95,7 +95,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   <TableCell className="text-sm tabular-nums">{formatIskAmount(row.yourCostPerUnit, true)}</TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">{formatIskAmount(row.avgCostPerUnit, true)}</TableCell>
                   <TableCell>
-                    <span className={cn('text-sm font-semibold tabular-nums', row.diffPercent < -10 ? 'text-green-700' : row.diffPercent > 10 ? 'text-red-700' : 'text-yellow-700')}>
+                    <span className={cn('text-sm font-semibold tabular-nums', row.diffPercent < -10 ? 'text-teal-700' : row.diffPercent > 10 ? 'text-rose-700' : 'text-yellow-700')}>
                       {row.diffPercent > 0 ? '+' : ''}{row.diffPercent.toFixed(1)}%
                     </span>
                   </TableCell>

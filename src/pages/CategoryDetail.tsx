@@ -211,9 +211,9 @@ export default function CategoryDetail() {
             variant="secondary"
             className={
               trendPct > 0
-                ? 'bg-red-100 text-red-800'
+                ? 'bg-rose-100 text-rose-800'
                 : trendPct < 0
-                ? 'bg-emerald-100 text-emerald-800'
+                ? 'bg-teal-100 text-teal-800'
                 : 'bg-gray-100 text-gray-800'
             }
           >
