@@ -264,7 +264,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
             <SelectItem value="all">Allt</SelectItem>
             <SelectItem value="income">
               <span className="flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5 text-green-600" /> Tekjur
+                <TrendingUp className="h-3.5 w-3.5 text-teal-600" /> Tekjur
               </span>
             </SelectItem>
             <SelectItem value="expense">
