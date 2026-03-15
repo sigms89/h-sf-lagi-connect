@@ -65,7 +65,7 @@ const Dashboard = () => {
       )}
 
       {(isLoading || hasData) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
           <BalanceCard label="Staða" amount={stats?.current_balance} isLoading={isLoading} type="balance" subtitle="Nýjasta staða á bankayfirliti" />
           <BalanceCard label="Tekjur (12 mán.)" amount={stats?.total_income} isLoading={isLoading} type="income" />
           <BalanceCard label="Gjöld (12 mán.)" amount={stats?.total_expenses} isLoading={isLoading} type="expense" />
