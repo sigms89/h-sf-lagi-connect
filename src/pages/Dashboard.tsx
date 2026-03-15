@@ -33,10 +33,10 @@ const Dashboard = () => {
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Yfirlit</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Yfirlit</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {association?.name ?? 'Húsfélagið þitt'} — {label}
           </p>
@@ -65,7 +65,7 @@ const Dashboard = () => {
       )}
 
       {(isLoading || hasData) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
           <BalanceCard label="Staða" amount={stats?.current_balance} isLoading={isLoading} type="balance" subtitle="Nýjasta staða á bankayfirliti" />
           <BalanceCard label="Tekjur (12 mán.)" amount={stats?.total_income} isLoading={isLoading} type="income" />
           <BalanceCard label="Gjöld (12 mán.)" amount={stats?.total_expenses} isLoading={isLoading} type="expense" />
@@ -77,14 +77,14 @@ const Dashboard = () => {
       )}
 
       {(isLoading || hasData) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <MonthlyChart data={stats?.monthly_data ?? []} isLoading={isLoading} />
           <CategoryPieChart data={stats?.category_breakdown ?? []} isLoading={isLoading} />
         </div>
       )}
 
       {(isLoading || hasData) && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2">
             <RecentTransactions transactions={txData?.data ?? []} isLoading={txLoading} />
           </div>

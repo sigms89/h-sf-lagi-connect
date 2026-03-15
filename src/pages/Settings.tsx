@@ -187,7 +187,7 @@ export default function Settings() {
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Stillingar</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Stillingar</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           Upplýsingar um húsfélagið og meðlimastjórnun
         </p>
