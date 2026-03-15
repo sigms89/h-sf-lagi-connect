@@ -57,7 +57,7 @@ function factorStatus(score: number): 'good' | 'warning' | 'critical' {
 }
 
 // ---------------------------------------------------------------
-// Factor calculators
+// Factor calculators — ALL scores are Math.round()'d
 // ---------------------------------------------------------------
 
 /** Factor 1 — Tekjur vs gjöld (30%): income/expense ratio */
@@ -73,8 +73,7 @@ function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
     detail = 'Engin útgjöld skráð á tímabilinu.';
   } else {
     const ratio = totalIncome / totalExpense;
-    // 100 at ratio>=1, linear scale down to 0 at ratio 0
-    score = clamp(ratio * 100);
+    score = Math.round(clamp(ratio * 100));
     const pct = ((ratio - 1) * 100).toFixed(1);
     if (ratio >= 1) {
       detail = `Tekjur eru ${Math.abs(Number(pct))}% umfram gjöld.`;
@@ -95,11 +94,9 @@ function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
 
 /** Factor 2 — Sjóðsstaða (25%): balance vs avg monthly expenses */
 function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
-  // Latest balance from the most recent transaction
   const sorted = [...txs].sort((a, b) => b.date.localeCompare(a.date));
   const latestBalance = sorted.find((t) => t.balance != null)?.balance ?? 0;
 
-  // Avg monthly expenses over last 12 months
   const now = new Date();
   const twelveMonthsAgo = subMonths(now, 12);
   const recentExpenses = txs.filter(
@@ -116,12 +113,10 @@ function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
     detail = 'Ekki nóg gögn til að reikna sjóðsstöðu.';
   } else {
     const ratio = latestBalance / avgMonthlyExpense;
-    // 100 at >=3x, linear between 0x and 3x; 50 at 1.5x per spec
-    // Use piecewise: 0→0, 1.5→50, 3→100 (all linear)
     if (ratio >= 3) {
       score = 100;
     } else if (ratio >= 0) {
-      score = clamp((ratio / 3) * 100);
+      score = Math.round(clamp((ratio / 3) * 100));
     } else {
       score = 0;
     }
@@ -145,13 +140,11 @@ function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
   const lastMonthStart = startOfMonth(subMonths(now, 1));
   const lastMonthEnd = endOfMonth(subMonths(now, 1));
 
-  // All individual payment transactions last month
   const lastMonthPayments = txs.filter((t) => {
     const d = new Date(t.date);
     return t.is_individual_payment && d >= lastMonthStart && d <= lastMonthEnd;
   });
 
-  // Expected = sum of expected income transactions (individual)
   const expectedPayments = txs.filter((t) => {
     const d = new Date(t.date);
     return t.is_individual_payment && t.is_income && d >= lastMonthStart && d <= lastMonthEnd;
@@ -161,20 +154,19 @@ function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
   let detail: string;
 
   if (expectedPayments.length === 0) {
-    // Fallback: look at ratio of individual income vs all individual txs
     const totalIndividual = lastMonthPayments.length;
     if (totalIndividual === 0) {
       score = 50;
       detail = 'Engar einstaklingsgreiðslur skráðar síðasta mánuð.';
     } else {
       const received = lastMonthPayments.filter((t) => t.is_income).length;
-      score = clamp((received / totalIndividual) * 100);
+      score = Math.round(clamp((received / totalIndividual) * 100));
       detail = `${received} af ${totalIndividual} greiðslum mótteknar síðasta mánuð.`;
     }
   } else {
     const receivedCount = lastMonthPayments.filter((t) => t.is_income).length;
     const expectedCount = expectedPayments.length;
-    score = clamp((receivedCount / expectedCount) * 100);
+    score = Math.round(clamp((receivedCount / expectedCount) * 100));
     detail = `${receivedCount} af ${expectedCount} greiðslum mótteknar síðasta mánuð.`;
   }
 
@@ -189,16 +181,12 @@ function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 4 — Viðvaranir (15%): based on alert signals derived from transactions.
- * Alerts are detected from the data:
- *   - Critical: any month where expenses > 2x avg monthly expenses
- *   - Warning: any month where expenses > 1.5x avg monthly expenses
+ * Factor 4 — Viðvaranir (15%)
  */
 function calcAlerts(txs: TxRow[]): HealthScoreFactor {
   const now = new Date();
   const twelveMonthsAgo = subMonths(now, 12);
 
-  // Build monthly expense map for last 12 months
   const monthlyExpenses: Record<string, number> = {};
   txs.forEach((t) => {
     const d = new Date(t.date);
@@ -228,9 +216,8 @@ function calcAlerts(txs: TxRow[]): HealthScoreFactor {
     });
   }
 
-  // 100 if 0 alerts; -20 per critical, -10 per warning
   const rawScore = 100 - criticals * 20 - warnings * 10;
-  const score = clamp(rawScore);
+  const score = Math.round(clamp(rawScore));
 
   let detail: string;
   if (criticals === 0 && warnings === 0) {
@@ -250,11 +237,7 @@ function calcAlerts(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 5 — Viðhaldskostnaður (10%): maintenance as % of total expenses.
- * Optimal range 15–25%. Score decreases outside range.
- *
- * We approximate maintenance by looking at categories; if no category data,
- * we use a heuristic of 0% which gives a neutral score.
+ * Factor 5 — Viðhaldskostnaður (10%)
  */
 function calcMaintenanceRatio(
   txs: TxRow[],
@@ -280,12 +263,10 @@ function calcMaintenanceRatio(
       score = 100;
       detail = `Viðhaldskostnaður er ${pctStr}% af heildargjöldum — innan við markmiðsbils.`;
     } else if (pct < 15) {
-      // Below ideal: scale from 0% → 0 score, 15% → 100 score
-      score = clamp((pct / 15) * 100);
+      score = Math.round(clamp((pct / 15) * 100));
       detail = `Viðhaldskostnaður er ${pctStr}% — lægri en ráðlögð 15–25%.`;
     } else {
-      // Above ideal: scale from 25% → 100, 50% → 0
-      score = clamp(((50 - pct) / 25) * 100);
+      score = Math.round(clamp(((50 - pct) / 25) * 100));
       detail = `Viðhaldskostnaður er ${pctStr}% — hærri en ráðlögð 15–25%.`;
     }
   }
@@ -331,7 +312,6 @@ function aggregateScore(factors: HealthScoreFactor[]): HealthScoreResult {
 // ---------------------------------------------------------------
 
 async function fetchHealthScore(associationId: string): Promise<HealthScoreResult> {
-  // Fetch all transactions for the association
   const { data: txs, error: txError } = await (db as any)
     .from('transactions')
     .select('amount, balance, is_income, is_individual_payment, date, category_id')
@@ -341,8 +321,6 @@ async function fetchHealthScore(associationId: string): Promise<HealthScoreResul
 
   const transactions: TxRow[] = txs ?? [];
 
-  // Fetch categories to identify maintenance categories
-  // We assume maintenance categories contain keywords like "viðhald" or "viðgerð"
   const { data: cats, error: catError } = await (db as any)
     .from('categories')
     .select('id, name_is');
@@ -358,7 +336,6 @@ async function fetchHealthScore(associationId: string): Promise<HealthScoreResul
       .map((c: { id: string }) => c.id),
   );
 
-  // Calculate each factor
   const factors: HealthScoreFactor[] = [
     calcIncomeExpense(transactions),
     calcCashPosition(transactions),
@@ -374,21 +351,11 @@ async function fetchHealthScore(associationId: string): Promise<HealthScoreResul
 // Hook
 // ---------------------------------------------------------------
 
-/**
- * useHealthScore
- *
- * Returns a 0–100 financial health score for the current association
- * with weighted factor breakdown and Icelandic labels.
- *
- * @example
- * const { data, isLoading } = useHealthScore();
- * // data.score, data.label, data.color, data.factors
- */
 export function useHealthScore(associationId: string | null | undefined) {
   return useQuery<HealthScoreResult>({
     queryKey: ['health_score', associationId],
     queryFn: () => fetchHealthScore(associationId!),
     enabled: Boolean(associationId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }

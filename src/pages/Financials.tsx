@@ -13,7 +13,6 @@ import { Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-// Lazy-style inline imports for Analytics and Reports content
 import AnalyticsPage from "@/pages/Analytics";
 import ReportsPage from "@/pages/ReportsPage";
 
@@ -42,26 +41,26 @@ export default function Financials() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
       </div>
     );
   }
 
   if (!association) {
     return (
-      <div className="text-center py-16 text-muted-foreground">
+      <div className="text-center py-16 text-zinc-500">
         Ekkert húsfélag tengt.
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Fjármál</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Fjármál</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
             {association.name}
           </p>
         </div>
@@ -71,33 +70,35 @@ export default function Financials() {
         </Button>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="bg-secondary/50 p-1 h-auto">
-          {TAB_KEYS.map((key) => (
-            <TabsTrigger
-              key={key}
-              value={key}
-              className="text-[13px] px-4 py-1.5 data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-foreground rounded-lg transition-all duration-200"
-            >
-              {TAB_LABELS[key]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {/* Tabs — bottom-border underline style */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <div className="border-b border-zinc-200">
+          <TabsList className="bg-transparent p-0 h-auto gap-6">
+            {TAB_KEYS.map((key) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="rounded-none border-b-2 border-transparent px-0 pb-3 pt-1 text-[13px] text-zinc-500 hover:text-zinc-700 data-[state=active]:border-b-zinc-900 data-[state=active]:text-zinc-900 data-[state=active]:font-medium data-[state=active]:shadow-none data-[state=active]:bg-transparent transition-colors duration-150"
+              >
+                {TAB_LABELS[key]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
-        <TabsContent value="faerslur" className="mt-0">
+        <TabsContent value="faerslur" className="mt-6">
           <TransactionList associationId={association.id} />
         </TabsContent>
 
-        <TabsContent value="flokkun" className="mt-0">
+        <TabsContent value="flokkun" className="mt-6">
           <VendorOverview associationId={association.id} />
         </TabsContent>
 
-        <TabsContent value="greining" className="mt-0">
+        <TabsContent value="greining" className="mt-6">
           <AnalyticsPage />
         </TabsContent>
 
-        <TabsContent value="skyrsla" className="mt-0">
+        <TabsContent value="skyrsla" className="mt-6">
           <ReportsPage />
         </TabsContent>
       </Tabs>

@@ -19,8 +19,8 @@ const iconMap = {
 
 const colorMap = {
   balance: 'text-foreground',
-  income: 'text-green-600',
-  expense: 'text-red-600',
+  income: 'text-teal-600',
+  expense: 'text-rose-600',
 };
 
 export function BalanceCard({ label, amount, isLoading, type, subtitle }: BalanceCardProps) {
@@ -36,11 +36,11 @@ export function BalanceCard({ label, amount, isLoading, type, subtitle }: Balanc
         {isLoading ? (
           <Skeleton className="h-7 w-32" />
         ) : (
-          <div className={`text-2xl font-bold ${colorMap[type]}`}>
+          <div className={`text-2xl font-bold tabular-nums ${colorMap[type]}`}>
             {amount != null ? formatIskAmount(amount) : '—'}
           </div>
         )}
-        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}
       </CardContent>
     </Card>
   );

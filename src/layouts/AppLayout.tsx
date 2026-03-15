@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — AppLayout v2
-// Premium shell: clean sidebar + refined header
+// Húsfélagið.is — AppLayout v3
+// bg-zinc-50 main content area
 // ============================================================
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,22 +13,19 @@ import { NotificationBell } from '@/components/notifications/NotificationBell';
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, signOut } = useAuth();
 
-  // First letter of email for avatar
-  const avatarLetter = user?.email?.charAt(0)?.toUpperCase() ?? "?";
-
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between border-b border-border/60 px-8 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex-1 flex flex-col min-w-0 bg-zinc-50">
+          <header className="h-14 flex items-center justify-between border-b border-zinc-200 px-8 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
             <SidebarTrigger />
             <div className="flex items-center gap-3">
-              <span className="text-[13px] text-muted-foreground hidden sm:inline">
+              <span className="text-[13px] text-zinc-500 hidden sm:inline">
                 {user?.email}
               </span>
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors duration-200">
+              <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-zinc-400 hover:text-zinc-900 transition-colors duration-150">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
