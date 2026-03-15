@@ -425,7 +425,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                       {/* Amount */}
                       <TableCell
                         className={`text-right text-sm font-medium whitespace-nowrap ${
-                          tx.is_income ? 'text-green-600' : 'text-red-600'
+                          tx.is_income ? 'text-teal-600' : 'text-rose-600'
                         }`}
                       >
                         {tx.is_income ? '+' : '-'}
