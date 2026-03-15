@@ -77,7 +77,7 @@ const Dashboard = () => {
       )}
 
       {(isLoading || hasData) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <MonthlyChart data={stats?.monthly_data ?? []} isLoading={isLoading} />
           <CategoryPieChart data={stats?.category_breakdown ?? []} isLoading={isLoading} />
         </div>
