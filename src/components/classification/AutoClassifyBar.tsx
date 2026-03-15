@@ -91,15 +91,15 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
   // ============================================================
   if (lastResult) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+      <div className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-teal-600 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-green-800">
+              <p className="text-sm font-medium text-teal-800">
                 Sjálfvirk flokkun lokið
               </p>
-              <p className="text-xs text-green-700 mt-0.5">
+              <p className="text-xs text-teal-700 mt-0.5">
                 <span className="font-semibold">{lastResult.classified}</span> færslur flokkaðar
                 sjálfvirkt
                 {lastResult.skipped > 0 && (

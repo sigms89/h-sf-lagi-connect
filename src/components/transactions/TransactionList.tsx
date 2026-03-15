@@ -478,9 +478,9 @@ export function TransactionList({ associationId }: TransactionListProps) {
                       {/* Type icon */}
                       <TableCell className="text-center">
                         {tx.is_income ? (
-                          <TrendingUp className="h-4 w-4 text-green-500 mx-auto" />
+                          <TrendingUp className="h-4 w-4 text-teal-500 mx-auto" />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-500 mx-auto" />
+                          <TrendingDown className="h-4 w-4 text-rose-500 mx-auto" />
                         )}
                       </TableCell>
                     </TableRow>

@@ -790,7 +790,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                           </TableCell>
                           <TableCell
                             className={`text-right text-sm font-medium whitespace-nowrap ${
-                              tx.isIncome ? 'text-green-600' : 'text-red-600'
+                              tx.isIncome ? 'text-teal-600' : 'text-rose-600'
                             }`}
                           >
                             {tx.isIncome ? '+' : '-'}
