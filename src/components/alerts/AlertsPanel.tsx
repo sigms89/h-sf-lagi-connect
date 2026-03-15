@@ -119,9 +119,9 @@ function AlertCard({ alert }: { alert: FinancialAlert }) {
           {hasMetric && (
             <div className="flex items-center gap-2 text-xs font-medium mb-2">
               {isPositiveChange ? (
-                <TrendingUp className="h-3.5 w-3.5 text-red-600" />
+                <TrendingUp className="h-3.5 w-3.5 text-rose-600" />
               ) : (
-                <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                <TrendingDown className="h-3.5 w-3.5 text-teal-600" />
               )}
               <span>
                 {isPositiveChange ? '+' : '-'}
