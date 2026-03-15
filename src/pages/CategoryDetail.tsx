@@ -203,7 +203,7 @@ export default function CategoryDetail() {
           className="h-4 w-4 rounded-full shrink-0"
           style={{ backgroundColor: categoryColor }}
         />
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-xl font-semibold tracking-tight">
           {category.name_is}
         </h1>
         {trendPct !== null && (
