@@ -364,7 +364,7 @@ export default function ReportsPage() {
                       </dt>
                       <dd
                         className={`font-mono text-sm font-bold ${
-                          netBalance < 0 ? "text-red-600" : "text-teal-700"
+                          netBalance < 0 ? "text-rose-600" : "text-teal-700"
                         }`}
                       >
                         {formatIskAmount(netBalance)}
