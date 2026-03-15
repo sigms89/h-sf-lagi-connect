@@ -269,7 +269,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
             </SelectItem>
             <SelectItem value="expense">
               <span className="flex items-center gap-2">
-                <TrendingDown className="h-3.5 w-3.5 text-red-600" /> Gjöld
+                <TrendingDown className="h-3.5 w-3.5 text-rose-600" /> Gjöld
               </span>
             </SelectItem>
             <SelectItem value="uncategorized">
