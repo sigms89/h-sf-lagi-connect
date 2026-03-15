@@ -644,9 +644,9 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
             </Card>
             <Card className="p-3">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingDown className="h-3 w-3 text-red-600" /> Útgjöld
+                <TrendingDown className="h-3 w-3 text-rose-600" /> Útgjöld
               </p>
-              <p className="text-lg font-semibold text-red-600">
+              <p className="text-lg font-semibold text-rose-600 tabular-nums">
                 {formatIskAmount(stats.totalExpenses)}
               </p>
             </Card>
