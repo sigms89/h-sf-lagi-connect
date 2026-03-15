@@ -119,9 +119,9 @@ function AlertCard({ alert }: { alert: FinancialAlert }) {
           {hasMetric && (
             <div className="flex items-center gap-2 text-xs font-medium mb-2">
               {isPositiveChange ? (
-                <TrendingUp className="h-3.5 w-3.5 text-red-600" />
+                <TrendingUp className="h-3.5 w-3.5 text-rose-600" />
               ) : (
-                <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                <TrendingDown className="h-3.5 w-3.5 text-teal-600" />
               )}
               <span>
                 {isPositiveChange ? '+' : '-'}
@@ -250,7 +250,7 @@ export function AlertsPanel({ associationId }: AlertsPanelProps) {
         ) : filteredAlerts.length === 0 && activeFilter === 'all' ? (
           // Empty state
           <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
-            <CheckCircle2 className="h-10 w-10 text-green-500 mb-1" />
+            <CheckCircle2 className="h-10 w-10 text-teal-500 mb-1" />
             <p className="text-sm font-medium text-foreground">Ekkert athugavert</p>
             <p className="text-xs text-muted-foreground">
               Engar viðvaranir eða tillögur eru til staðar

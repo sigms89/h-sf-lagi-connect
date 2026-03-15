@@ -62,7 +62,7 @@ export default function VendorView() {
       <div className="flex items-center gap-3">
         <Store className="h-6 w-6 text-[#1e3a5f]" />
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Birgjar</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Birgjar</h1>
           <p className="text-sm text-muted-foreground">
             Yfirlit yfir alla birgjasamninga og útgjöld
           </p>

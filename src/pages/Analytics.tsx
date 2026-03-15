@@ -148,7 +148,7 @@ function YoYTable({ data, isLoading }: { data: YearOverYearRow[]; isLoading: boo
                 const isIncrease = row.change > 0;
                 const changeAbs = Math.abs(row.change);
                 return (
-                  <TableRow key={row.category}>
+                  <TableRow key={`${row.category}-${row.lastYear}-${row.thisYear}`}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className={`inline-block w-2.5 h-2.5 rounded-full ${colors.bg}`} />

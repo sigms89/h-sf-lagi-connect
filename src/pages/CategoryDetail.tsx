@@ -203,7 +203,7 @@ export default function CategoryDetail() {
           className="h-4 w-4 rounded-full shrink-0"
           style={{ backgroundColor: categoryColor }}
         />
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-xl font-semibold tracking-tight">
           {category.name_is}
         </h1>
         {trendPct !== null && (
@@ -211,9 +211,9 @@ export default function CategoryDetail() {
             variant="secondary"
             className={
               trendPct > 0
-                ? 'bg-red-100 text-red-800'
+                ? 'bg-rose-100 text-rose-800'
                 : trendPct < 0
-                ? 'bg-emerald-100 text-emerald-800'
+                ? 'bg-teal-100 text-teal-800'
                 : 'bg-gray-100 text-gray-800'
             }
           >
@@ -345,7 +345,7 @@ export default function CategoryDetail() {
                     <TableCell className="text-sm text-muted-foreground">
                       {tx.vendor_name || '—'}
                     </TableCell>
-                    <TableCell className="text-right text-sm font-medium text-red-600">
+                    <TableCell className="text-right text-sm font-medium text-rose-600">
                       -{formatISK(Math.abs(tx.amount))}
                     </TableCell>
                   </TableRow>

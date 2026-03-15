@@ -76,7 +76,7 @@ export default function Marketplace() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">Markaðstorg</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Markaðstorg</h1>
         <Badge variant="secondary" className="text-xs">Beta</Badge>
       </div>
 

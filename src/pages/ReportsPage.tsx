@@ -82,7 +82,7 @@ function getHealthScoreRingClass(color: "green" | "yellow" | "red"): string {
 
 function TrendIcon({ trend }: { trend: VendorStat["trend"] }) {
   if (trend === "up")
-    return <TrendingUp className="inline h-3.5 w-3.5 text-red-500 ml-1" />;
+    return <TrendingUp className="inline h-3.5 w-3.5 text-rose-500 ml-1" />;
   if (trend === "down")
     return <TrendingDown className="inline h-3.5 w-3.5 text-teal-600 ml-1" />;
   return <Minus className="inline h-3.5 w-3.5 text-gray-400 ml-1" />;
@@ -273,7 +273,7 @@ export default function ReportsPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-6 mb-8">
         <div className="max-w-4xl mx-auto">
           <h1
-            className="text-2xl font-bold text-[#1e3a5f] tracking-tight"
+            className="text-xl font-semibold text-[#1e3a5f] tracking-tight"
             style={{ fontFamily: "ui-serif, Georgia, serif" }}
           >
             Aðalfundarskýrsla
@@ -364,7 +364,7 @@ export default function ReportsPage() {
                       </dt>
                       <dd
                         className={`font-mono text-sm font-bold ${
-                          netBalance < 0 ? "text-red-600" : "text-teal-700"
+                          netBalance < 0 ? "text-rose-600" : "text-teal-700"
                         }`}
                       >
                         {formatIskAmount(netBalance)}
@@ -376,7 +376,7 @@ export default function ReportsPage() {
                       </dt>
                       <dd
                         className={`font-mono text-sm ${
-                          avgMonthly < 0 ? "text-red-500" : "text-gray-700"
+                          avgMonthly < 0 ? "text-rose-500" : "text-gray-700"
                         }`}
                       >
                         {formatIskAmount(Math.round(avgMonthly))}

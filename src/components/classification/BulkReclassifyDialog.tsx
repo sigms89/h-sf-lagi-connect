@@ -116,7 +116,7 @@ export function BulkReclassifyDialog({
                 Samtals:{' '}
                 <span
                   className={`font-medium ${
-                    amountIsNegative ? 'text-red-600' : 'text-green-600'
+                    amountIsNegative ? 'text-rose-600' : 'text-teal-600'
                   }`}
                 >
                   {amountIsNegative ? '-' : '+'}

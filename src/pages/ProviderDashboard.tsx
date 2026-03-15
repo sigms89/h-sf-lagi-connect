@@ -62,7 +62,7 @@ export default function ProviderDashboard() {
           <Briefcase className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{provider.company_name}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{provider.company_name}</h1>
           <p className="text-xs text-muted-foreground">Þjónustuaðilasvæðið</p>
         </div>
         {!provider.is_approved && (
@@ -71,7 +71,7 @@ export default function ProviderDashboard() {
           </Badge>
         )}
         {provider.is_approved && (
-          <Badge className="text-xs bg-green-100 text-green-800 border-green-200">
+          <Badge className="text-xs bg-teal-100 text-teal-800 border-teal-200">
             Samþykkt
           </Badge>
         )}
