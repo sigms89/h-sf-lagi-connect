@@ -22,10 +22,10 @@ interface BenchmarkTableProps {
 
 function StatusBadge({ status }: { status: BenchmarkStatus }) {
   if (status === 'below') {
-    return <Badge className="bg-green-100 text-green-800 border-green-200 gap-1 font-medium"><TrendingDown className="h-3 w-3" />Undir meðaltali</Badge>;
+    return <Badge className="bg-teal-50 text-teal-800 border-teal-200 gap-1 font-medium"><TrendingDown className="h-3 w-3" />Undir meðaltali</Badge>;
   }
   if (status === 'above') {
-    return <Badge className="bg-red-100 text-red-800 border-red-200 gap-1 font-medium"><TrendingUp className="h-3 w-3" />Yfir meðaltali</Badge>;
+    return <Badge className="bg-rose-50 text-rose-800 border-rose-200 gap-1 font-medium"><TrendingUp className="h-3 w-3" />Yfir meðaltali</Badge>;
   }
   return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 gap-1 font-medium"><Minus className="h-3 w-3" />Nálægt meðaltali</Badge>;
 }

@@ -264,12 +264,12 @@ export function TransactionList({ associationId }: TransactionListProps) {
             <SelectItem value="all">Allt</SelectItem>
             <SelectItem value="income">
               <span className="flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5 text-green-600" /> Tekjur
+                <TrendingUp className="h-3.5 w-3.5 text-teal-600" /> Tekjur
               </span>
             </SelectItem>
             <SelectItem value="expense">
               <span className="flex items-center gap-2">
-                <TrendingDown className="h-3.5 w-3.5 text-red-600" /> Gjöld
+                <TrendingDown className="h-3.5 w-3.5 text-rose-600" /> Gjöld
               </span>
             </SelectItem>
             <SelectItem value="uncategorized">
@@ -425,7 +425,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                       {/* Amount */}
                       <TableCell
                         className={`text-right text-sm font-medium whitespace-nowrap ${
-                          tx.is_income ? 'text-green-600' : 'text-red-600'
+                          tx.is_income ? 'text-teal-600' : 'text-rose-600'
                         }`}
                       >
                         {tx.is_income ? '+' : '-'}
@@ -478,9 +478,9 @@ export function TransactionList({ associationId }: TransactionListProps) {
                       {/* Type icon */}
                       <TableCell className="text-center">
                         {tx.is_income ? (
-                          <TrendingUp className="h-4 w-4 text-green-500 mx-auto" />
+                          <TrendingUp className="h-4 w-4 text-teal-500 mx-auto" />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-500 mx-auto" />
+                          <TrendingDown className="h-4 w-4 text-rose-500 mx-auto" />
                         )}
                       </TableCell>
                     </TableRow>

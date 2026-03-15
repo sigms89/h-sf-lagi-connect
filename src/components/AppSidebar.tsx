@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — AppSidebar v2
-// Mercury × Linear: clean, confident, 4 primary destinations
+// Húsfélagið.is — AppSidebar v3
+// Linear-style: left-border active accent, no bg highlight
 // ============================================================
 import {
   LayoutDashboard,
@@ -13,15 +13,13 @@ import {
   Building2,
   ChevronDown,
 } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
   useSidebar,
@@ -33,9 +31,6 @@ import { db } from "@/integrations/supabase/db";
 import type { Profile } from "@/types/database";
 import { DevRoleSwitcher } from "@/components/DevRoleSwitcher";
 
-// ============================================================
-// NAV ITEMS — 4 primary destinations
-// ============================================================
 const primaryItems = [
   { title: "Yfirlit", url: "/", icon: LayoutDashboard },
   { title: "Fjármál", url: "/financials", icon: Receipt },
@@ -43,9 +38,6 @@ const primaryItems = [
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
 ];
 
-// ============================================================
-// COMPONENT
-// ============================================================
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -72,7 +64,6 @@ export function AppSidebar() {
   const roleType = profile?.role_type ?? "member";
   const isSuperAdmin = roleType === "super_admin";
   const isServiceProvider = roleType === "service_provider";
-
   const avatarLetter = user?.email?.charAt(0)?.toUpperCase() ?? "?";
 
   const isActive = (url: string) => {
@@ -80,7 +71,6 @@ export function AppSidebar() {
     return location.pathname.startsWith(url);
   };
 
-  // Old routes that now map to /financials
   const isFinancialsActive = isActive("/financials") ||
     location.pathname.startsWith("/transactions") ||
     location.pathname.startsWith("/classification") ||
@@ -88,11 +78,34 @@ export function AppSidebar() {
     location.pathname.startsWith("/alerts") ||
     location.pathname.startsWith("/reports");
 
+  const getItemActive = (url: string) => url === "/financials" ? isFinancialsActive : isActive(url);
+
+  function NavItem({ title, url, icon: Icon }: { title: string; url: string; icon: React.ElementType }) {
+    const active = getItemActive(url);
+    return (
+      <SidebarMenuItem>
+        <Link
+          to={url}
+          className={`flex items-center gap-2 text-[13px] h-9 px-3 rounded-none transition-colors duration-150 ${
+            active
+              ? "font-semibold text-zinc-900 border-l-2 border-l-teal-600 ml-[-1px] pl-[calc(0.75rem-1px)]"
+              : "font-normal text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+          }`}
+        >
+          <Icon className={`h-[18px] w-[18px] flex-shrink-0 transition-colors duration-150 ${
+            active ? "text-teal-600" : "text-zinc-400"
+          }`} />
+          {!collapsed && <span>{title}</span>}
+        </Link>
+      </SidebarMenuItem>
+    );
+  }
+
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-zinc-200">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-14 border-b border-sidebar-border px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-14 border-b border-zinc-200 px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
@@ -102,138 +115,59 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="min-w-0 flex-1 flex items-center gap-1">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground leading-tight truncate">
+              <p className="text-sm font-semibold text-zinc-900 leading-tight truncate">
                 {association?.name ?? "Húsfélagið.is"}
               </p>
-              <p className="text-[11px] text-muted-foreground leading-tight truncate">
+              <p className="text-[11px] text-zinc-500 leading-tight truncate">
                 {association?.address ?? "Fjármálagreining"}
               </p>
             </div>
-            <ChevronDown className="h-3 w-3 text-muted-foreground/50 flex-shrink-0 ml-auto" />
+            <ChevronDown className="h-3 w-3 text-zinc-400 flex-shrink-0 ml-auto" />
           </div>
         )}
       </div>
 
       <SidebarContent className="pt-2">
-        {/* ── Primary navigation ─────────────────────────── */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
-              {primaryItems.map((item) => {
-                const active = item.url === "/financials" ? isFinancialsActive : isActive(item.url);
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title} className="h-9 px-3">
-                      <NavLink
-                        to={item.url}
-                        end={item.url === "/"}
-                        className={`flex items-center gap-2 text-[13px] rounded-lg transition-all duration-200
-                          ${active
-                            ? "font-semibold text-foreground nav-active-accent"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                          }`}
-                        activeClassName=""
-                      >
-                        <item.icon className={`h-[18px] w-[18px] flex-shrink-0 transition-colors duration-200 ${
-                          active ? "text-foreground" : "text-muted-foreground"
-                        }`} />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {primaryItems.map((item) => (
+                <NavItem key={item.title} {...item} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ── Provider section ────────────────────────────── */}
         {isServiceProvider && (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Þjónustugátt" className="h-9 px-3">
-                    <NavLink
-                      to="/provider"
-                      className={`flex items-center gap-2 text-[13px] rounded-lg transition-all duration-200
-                        ${isActive("/provider")
-                          ? "font-semibold text-foreground nav-active-accent"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                        }`}
-                      activeClassName=""
-                    >
-                      <Briefcase className={`h-[18px] w-[18px] flex-shrink-0 ${
-                        isActive("/provider") ? "text-foreground" : "text-muted-foreground"
-                      }`} />
-                      {!collapsed && <span>Þjónustugátt</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <NavItem title="Þjónustugátt" url="/provider" icon={Briefcase} />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
 
-      {/* ── Footer ──────────────────────────────────────── */}
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-zinc-200">
         <SidebarMenu className="gap-0.5">
-          {/* Dev role switcher */}
           <SidebarMenuItem>
             <DevRoleSwitcher collapsed={collapsed} />
           </SidebarMenuItem>
 
-          {/* Settings */}
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Stillingar" className="h-9 px-3">
-              <NavLink
-                to="/settings"
-                className={`flex items-center gap-2 text-[13px] rounded-lg transition-all duration-200
-                  ${isActive("/settings")
-                    ? "font-semibold text-foreground nav-active-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                  }`}
-                activeClassName=""
-              >
-                <Settings className={`h-[18px] w-[18px] flex-shrink-0 ${
-                  isActive("/settings") ? "text-foreground" : "text-muted-foreground"
-                }`} />
-                {!collapsed && <span>Stillingar</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <NavItem title="Stillingar" url="/settings" icon={Settings} />
 
-          {/* Admin */}
           {isSuperAdmin && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Kerfisstjórnun" className="h-9 px-3">
-                <NavLink
-                  to="/admin"
-                  className={`flex items-center gap-2 text-[13px] rounded-lg transition-all duration-200
-                    ${isActive("/admin")
-                      ? "font-semibold text-foreground nav-active-accent"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                    }`}
-                  activeClassName=""
-                >
-                  <Shield className={`h-[18px] w-[18px] flex-shrink-0 ${
-                    isActive("/admin") ? "text-foreground" : "text-muted-foreground"
-                  }`} />
-                  {!collapsed && <span>Kerfisstjórnun</span>}
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <NavItem title="Kerfisstjórnun" url="/admin" icon={Shield} />
           )}
 
-          {/* User avatar + email */}
           {!collapsed && (
             <SidebarMenuItem>
               <div className="flex items-center gap-2.5 px-3 py-2">
-                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-foreground">{avatarLetter}</span>
+                <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-semibold text-zinc-700">{avatarLetter}</span>
                 </div>
-                <span className="text-[11px] text-muted-foreground truncate">
+                <span className="text-[11px] text-zinc-500 truncate">
                   {user?.email}
                 </span>
               </div>

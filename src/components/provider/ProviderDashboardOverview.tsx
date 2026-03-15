@@ -73,8 +73,8 @@ export function ProviderDashboardOverview({ provider }: ProviderDashboardProps) 
           icon={CheckCircle2}
           label="Samþykkt tilboð"
           value={stats?.acceptedBids ?? 0}
-          iconBg="bg-green-50"
-          iconColor="text-green-600"
+          iconBg="bg-teal-50"
+          iconColor="text-teal-600"
         />
         <StatCard
           icon={TrendingUp}

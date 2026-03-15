@@ -636,17 +636,17 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
             </Card>
             <Card className="p-3">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-600" /> Innkoma
+                <TrendingUp className="h-3 w-3 text-teal-600" /> Innkoma
               </p>
-              <p className="text-lg font-semibold text-green-600">
+              <p className="text-lg font-semibold text-teal-600 tabular-nums">
                 {formatIskAmount(stats.totalIncome)}
               </p>
             </Card>
             <Card className="p-3">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingDown className="h-3 w-3 text-red-600" /> Útgjöld
+                <TrendingDown className="h-3 w-3 text-rose-600" /> Útgjöld
               </p>
-              <p className="text-lg font-semibold text-red-600">
+              <p className="text-lg font-semibold text-rose-600 tabular-nums">
                 {formatIskAmount(stats.totalExpenses)}
               </p>
             </Card>
@@ -790,7 +790,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                           </TableCell>
                           <TableCell
                             className={`text-right text-sm font-medium whitespace-nowrap ${
-                              tx.isIncome ? 'text-green-600' : 'text-red-600'
+                              tx.isIncome ? 'text-teal-600' : 'text-rose-600'
                             }`}
                           >
                             {tx.isIncome ? '+' : '-'}
