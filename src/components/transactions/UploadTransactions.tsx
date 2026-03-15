@@ -636,9 +636,9 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
             </Card>
             <Card className="p-3">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-600" /> Innkoma
+                <TrendingUp className="h-3 w-3 text-teal-600" /> Innkoma
               </p>
-              <p className="text-lg font-semibold text-green-600">
+              <p className="text-lg font-semibold text-teal-600 tabular-nums">
                 {formatIskAmount(stats.totalIncome)}
               </p>
             </Card>
