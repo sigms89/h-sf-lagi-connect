@@ -376,7 +376,7 @@ export default function ReportsPage() {
                       </dt>
                       <dd
                         className={`font-mono text-sm ${
-                          avgMonthly < 0 ? "text-red-500" : "text-gray-700"
+                          avgMonthly < 0 ? "text-rose-500" : "text-gray-700"
                         }`}
                       >
                         {formatIskAmount(Math.round(avgMonthly))}
