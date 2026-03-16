@@ -392,7 +392,7 @@ function checkFeeAdequacy(
       type: 'fee_adequacy',
       severity: 'warning',
       title: 'Húsgjöld standa ekki undir kostnaði',
-      description: `Á síðustu 12 mánuðum eru gjöld ${deficit.toLocaleString('is-IS')} kr. umfram tekjur. Ráðlögð hækkun: ${neededIncreasePerUnit.toFixed(0)} kr./íbúð/mán.`,
+      description: `Á síðustu 12 mánuðum eru gjöld ${formatNumberIs(deficit)} kr. umfram tekjur. Ráðlögð hækkun: ${formatNumberIs(neededIncreasePerUnit)} kr./íbúð/mán.`,
       metric: { current: totalExpenses, previous: totalIncome, change: ((totalExpenses - totalIncome) / totalIncome) * 100 },
       actionLabel: 'Skoða greiningu',
       actionHref: '/analytics',
