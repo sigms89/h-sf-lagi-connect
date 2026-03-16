@@ -71,11 +71,6 @@ export default function TaskDetailPage() {
     setCommentText('');
   };
 
-  const handleAssignMember = (userId: string) => {
-    if (!taskId) return;
-    assignTask.mutate({ taskId, userId });
-    setAssignModalOpen(false);
-  };
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
