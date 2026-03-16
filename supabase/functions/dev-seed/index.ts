@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Fixed UUIDs for demo data so teardown can find them
 const DEMO_BATCH_ID = "00000000-dead-beef-0000-000000000001";
-const DEMO_POSTAL = "DEMO";
+// Realistic postal codes for benchmarking
 const DEMO_KENNITALA_PREFIX = "DEMO";
 
 // Fixed IDs for associations so we can reference them
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
           id: ASSOC_IDS[0],
           name: "Birkigrund 5",
           address: "Birkigrund 5",
-          postal_code: DEMO_POSTAL,
+          postal_code: "107",
           city: "Reykjavík",
           type: "fjolbyli",
           num_units: 12,
@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
           id: ASSOC_IDS[1],
           name: "Laugavegur 22",
           address: "Laugavegur 22",
-          postal_code: DEMO_POSTAL,
+          postal_code: "101",
           city: "Reykjavík",
           type: "fjolbyli",
           num_units: 24,
@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
           id: ASSOC_IDS[2],
           name: "Skógarhlíð 10",
           address: "Skógarhlíð 10",
-          postal_code: DEMO_POSTAL,
+          postal_code: "201",
           city: "Kópavogur",
           type: "radhus",
           num_units: 6,

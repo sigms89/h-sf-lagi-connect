@@ -13,6 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type BenchmarkStatus = 'below' | 'average' | 'above' | 'insufficient';
 
+export type BenchmarkRegion = 'local' | 'capital_vs_rural' | 'all';
+
 export interface BenchmarkRow {
   categoryId: string;
   categoryName: string;
@@ -34,7 +36,7 @@ export interface BenchmarkFilters {
   buildingType: 'all' | 'fjolbyli' | 'radhus' | 'parhus';
   minUnits: number;
   maxUnits: number;
-  postalPrefix: string; // e.g. '1' for 100-199
+  region: BenchmarkRegion;
   buildingYearFrom: number;
   buildingYearTo: number;
 }
@@ -43,10 +45,43 @@ export const DEFAULT_BENCHMARK_FILTERS: BenchmarkFilters = {
   buildingType: 'all',
   minUnits: 2,
   maxUnits: 200,
-  postalPrefix: 'all',
+  region: 'all',
   buildingYearFrom: 1900,
   buildingYearTo: new Date().getFullYear(),
 };
+
+// ============================================================
+// Region helpers
+// ============================================================
+
+const REGION_LABELS: Record<string, string> = {
+  '1': 'Reykjavík',
+  '2': 'Kópavogur / Garðabær / Hafnarfjörður',
+  '3': 'Akranes / Borgarnes',
+  '4': 'Vestfirðir',
+  '5': 'Skagafjörður / Húnaþing',
+  '6': 'Akureyri / Eyjafjörður',
+  '7': 'Austurland',
+  '8': 'Suðurland',
+  '9': 'Vestmannaeyjar',
+};
+
+export function getLocalRegionLabel(postalCode: string | null | undefined): string {
+  if (!postalCode || postalCode.length < 1) return 'Mitt svæði';
+  const prefix = postalCode.charAt(0);
+  const label = REGION_LABELS[prefix];
+  return label ? `${label} (${prefix}xx)` : `Svæði ${prefix}xx`;
+}
+
+export function isCapitalArea(postalCode: string | null | undefined): boolean {
+  if (!postalCode) return false;
+  const num = parseInt(postalCode, 10);
+  return num >= 100 && num <= 299;
+}
+
+export function getRegionGroupLabel(postalCode: string | null | undefined): string {
+  return isCapitalArea(postalCode) ? 'Höfuðborgarsvæðið' : 'Landsbyggðin';
+}
 
 // ============================================================
 // QUERY KEYS
@@ -114,8 +149,14 @@ export function useComparableCount(
 // useBenchmarkFilters
 // Local state management for benchmark filter bar
 // ============================================================
-export function useBenchmarkFilters() {
-  const [filters, setFilters] = useState<BenchmarkFilters>(DEFAULT_BENCHMARK_FILTERS);
+export function useBenchmarkFilters(buildingYear?: number | null) {
+  const defaultFilters: BenchmarkFilters = {
+    ...DEFAULT_BENCHMARK_FILTERS,
+    buildingYearFrom: buildingYear ? buildingYear - 10 : 1900,
+    buildingYearTo: buildingYear ? buildingYear + 10 : new Date().getFullYear(),
+  };
+
+  const [filters, setFilters] = useState<BenchmarkFilters>(defaultFilters);
 
   const updateFilter = <K extends keyof BenchmarkFilters>(
     key: K,
@@ -124,7 +165,7 @@ export function useBenchmarkFilters() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const resetFilters = () => setFilters(DEFAULT_BENCHMARK_FILTERS);
+  const resetFilters = () => setFilters(defaultFilters);
 
   return { filters, updateFilter, resetFilters };
 }

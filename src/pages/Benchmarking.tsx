@@ -19,7 +19,7 @@ import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 
 export default function Benchmarking() {
   const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
-  const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
+  const { filters, updateFilter, resetFilters } = useBenchmarkFilters(association?.building_year);
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
@@ -79,7 +79,7 @@ export default function Benchmarking() {
       {!isUnlocked ? (
         <div className="relative">
           <div className="blur-sm pointer-events-none select-none space-y-4" aria-hidden>
-            <BenchmarkFilters filters={filters} comparableCount={0} isLoadingCount={false} onUpdate={updateFilter} onReset={resetFilters} />
+            <BenchmarkFilters filters={filters} comparableCount={0} isLoadingCount={false} postalCode={association?.postal_code} onUpdate={updateFilter} onReset={resetFilters} />
             <div className="rounded-lg border bg-card h-64" />
             <div className="rounded-lg border h-48" />
           </div>
@@ -100,7 +100,7 @@ export default function Benchmarking() {
         </div>
       ) : (
         <>
-          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingCount} onUpdate={updateFilter} onReset={resetFilters} />
+          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingCount} postalCode={association?.postal_code} onUpdate={updateFilter} onReset={resetFilters} />
           {!isLoadingData && benchmarkRows.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
