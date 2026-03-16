@@ -24,6 +24,7 @@ import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
+import MinVerkefni from "@/pages/MinVerkefni";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
