@@ -148,7 +148,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
                 variant="secondary"
                 className="bg-teal-100 text-teal-800 text-xs"
               >
-                {reclassifiableCount.toLocaleString('is-IS')} færslur
+                {reclassifiableCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur
               </Badge>
             </div>
           )}
