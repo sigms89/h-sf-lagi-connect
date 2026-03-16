@@ -86,7 +86,7 @@ type InviteFormData = z.infer<typeof inviteSchema>;
 // ============================================================
 const ROLE_LABELS: Record<MemberRole, string> = {
   admin: 'Formaður',
-  board: 'Stjórnarsmeðlimur',
+  board: 'Stjórnarmeðlimur',
   member: 'Meðlimur',
 };
 
