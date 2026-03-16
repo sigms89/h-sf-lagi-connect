@@ -9,6 +9,8 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { useHealthScore } from '@/hooks/useHealthScore';
 import { useAutoTasks } from '@/hooks/useAutoTasks';
+import { useQuery } from '@tanstack/react-query';
+import { db } from '@/integrations/supabase/db';
 import { StatusSummary } from '@/components/dashboard/StatusSummary';
 import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
