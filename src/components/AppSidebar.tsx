@@ -4,6 +4,7 @@
 // ============================================================
 import {
   LayoutDashboard,
+  Star,
   Receipt,
   Scale,
   Store,
@@ -33,6 +34,7 @@ import { DevRoleSwitcher } from "@/components/DevRoleSwitcher";
 
 const primaryItems = [
   { title: "Yfirlit", url: "/", icon: LayoutDashboard },
+  { title: "Mín verkefni", url: "/min-verkefni", icon: Star },
   { title: "Fjármál", url: "/financials", icon: Receipt },
   { title: "Samanburður", url: "/benchmarking", icon: Scale },
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
