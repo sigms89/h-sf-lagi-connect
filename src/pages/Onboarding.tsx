@@ -40,11 +40,11 @@ import { toast } from 'sonner';
 const onboardingSchema = z.object({
   name: z.string().min(2, 'Nafn verður að vera að minnsta kosti 2 stafir'),
   address: z.string().optional(),
-  postal_code: z.string().optional(),
+  postal_code: z.string().min(3, 'Póstnúmer vantar — nauðsynlegt fyrir samanburð'),
   city: z.string().default('Reykjavík'),
   num_units: z.number().int().min(1, 'Hlýtur að vera a.m.k. 1 íbúð').max(999),
   type: z.enum(['fjolbyli', 'radhus', 'parhus']),
-  building_year: z.number().int().min(1800).max(2030).optional().nullable(),
+  building_year: z.number({ required_error: 'Byggingarár vantar — nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ólöglegt byggingarár').max(2030, 'Ólöglegt byggingarár'),
   has_elevator: z.boolean(),
   has_parking: z.boolean(),
   num_floors: z.number().int().min(1),
