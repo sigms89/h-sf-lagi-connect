@@ -23,7 +23,7 @@ import {
 import { useCurrentAssociation } from '@/hooks/useAssociation';
 import { useTransactionStats } from '@/hooks/useTransactions';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
-import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
+
 import { formatIskAmount, getCategoryColor } from '@/lib/categories';
 import { useFinancialAlerts } from '@/hooks/useAlerts';
 import { useVendorAnalytics, useYearOverYear, useFeeAdequacy } from '@/hooks/useAnalytics';
