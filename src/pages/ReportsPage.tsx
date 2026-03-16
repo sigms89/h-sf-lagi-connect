@@ -327,7 +327,7 @@ export default function ReportsPage() {
                   className="text-2xl font-bold text-gray-800 tracking-tight"
                   style={{ fontFamily: "ui-serif, Georgia, 'Times New Roman', serif" }}
                 >
-                  Fjárhagsyfirlit Húsfélags
+                  Fjárhagsyfirlit húsfélags
                 </h2>
                 {association?.name && (
                   <p
