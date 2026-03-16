@@ -192,7 +192,7 @@ function checkAnomalies(transactions: RawTx[], now: Date): FinancialAlert[] {
         type: 'anomaly',
         severity: 'warning',
         title: `Óvenjuleg upphæð í ${name}`,
-        description: `Útgjöld þessa mánaðar (${currentTotal.toLocaleString('is-IS')} kr.) eru mun yfir meðaltali (${m.toFixed(0)} kr.) í þessum flokki.`,
+        description: `Útgjöld þessa mánaðar (${formatNumberIs(currentTotal)} kr.) eru mun yfir meðaltali (${formatNumberIs(m)} kr.) í þessum flokki.`,
         metric: { current: currentTotal, previous: m, change: ((currentTotal - m) / m) * 100 },
         category: name,
         createdAt: now.toISOString(),
