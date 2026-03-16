@@ -176,7 +176,7 @@ export default function Onboarding() {
       city: 'Reykjavík',
       num_units: 10,
       type: 'fjolbyli',
-      building_year: null,
+      building_year: undefined as unknown as number,
       has_elevator: false,
       has_parking: false,
       num_floors: 4,
