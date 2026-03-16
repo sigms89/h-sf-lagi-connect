@@ -9,6 +9,8 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { useHealthScore } from '@/hooks/useHealthScore';
 import { useAutoTasks } from '@/hooks/useAutoTasks';
+import { useQuery } from '@tanstack/react-query';
+import { db } from '@/integrations/supabase/db';
 import { StatusSummary } from '@/components/dashboard/StatusSummary';
 import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
@@ -38,6 +40,28 @@ const Dashboard = () => {
   });
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
   useAutoTasks(association?.id);
+
+  // Task completion stats
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: taskStats } = useQuery({
+    queryKey: ['task-stats', association?.id],
+    queryFn: async () => {
+      const [doneRes, openRes] = await Promise.all([
+        db.from('tasks').select('id', { count: 'exact', head: true })
+          .eq('association_id', association!.id)
+          .eq('status', 'done')
+          .gte('completed_at', thirtyDaysAgo),
+        db.from('tasks').select('id', { count: 'exact', head: true })
+          .eq('association_id', association!.id)
+          .in('status', ['open', 'waiting']),
+      ]);
+      return {
+        doneCount: doneRes.count ?? 0,
+        openCount: openRes.count ?? 0,
+      };
+    },
+    enabled: !!association?.id,
+  });
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
@@ -148,6 +172,13 @@ const Dashboard = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* ── Task completion stats ─────────────────────── */}
+          {taskStats && (taskStats.doneCount > 0 || taskStats.openCount > 0) && (
+            <p className="text-sm text-zinc-500">
+              ✅ {taskStats.doneCount} verkefni kláruð síðastliðna 30 daga · 📋 {taskStats.openCount} opin verkefni
+            </p>
+          )}
 
           {/* ═══ SECTION 2: TASKS ═══════════════════════════ */}
           <TasksWidget associationId={association?.id} />
