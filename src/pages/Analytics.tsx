@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
 import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
