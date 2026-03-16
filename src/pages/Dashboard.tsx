@@ -26,25 +26,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { formatIskAmount } from '@/lib/categories';
 
-// ── Action Item type ──────────────────────────────────────────
-interface ActionItem {
-  icon: 'critical' | 'warning' | 'info';
-  title: string;
-  description: string;
-  onClick: () => void;
-}
-
-const iconMap = {
-  critical: AlertCircle,
-  warning: AlertTriangle,
-  info: Info,
-};
-
-const iconColorMap = {
-  critical: 'text-rose-500',
-  warning: 'text-amber-500',
-  info: 'text-blue-500',
-};
 
 const Dashboard = () => {
   const navigate = useNavigate();
