@@ -8,8 +8,9 @@ import { useTransactionStats } from '@/hooks/useTransactions';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { useHealthScore } from '@/hooks/useHealthScore';
-import { useFinancialAlerts } from '@/hooks/useAlerts';
+import { useAutoTasks } from '@/hooks/useAutoTasks';
 import { StatusSummary } from '@/components/dashboard/StatusSummary';
+import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
@@ -18,10 +19,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Upload,
-  AlertCircle,
-  AlertTriangle,
-  Info,
-  ChevronRight,
   TrendingUp,
   TrendingDown,
   ArrowRight,
@@ -29,25 +26,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { formatIskAmount } from '@/lib/categories';
 
-// ── Action Item type ──────────────────────────────────────────
-interface ActionItem {
-  icon: 'critical' | 'warning' | 'info';
-  title: string;
-  description: string;
-  onClick: () => void;
-}
-
-const iconMap = {
-  critical: AlertCircle,
-  warning: AlertTriangle,
-  info: Info,
-};
-
-const iconColorMap = {
-  critical: 'text-rose-500',
-  warning: 'text-amber-500',
-  info: 'text-blue-500',
-};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -59,7 +37,7 @@ const Dashboard = () => {
     page_size: 5,
   });
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
-  const { data: alerts = [] } = useFinancialAlerts(association?.id);
+  useAutoTasks(association?.id);
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
@@ -102,36 +80,6 @@ const Dashboard = () => {
       ? 'border-l-amber-400'
       : 'border-l-rose-400';
 
-  // ── Build action items ─────────────────────────────────────
-  const actionItems: ActionItem[] = [];
-
-  if (isBalanceLow && avgMonthlyExpense > 0) {
-    actionItems.push({
-      icon: 'warning',
-      title: 'Sjóðsstaða undir meðalgjöldum',
-      description: `Sjóður (${formatIskAmount(currentBalance)}) dugar ekki fyrir meðalmánuð`,
-      onClick: () => navigate('/financials?tab=greining'),
-    });
-  }
-
-  for (const alert of alerts.slice(0, 5)) {
-    const iconType = alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info';
-    actionItems.push({
-      icon: iconType,
-      title: alert.title,
-      description: alert.description,
-      onClick: () => navigate(alert.actionHref ?? '/financials?tab=greining'),
-    });
-  }
-
-  if (uncategorizedCount > 0) {
-    actionItems.push({
-      icon: 'info',
-      title: `${uncategorizedCount} óflokkuð færslur`,
-      description: 'Smelltu til að flokka',
-      onClick: () => navigate('/financials?tab=flokkun'),
-    });
-  }
 
   // ── Chart insight ──────────────────────────────────────────
   const monthlyData = stats?.monthly_data ?? [];
@@ -187,11 +135,6 @@ const Dashboard = () => {
                   <div className="flex-1 min-w-0 space-y-3">
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
-                      {actionItems.length === 0 && (
-                        <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-                          ✓ Ekkert útistandandi
-                        </span>
-                      )}
                     </div>
                     <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
                   </div>
@@ -206,38 +149,8 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* ═══ SECTION 2: ACTION ITEMS ════════════════════ */}
-          {actionItems.length > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[15px] font-semibold text-foreground">Þetta þarfnast athygli</h2>
-                <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 text-[10px] font-medium text-white px-1">
-                  {actionItems.length}
-                </span>
-              </div>
-              <div className="space-y-1.5">
-                {actionItems.slice(0, 6).map((item, i) => {
-                  const Icon = iconMap[item.icon];
-                  return (
-                    <div
-                      key={i}
-                      className="group flex items-center justify-between p-3.5 rounded-lg bg-card hover:bg-muted/50 shadow-card hover:shadow-card-hover transition-all duration-150 cursor-pointer"
-                      onClick={item.onClick}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-[18px] w-[18px] mt-0.5 shrink-0 ${iconColorMap[item.icon]}`} />
-                        <div>
-                          <p className="text-[13px] font-medium text-foreground">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* ═══ SECTION 2: TASKS ═══════════════════════════ */}
+          <TasksWidget associationId={association?.id} />
 
           {/* ═══ SECTION 3: TREND CHART ═════════════════════ */}
           <Card>

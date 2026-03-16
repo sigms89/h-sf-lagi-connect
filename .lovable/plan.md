@@ -1,73 +1,68 @@
 
 
-## Plan: Replace "Þetta þarfnast athygli" with "Verkefni" tasks section
+## Yfirferð: Glufur og vandamál í Húsfélagið.is
 
-### 1. Create `tasks` database table
+### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
 
-New migration:
+**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
 
-```sql
-CREATE TABLE public.tasks (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  association_id uuid NOT NULL,
-  title text NOT NULL,
-  description text,
-  priority text NOT NULL DEFAULT 'info', -- 'critical', 'warning', 'info'
-  category text, -- 'vangreiðsla', 'sjóðsstaða', etc.
-  status text NOT NULL DEFAULT 'open', -- 'open', 'in_progress', 'done'
-  completed_at timestamptz,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
+**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
+- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
+- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
+- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
+- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
+- Bjóða upp á „Sleppa tvíteknum" hnapp
 
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+### 2. ProtectedRoute — röng fyrirspurn á profiles
 
-CREATE POLICY "Members can view tasks" ON public.tasks
-  FOR SELECT TO authenticated
-  USING (is_association_member(association_id));
+**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
 
-CREATE POLICY "Admins can insert tasks" ON public.tasks
-  FOR INSERT TO authenticated
-  WITH CHECK (is_association_admin(association_id));
+**Lausn:** Breyta í `.eq('user_id', user.id)`.
 
-CREATE POLICY "Admins can update tasks" ON public.tasks
-  FOR UPDATE TO authenticated
-  USING (is_association_admin(association_id));
+### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
 
-CREATE POLICY "Admins can delete tasks" ON public.tasks
-  FOR DELETE TO authenticated
-  USING (is_association_admin(association_id));
-```
+**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
 
-### 2. Create `src/hooks/useAutoTasks.ts`
+**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
 
-- Runs on Dashboard load when `associationId` is available
-- Uses `useFinancialAlerts` data to detect conditions:
-  - Missing payment alerts (`type === 'missing_payment'`) → create task per payer with priority `critical`, category `vangreiðsla`
-  - Low balance alerts (`type === 'low_balance'`) → create task with priority `critical`, category `sjóðsstaða`
-- Before inserting, queries existing open tasks and checks if one with the same `title` already exists
-- Uses `useMutation` or a `useEffect` to run once
+### 4. Console viðvörun — Badge ref í Settings
 
-### 3. Create `src/components/dashboard/TasksWidget.tsx`
+**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
 
-- Fetches open/in_progress tasks ordered by priority (critical → warning → info), limit 5
-- Header: "Verkefni" with count badge showing number of open tasks
-- Each task row: colored dot (rose/amber/gray), bold title, truncated description, "Lokið" button
-- "Lokið" button calls update to set `status = 'done'` and `completed_at = now()`
-- Footer: "Sjá öll verkefni →" placeholder link
-- Uses `invalidateQueries` on completion to refresh the list
+**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
 
-### 4. Update `src/pages/Dashboard.tsx`
+### 5. TimeRange hefur ekki áhrif á gagnasótt
 
-- Remove Section 2 ("Þetta þarfnast athygli") — lines 209–240
-- Remove `actionItems` building logic (lines 106–134) and related imports (`useFinancialAlerts`, `AlertCircle`, `AlertTriangle`, `Info`, `ChevronRight`, `iconMap`, `iconColorMap`)
-- Remove `actionItems.length === 0` check in hero card (line 190–194 badge)
-- Insert `<TasksWidget associationId={association?.id} />` in place of old Section 2
-- Call `useAutoTasks(association?.id)` in the component body
+**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
 
-### Files
-- **New migration:** `tasks` table + RLS
-- **New:** `src/hooks/useAutoTasks.ts`
-- **New:** `src/components/dashboard/TasksWidget.tsx`
-- **Modified:** `src/pages/Dashboard.tsx`
+**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
+
+### 6. Supabase 1000 línu takmörkun
+
+**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
+
+**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
+
+### 7. Upload Batches — vantar UPDATE/DELETE RLS
+
+**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
+
+**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
+
+---
+
+### Forgangsröðun
+
+| # | Vandamál | Alvarleiki | Staða |
+|---|----------|-----------|-------|
+| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
+| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
+| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
+| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
+| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
+| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
+
+### Tillaga
+
+Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
 
