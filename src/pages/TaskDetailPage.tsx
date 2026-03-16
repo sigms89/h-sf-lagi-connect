@@ -236,27 +236,14 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Member assign modal */}
-      <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Úthluta verkefni</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-1 max-h-[300px] overflow-y-auto">
-            {members.map((member: any) => (
-              <button
-                key={member.id}
-                onClick={() => handleAssignMember(member.user_id)}
-                className="w-full text-left px-3 py-2.5 rounded-md hover:bg-secondary text-sm text-foreground transition-colors"
-              >
-                {member.profile?.full_name ?? member.user_id}
-              </button>
-            ))}
-            {members.length === 0 && (
-              <p className="text-sm text-muted-foreground p-3">Engir meðlimir fundust.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AssignTaskModal
+        open={assignModalOpen}
+        onOpenChange={setAssignModalOpen}
+        taskId={task.id}
+        associationId={association?.id}
+        currentAssigneeId={task.assigned_to}
+        currentAssigneeName={task.assignee_name}
+      />
     </div>
   );
 }
