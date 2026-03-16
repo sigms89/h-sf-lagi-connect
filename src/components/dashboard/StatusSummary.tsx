@@ -75,17 +75,17 @@ export function StatusSummary({ healthData }: StatusSummaryProps) {
   items.sort((a, b) => order[a.status] - order[b.status]);
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Ástandsyfirlit</h3>
-      <div className="space-y-2.5">
+    <div className="space-y-2.5">
+      <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Ástandsyfirlit</h3>
+      <div className="space-y-2">
         {items.map((item, i) => {
           const indicator = statusIndicator[item.status];
           return (
-            <div key={i} className="flex items-start gap-3">
-              <span className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${indicator.bg} ring-4 ${indicator.ring}`} />
+            <div key={i} className="flex items-start gap-2.5">
+              <span className={`mt-[7px] h-2 w-2 rounded-full shrink-0 ${indicator.bg} ring-[3px] ${indicator.ring}`} />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-zinc-900">{item.title}</p>
-                <p className="text-xs text-zinc-500 leading-relaxed">{item.description}</p>
+                <p className="text-[13px] font-medium text-foreground leading-snug">{item.title}</p>
+                <p className="text-[12px] text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             </div>
           );
