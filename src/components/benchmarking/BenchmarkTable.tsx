@@ -22,7 +22,7 @@ interface BenchmarkTableProps {
 
 function StatusBadge({ status }: { status: BenchmarkStatus }) {
   if (status === 'insufficient') {
-    return <Badge className="bg-muted text-muted-foreground border-border gap-1 font-medium"><AlertCircle className="h-3 w-3" />Ekki nóg gögn</Badge>;
+    return <Badge className="bg-muted text-muted-foreground border-border gap-1 font-medium"><AlertCircle className="h-3 w-3" />Ekki næg gögn</Badge>;
   }
   if (status === 'below') {
     return <Badge className="bg-teal-50 text-teal-800 border-teal-200 gap-1 font-medium"><TrendingDown className="h-3 w-3" />Undir miðgildi</Badge>;
