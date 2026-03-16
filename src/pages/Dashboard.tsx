@@ -135,11 +135,6 @@ const Dashboard = () => {
                   <div className="flex-1 min-w-0 space-y-3">
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
-                      {actionItems.length === 0 && (
-                        <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-                          ✓ Ekkert útistandandi
-                        </span>
-                      )}
                     </div>
                     <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
                   </div>
