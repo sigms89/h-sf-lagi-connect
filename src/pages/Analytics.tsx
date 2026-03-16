@@ -26,7 +26,7 @@ import { useTransactionStats } from '@/hooks/useTransactions';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 
 import { formatIskAmount, getCategoryColor } from '@/lib/categories';
-import { useFinancialAlerts } from '@/hooks/useAlerts';
+
 import { useVendorAnalytics, useYearOverYear, useFeeAdequacy } from '@/hooks/useAnalytics';
 import type { VendorStat, YearOverYearRow } from '@/hooks/useAnalytics';
 
