@@ -523,14 +523,6 @@ export function TransactionList({ associationId }: TransactionListProps) {
                         </DropdownMenu>
                       </TableCell>
 
-                      {/* Type icon */}
-                      <TableCell className="text-center">
-                        {tx.is_income ? (
-                          <TrendingUp className="h-4 w-4 text-teal-500 mx-auto" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4 text-rose-500 mx-auto" />
-                        )}
-                      </TableCell>
                     </TableRow>
                   );
                 })
