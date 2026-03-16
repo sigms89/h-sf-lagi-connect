@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
 import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -23,7 +23,7 @@ import {
 import { useCurrentAssociation } from '@/hooks/useAssociation';
 import { useTransactionStats } from '@/hooks/useTransactions';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
-import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
+
 import { formatIskAmount, getCategoryColor } from '@/lib/categories';
 import { useFinancialAlerts } from '@/hooks/useAlerts';
 import { useVendorAnalytics, useYearOverYear, useFeeAdequacy } from '@/hooks/useAnalytics';
@@ -273,7 +273,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Greining</h2>
-          <Badge variant="secondary">Beta</Badge>
+          
         </div>
         <TimeRangeSelector />
       </div>
@@ -322,51 +322,38 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* ── Category Breakdown ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" /> Kostnaðarflokkur
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CategoryPieChart data={stats?.category_breakdown ?? []} isLoading={statsLoading} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" /> Stærstu kostnaðarflokkar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <div className="space-y-3">{[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
-            ) : (stats?.category_breakdown ?? []).length === 0 ? (
-              <div className="py-8 text-center text-sm text-zinc-500">Engar færslur enn — hlaðið upp gögnum til að sjá greiningu</div>
-            ) : (
-              <div className="space-y-2">
-                {(stats?.category_breakdown ?? []).slice(0, 8).map((cat, i) => (
-                  <div key={cat.category_id} className="flex items-center justify-between py-2 border-b border-zinc-100 last:border-0">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-xs text-zinc-400 w-5 text-right flex-shrink-0">{i + 1}.</span>
-                      <span className="text-sm font-medium truncate">{cat.category_name}</span>
-                    </div>
-                    <div className="flex items-center gap-4 flex-shrink-0">
-                      <div className="w-20 h-2 rounded-full bg-zinc-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-teal-500" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
-                      </div>
-                      <span className="text-sm tabular-nums text-right w-28">{formatIskAmount(cat.total)}</span>
-                      <span className="text-xs text-zinc-500 w-12 text-right">{cat.percentage.toFixed(1)}%</span>
-                    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" /> Stærstu kostnaðarflokkar
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {statsLoading ? (
+            <div className="space-y-3">{[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
+          ) : (stats?.category_breakdown ?? []).length === 0 ? (
+            <div className="py-8 text-center text-sm text-zinc-500">Engar færslur enn — hlaðið upp gögnum til að sjá greiningu</div>
+          ) : (
+            <div className="space-y-2">
+              {(stats?.category_breakdown ?? []).slice(0, 8).map((cat, i) => (
+                <div key={cat.category_id} className="flex items-center justify-between py-2 border-b border-zinc-100 last:border-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs text-zinc-400 w-5 text-right flex-shrink-0">{i + 1}.</span>
+                    <span className="text-sm font-medium truncate">{cat.category_name}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    <div className="w-24 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                      <div className="h-full rounded-full bg-teal-500" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
+                    </div>
+                    <span className="text-sm tabular-nums text-right w-28">{formatIskAmount(cat.total)}</span>
+                    <span className="text-xs text-zinc-500 w-12 text-right">{cat.percentage.toFixed(1)}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* ── Vendor Analysis ────────────────────────────────── */}
       <VendorTable data={vendorData} isLoading={vendorLoading} />

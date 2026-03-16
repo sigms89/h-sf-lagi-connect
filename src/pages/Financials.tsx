@@ -64,10 +64,12 @@ export default function Financials() {
             {association.name}
           </p>
         </div>
-        <Button onClick={() => navigate("/upload")} size="sm" className="gap-1.5">
-          <Upload className="h-4 w-4" />
-          Hlaða upp
-        </Button>
+        {activeTab === 'faerslur' && (
+          <Button onClick={() => navigate("/upload")} size="sm" className="gap-1.5">
+            <Upload className="h-4 w-4" />
+            Hlaða upp
+          </Button>
+        )}
       </div>
 
       {/* Tabs — bottom-border underline style */}

@@ -1,72 +1,68 @@
 
 
-## Áætlun: Villuleiðréttingar og sjónræn fágun
+## Yfirferð: Glufur og vandamál í Húsfélagið.is
 
-### Yfirlit á vandamálum
+### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
 
-9 lagfæringar í tveimur hlutum. Engum viðskiptalogík breytt.
+**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
 
----
+**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
+- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
+- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
+- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
+- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
+- Bjóða upp á „Sleppa tvíteknum" hnapp
 
-### A1: Tvítekningar í flokkum (3 pör fundust)
+### 2. ProtectedRoute — röng fyrirspurn á profiles
 
-**Gögn úr gagnagrunni:**
-- **Tryggingar**: `cbf1ef01` (253 tx, eldri) + `98863323` (13 tx, nýrri) → halda eldri
-- **Annað**: `15f67921` (0 tx, eldri) + `80e15952` (8310 tx, nýrri) → halda nýrri (hefur gögnin)
-- **Vatnsveita**: `00364b69` (0 tx, eldri) + `ea40cf92` (0 tx, nýrri) → halda eldri
+**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
 
-**Aðgerð:** 3 SQL skipanir í röð via insert tool:
-1. `UPDATE transactions SET category_id = 'cbf1ef01...' WHERE category_id = '98863323...'` (13 færslur)
-2. `DELETE FROM categories WHERE id IN ('98863323...', '80e15952...nú wait` — nei, Annað: halda `80e15952` sem hefur 8310 tx, eyða `15f67921`
-3. Vatnsveita: eyða nýrri `ea40cf92`
+**Lausn:** Breyta í `.eq('user_id', user.id)`.
 
-Skref:
-- UPDATE transactions frá nýrri → eldri (Tryggingar)
-- DELETE categories duplicates (3 raðir)
-- Engar vendor_rules vísa á duplicates (staðfest)
+### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
 
-### A2: Hlaða upp hnappurinn — aðeins á Færslur
+**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
 
-Í `Financials.tsx` lína 67: setja `{activeTab === 'faerslur' && (...)}` utan um Button.
+**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
 
-### A3: Flokkabadge litir — neutral tones
+### 4. Console viðvörun — Badge ref í Settings
 
-Í `src/lib/categories.ts`: skipta út öllum `badge:` gildum í COLOR_MAP yfir í `'bg-zinc-100 text-zinc-700'`. Undantekning: `yellow` heldur `'bg-amber-50 text-amber-700'`. Einnig bæta við rose/fuchsia entries.
+**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
 
-### A4: Skýrsla dagsetning
+**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
 
-Dagsetningin er nú þegar með `is-IS` locale (lína 587). Þetta ætti að virka — en `toLocaleDateString('is-IS')` skilar réttu. **Engin breyting nauðsynleg** — ég staðfesti kóðann.
+### 5. TimeRange hefur ekki áhrif á gagnasótt
 
-### A5: Fjarlægja "Beta" badge af Greining
+**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
 
-Í `Analytics.tsx` lína 276: eyða `<Badge variant="secondary">Beta</Badge>`.
+**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
 
-### A6: Skipta pie chart út fyrir full-width bar list
+### 6. Supabase 1000 línu takmörkun
 
-Í `Analytics.tsx` línur 325-369: eyða tveggja dálka grid + CategoryPieChart. Gera "Stærstu kostnaðarflokkar" lista full-width (eins og hann er nú, bara utan um grid).
+**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
 
-### A7: Chart litir — þegar rétt
+**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
 
-MonthlyChart notar nú þegar `#0d9488` (teal) og `#e11d48` (rose). Legend notar sjálfgefna Recharts stíl sem sýnir litadisk + texta. **Engin breyting nauðsynleg.**
+### 7. Upload Batches — vantar UPDATE/DELETE RLS
 
-### A8: Sidebar — þegar rétt
+**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
 
-Active state notar `border-l-2 border-l-teal-600`, `font-semibold text-zinc-900`, engin bg highlight. **Engin breyting nauðsynleg.**
-
-### A9: Card border — þegar rétt
-
-`card.tsx` notar `border-0`. **Engin breyting nauðsynleg.** Skanna að engin explicit `border` klasi sé á cards annars staðar.
+**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
 
 ---
 
-### Samantekt breytinga
+### Forgangsröðun
 
-| Skrá | Breyting |
-|------|----------|
-| Gagnagrunnur (insert tool) | Sameina 3 tvítekin flokkapör |
-| `src/pages/Financials.tsx` | Fela upload hnapp nema á Færslur |
-| `src/lib/categories.ts` | Badge litir → zinc-100/zinc-700 |
-| `src/pages/Analytics.tsx` | Eyða Beta badge, eyða pie chart, full-width flokkalist |
+| # | Vandamál | Alvarleiki | Flækjustig |
+|---|----------|-----------|------------|
+| 1 | Tvítekningagreining á uppfleðslu | Hátt | Meðal |
+| 2 | ProtectedRoute `.eq('id')` bug | Hátt | Lágt |
+| 3 | TimeRange hefur ekki áhrif | Meðal | Meðal |
+| 4 | 1000 línu takmörkun | Meðal | Lágt |
+| 5 | Afturkalla upphleðslu | Meðal | Meðal |
+| 6 | Badge ref viðvörun | Lágt | Lágt |
 
-4 skrár + 3 SQL skipanir. Allar breytingar eru sjónrænar/skipulagslegar.
+### Tillaga
+
+Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
 
