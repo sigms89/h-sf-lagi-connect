@@ -1,68 +1,64 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Áætlun: Staðsetningarsíur og skyldureitir í nýskráningu
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### Vandamálið
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+Núverandi staðsetningarsía notar einfaldan „postal prefix" (1xx, 2xx...) sem er ekki nógu þýðingarmikið. Byggingarár og póstnúmer eru valkvæð í nýskráningu, sem þýðir að gögn vantar fyrir samanburð.
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+### Staðsetningarlógík — þrjú þrep
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+Íslensk póstnúmer skipta sér náttúrulega í svæði. Skynsamlegast er að bjóða þrjú samanburðarþrep sem eru sjálfkrafa valin út frá póstnúmeri húsfélagsins:
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+```text
+Þrep 1: „Mitt svæði"     → Nákvæmt póstnúmerasvæði (t.d. 600-699 = Akureyri og nágrenni)
+Þrep 2: „Svæðisflokkur"  → Höfuðborgarsvæðið (100-299) eða Landsbyggðin (300-999)
+Þrep 3: „Allt landið"    → Enginn staðsetningarfilter
+```
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+**Svæðaskipting:**
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+| Kóði | Svæði | Flokkur |
+|------|-------|---------|
+| 100-199 | Reykjavík | Höfuðborgarsvæðið |
+| 200-299 | Kópavogur / Garðabær / Hafnarfjörður | Höfuðborgarsvæðið |
+| 300-399 | Akranes / Borgarnes | Landsbyggðin |
+| 400-499 | Vestfirðir | Landsbyggðin |
+| 500-599 | Skagafjörður / Húnaþing | Landsbyggðin |
+| 600-699 | Akureyri / Eyjafjörður | Landsbyggðin |
+| 700-799 | Austurland | Landsbyggðin |
+| 800-899 | Suðurland | Landsbyggðin |
+| 900 | Vestmannaeyjar | Landsbyggðin |
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+### Breytingar
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+**1. Nýskráning (`Onboarding.tsx`)**
+- Gera `postal_code` og `building_year` að skyldu-svæðum (required) með skýrum skilaboðum um hvers vegna þau skipta máli fyrir samanburð
+- Uppfæra zod schema: `postal_code` verður `.min(3)` required, `building_year` verður `.int().min(1800).max(2030)` required
 
-### 4. Console viðvörun — Badge ref í Settings
+**2. BenchmarkFilters type og UI (`useBenchmarking.ts` + `BenchmarkFilters.tsx`)**
+- Skipta `postalPrefix: string` út fyrir `region: 'local' | 'capital_vs_rural' | 'all'`
+- UI sýnir þrjá valkosti: „Mitt svæði (600-699)", „Landsbyggðin" / „Höfuðborgarsvæðið", „Allt landið" — textinn á fyrsta valkostinum er dynamic eftir póstnúmeri húsfélagsins
+- Bæta við byggingarárabili (±10 ár frá eigin húsi sem default, stillanlegt)
 
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
+**3. Edge function (`benchmark/index.ts`)**
+- Taka á móti `region` í stað `postalPrefix`
+- Reikna svæðissíu server-side: ef `region = 'local'` → matcha póstnúmeraforskeyti (fyrsti stafur), ef `region = 'capital_vs_rural'` → 100-299 eða 300-999 eftir hópi notandans
+- Nota `buildingYearFrom/To` sem áður
 
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
+**4. Demo gögn (`dev-seed/index.ts`)**
+- Dreifa demo húsfélögum á raunhæf póstnúmer (101, 107, 200, 210, 600, 602) í stað `'DEMO'`
+- Nota raunhæf byggingarár (1965, 1982, 2003, osfrv.)
+- Merkja demo gögn með öðrum hætti (t.d. `uploaded_batch_id` sem þegar er til)
 
-### 5. TimeRange hefur ekki áhrif á gagnasótt
+### Skrár
 
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+| Skrá | Aðgerð |
+|------|--------|
+| `src/pages/Onboarding.tsx` | Gera postal_code og building_year required |
+| `src/hooks/useBenchmarking.ts` | Skipta `postalPrefix` út fyrir `region`, uppfæra default |
+| `src/components/benchmarking/BenchmarkFilters.tsx` | Nýtt þriggja-þrepa svæðisval, byggingarárabil |
+| `supabase/functions/benchmark/index.ts` | Nýr `region` filter logic |
+| `supabase/functions/dev-seed/index.ts` | Raunhæf póstnúmer og byggingarár |
+| `src/pages/Benchmarking.tsx` | Senda `postal_code` úr association til BenchmarkFilters |
 
