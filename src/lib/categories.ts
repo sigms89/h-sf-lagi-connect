@@ -78,10 +78,16 @@ export function getCategoryHex(color: string | null | undefined): string {
   return (COLOR_MAP[color ?? 'gray'] ?? COLOR_MAP.gray).hex;
 }
 
-export function formatIskAmount(amount: number, short?: boolean): string {
-  const formatted = amount.toLocaleString('is-IS', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return short ? `${formatted} kr.` : `${formatted} kr.`;
+/**
+ * Format a number with Icelandic dot separators (e.g. 1.234.567).
+ * Does NOT append "kr." — use formatIskAmount for currency.
+ */
+export function formatNumberIs(n: number): string {
+  const abs = Math.abs(Math.round(n));
+  const str = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return n < 0 ? `-${str}` : str;
+}
+
+export function formatIskAmount(amount: number, _short?: boolean): string {
+  return `${formatNumberIs(amount)} kr.`;
 }
