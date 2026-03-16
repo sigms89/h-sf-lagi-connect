@@ -149,7 +149,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-zinc-200">
+      <SidebarFooter className="border-t border-border">
         <SidebarMenu className="gap-0.5">
           <SidebarMenuItem>
             <DevRoleSwitcher collapsed={collapsed} />
@@ -164,10 +164,10 @@ export function AppSidebar() {
           {!collapsed && (
             <SidebarMenuItem>
               <div className="flex items-center gap-2.5 px-3 py-2">
-                <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-zinc-700">{avatarLetter}</span>
+                <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] font-semibold text-muted-foreground">{avatarLetter}</span>
                 </div>
-                <span className="text-[11px] text-zinc-500 truncate">
+                <span className="text-[11px] text-muted-foreground truncate">
                   {user?.email}
                 </span>
               </div>
