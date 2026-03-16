@@ -149,38 +149,8 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* ═══ SECTION 2: ACTION ITEMS ════════════════════ */}
-          {actionItems.length > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[15px] font-semibold text-foreground">Þetta þarfnast athygli</h2>
-                <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 text-[10px] font-medium text-white px-1">
-                  {actionItems.length}
-                </span>
-              </div>
-              <div className="space-y-1.5">
-                {actionItems.slice(0, 6).map((item, i) => {
-                  const Icon = iconMap[item.icon];
-                  return (
-                    <div
-                      key={i}
-                      className="group flex items-center justify-between p-3.5 rounded-lg bg-card hover:bg-muted/50 shadow-card hover:shadow-card-hover transition-all duration-150 cursor-pointer"
-                      onClick={item.onClick}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-[18px] w-[18px] mt-0.5 shrink-0 ${iconColorMap[item.icon]}`} />
-                        <div>
-                          <p className="text-[13px] font-medium text-foreground">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* ═══ SECTION 2: TASKS ═══════════════════════════ */}
+          <TasksWidget associationId={association?.id} />
 
           {/* ═══ SECTION 3: TREND CHART ═════════════════════ */}
           <Card>
