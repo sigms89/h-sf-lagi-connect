@@ -273,7 +273,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Greining</h2>
-          <Badge variant="secondary">Beta</Badge>
+          
         </div>
         <TimeRangeSelector />
       </div>
