@@ -79,7 +79,7 @@ export default function Benchmarking() {
       {!isUnlocked ? (
         <div className="relative">
           <div className="blur-sm pointer-events-none select-none space-y-4" aria-hidden>
-            <BenchmarkFilters filters={filters} comparableCount={0} isLoadingCount={false} onUpdate={updateFilter} onReset={resetFilters} />
+            <BenchmarkFilters filters={filters} comparableCount={0} isLoadingCount={false} postalCode={association?.postal_code} onUpdate={updateFilter} onReset={resetFilters} />
             <div className="rounded-lg border bg-card h-64" />
             <div className="rounded-lg border h-48" />
           </div>
