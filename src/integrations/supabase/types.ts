@@ -539,6 +539,8 @@ export type Database = {
           due_date: string | null
           id: string
           priority: string
+          related_entity_id: string | null
+          source: string | null
           status: string
           title: string
           total_stages: number | null
@@ -557,6 +559,8 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          related_entity_id?: string | null
+          source?: string | null
           status?: string
           title: string
           total_stages?: number | null
@@ -575,6 +579,8 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          related_entity_id?: string | null
+          source?: string | null
           status?: string
           title?: string
           total_stages?: number | null
