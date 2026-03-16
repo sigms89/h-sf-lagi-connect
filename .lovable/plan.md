@@ -1,33 +1,68 @@
 
 
-## Plan: Replace HealthScore and remove alert banner on Greining tab
+## Yfirferð: Glufur og vandamál í Húsfélagið.is
 
-### Changes to `src/pages/Analytics.tsx`
+### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
 
-1. **Remove alert banner** (lines 282–308) — the pink/amber banner with "mikilvægar viðvaranir". Delete entirely.
+**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
 
-2. **Replace HealthScoreCard** (lines 310–313) — replace the `HealthScoreCard` call with the reused `StatusSummary` component wrapped in a `Card`. Will use the existing `useHealthScore` hook (already imported) to get `healthData`, then pass it to `StatusSummary`.
+**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
+- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
+- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
+- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
+- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
+- Bjóða upp á „Sleppa tvíteknum" hnapp
 
-3. **Add health score hook call** inside the component body (around line 262), adding:
-   ```typescript
-   const { data: healthData, isLoading: healthLoading } = useHealthScore(associationId);
-   ```
+### 2. ProtectedRoute — röng fyrirspurn á profiles
 
-4. **Replace lines 310–313** with:
-   ```tsx
-   {healthData && (
-     <Card>
-       <CardContent className="pt-5">
-         <StatusSummary healthData={healthData} />
-       </CardContent>
-     </Card>
-   )}
-   ```
+**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
 
-5. **Clean up unused imports** — remove `Bell`, `ArrowRight` if no longer used, and remove `alerts`-related variables (`criticalCount`, `warningCount`) and the `useFinancialAlerts` import if the alert banner was the only consumer. Need to check if alerts are used elsewhere in the file.
+**Lausn:** Breyta í `.eq('user_id', user.id)`.
 
-Looking at the file: `alerts` is only used for the banner (lines 268–269, 283–306). The `useFinancialAlerts` import and related variables can be removed.
+### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
 
-### Files modified
-- `src/pages/Analytics.tsx` only
+**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+
+**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+
+### 4. Console viðvörun — Badge ref í Settings
+
+**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
+
+**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
+
+### 5. TimeRange hefur ekki áhrif á gagnasótt
+
+**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
+
+**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
+
+### 6. Supabase 1000 línu takmörkun
+
+**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
+
+**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
+
+### 7. Upload Batches — vantar UPDATE/DELETE RLS
+
+**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
+
+**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
+
+---
+
+### Forgangsröðun
+
+| # | Vandamál | Alvarleiki | Staða |
+|---|----------|-----------|-------|
+| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
+| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
+| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
+| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
+| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
+| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
+
+### Tillaga
+
+Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
 
