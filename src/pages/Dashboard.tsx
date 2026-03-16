@@ -87,7 +87,7 @@ const Dashboard = () => {
     summaryText += ` Gjöld eru ${formatIskAmount(Math.abs(netBalance))} umfram tekjur á tímabilinu.`;
   }
   if (uncategorizedCount > 0) {
-    summaryText += ` Athugið: ${uncategorizedCount} færslur eru óflokkuð.`;
+    summaryText += ` Athugið: ${uncategorizedCount} færslur eru óflokkaðar.`;
   }
 
   // ── Status headline ────────────────────────────────────────

@@ -479,7 +479,7 @@ export function VendorOverview({ associationId }: VendorOverviewProps) {
                 className="text-xs bg-yellow-100 text-yellow-800 gap-1"
               >
                 <AlertTriangle className="h-3 w-3" />
-                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} óflokkað
+                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} óflokkaðar
               </Badge>
             )}
           </div>

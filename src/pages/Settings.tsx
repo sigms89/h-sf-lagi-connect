@@ -86,7 +86,7 @@ type InviteFormData = z.infer<typeof inviteSchema>;
 // ============================================================
 const ROLE_LABELS: Record<MemberRole, string> = {
   admin: 'Formaður',
-  board: 'Stjórnarsmeðlimur',
+  board: 'Stjórnarmeðlimur',
   member: 'Meðlimur',
 };
 
@@ -395,7 +395,7 @@ export default function Settings() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">Formaður</SelectItem>
-                        <SelectItem value="board">Stjórnarsmeðlimur</SelectItem>
+                        <SelectItem value="board">Stjórnarmeðlimur</SelectItem>
                         <SelectItem value="member">Meðlimur</SelectItem>
                       </SelectContent>
                     </Select>

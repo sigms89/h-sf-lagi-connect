@@ -327,7 +327,7 @@ export default function ReportsPage() {
                   className="text-2xl font-bold text-gray-800 tracking-tight"
                   style={{ fontFamily: "ui-serif, Georgia, 'Times New Roman', serif" }}
                 >
-                  Fjárhagsyfirlit Húsfélags
+                  Fjárhagsyfirlit húsfélags
                 </h2>
                 {association?.name && (
                   <p
@@ -374,7 +374,7 @@ export default function ReportsPage() {
                     </div>
                     <div className="flex items-center justify-between border-t border-dashed border-gray-100 pt-2">
                       <dt className="text-sm text-gray-500">
-                        Meðalsöfnun pr. mánuð
+                        Meðalsöfnun á mánuði
                       </dt>
                       <dd
                         className={`font-mono text-sm ${

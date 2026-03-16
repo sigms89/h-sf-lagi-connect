@@ -42,9 +42,9 @@ const onboardingSchema = z.object({
   address: z.string().optional(),
   postal_code: z.string().min(3, 'Póstnúmer vantar — nauðsynlegt fyrir samanburð'),
   city: z.string().default('Reykjavík'),
-  num_units: z.number().int().min(1, 'Hlýtur að vera a.m.k. 1 íbúð').max(999),
+  num_units: z.number().int().min(1, 'Þarf að vera a.m.k. 1 íbúð').max(999),
   type: z.enum(['fjolbyli', 'radhus', 'parhus']),
-  building_year: z.number({ required_error: 'Byggingarár vantar — nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ólöglegt byggingarár').max(2030, 'Ólöglegt byggingarár'),
+  building_year: z.number({ required_error: 'Byggingarár vantar — nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ógilt byggingarár').max(2030, 'Ógilt byggingarár'),
   has_elevator: z.boolean(),
   has_parking: z.boolean(),
   num_floors: z.number().int().min(1),
@@ -97,7 +97,7 @@ function InviteForm({ associationId }: { associationId: string }) {
       return;
     }
     setSending(true);
-    // Boðskerfi er í vinnslu — sýnum UI-only töfrastig
+    // Boðskerfi er í vinnslu — sýnum UI-only sýndarstöðu
     await new Promise((resolve) => setTimeout(resolve, 600));
     setSending(false);
     toast.info('Boðskerfi er í vinnslu — netföngin verða vistuð þegar kerfið er tilbúið');

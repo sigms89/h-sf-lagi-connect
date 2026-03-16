@@ -82,7 +82,7 @@ function VendorTable({ data, isLoading }: { data: VendorStat[]; isLoading: boole
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead><button onClick={() => handleSort('vendor')} className="flex items-center text-xs font-semibold hover:text-foreground">Birgi <SortIcon col="vendor" /></button></TableHead>
+                <TableHead><button onClick={() => handleSort('vendor')} className="flex items-center text-xs font-semibold hover:text-foreground">Birgir <SortIcon col="vendor" /></button></TableHead>
                 <TableHead className="text-right"><button onClick={() => handleSort('count')} className="flex items-center ml-auto text-xs font-semibold hover:text-foreground">Fjöldi <SortIcon col="count" /></button></TableHead>
                 <TableHead className="text-right"><button onClick={() => handleSort('total')} className="flex items-center ml-auto text-xs font-semibold hover:text-foreground">Samtals <SortIcon col="total" /></button></TableHead>
                 <TableHead className="text-right"><button onClick={() => handleSort('avgPerTx')} className="flex items-center ml-auto text-xs font-semibold hover:text-foreground">Meðaltal/færslu <SortIcon col="avgPerTx" /></button></TableHead>

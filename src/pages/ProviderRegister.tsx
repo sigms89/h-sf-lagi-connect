@@ -33,22 +33,22 @@ const step1Schema = z.object({
   kennitala: z.string().min(10, 'Kennitala þarf að vera 10 tölustafir').optional().or(z.literal('')),
   description_is: z.string().min(10, 'Lýsing þarf að vera að minnsta kosti 10 stafir'),
   phone: z.string().min(7, 'Símanúmer þarf að vera gilt').optional().or(z.literal('')),
-  email: z.string().email('Ógild netfang'),
-  website: z.string().url('Ógild vefsíðuslóð').optional().or(z.literal('')),
+  email: z.string().email('Ógilt netfang'),
+  website: z.string().url('Ógild vefslóð').optional().or(z.literal('')),
 });
 
 type Step1Values = z.infer<typeof step1Schema>;
 
 const SERVICE_AREAS = [
-  { value: '1', label: 'Höfuðborgarsvæði (100–199)' },
-  { value: '2', label: 'Suðurnes (200–299)' },
+  { value: '1', label: 'Reykjavík (100–199)' },
+  { value: '2', label: 'Kópavogur / Hafnarfjörður / Garðabær (200–299)' },
   { value: '3', label: 'Vesturland (300–399)' },
   { value: '4', label: 'Vestfirðir (400–499)' },
   { value: '5', label: 'Norðurland vestra (500–599)' },
   { value: '6', label: 'Norðurland eystra (600–699)' },
   { value: '7', label: 'Austurland (700–799)' },
   { value: '8', label: 'Suðurland (800–899)' },
-  { value: '9', label: 'Suðurland / Norðausturland (900–999)' },
+  { value: '9', label: 'Vestmannaeyjar (900–999)' },
 ];
 
 const TOTAL_STEPS = 3;
