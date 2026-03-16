@@ -55,12 +55,12 @@ export default function Financials() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Fjármál</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Fjármál</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             {association.name}
           </p>
         </div>
@@ -74,13 +74,13 @@ export default function Financials() {
 
       {/* Tabs — bottom-border underline style */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <div className="border-b border-zinc-200">
-          <TabsList className="bg-transparent p-0 h-auto gap-6">
+        <div className="border-b border-border">
+          <TabsList className="bg-transparent p-0 h-auto gap-5">
             {TAB_KEYS.map((key) => (
               <TabsTrigger
                 key={key}
                 value={key}
-                className="rounded-none border-b-2 border-transparent px-0 pb-3 pt-1 text-[13px] text-zinc-500 hover:text-zinc-700 data-[state=active]:border-b-zinc-900 data-[state=active]:text-zinc-900 data-[state=active]:font-medium data-[state=active]:shadow-none data-[state=active]:bg-transparent transition-colors duration-150"
+                className="rounded-none border-b-2 border-transparent px-0 pb-2.5 pt-0.5 text-[13px] text-muted-foreground hover:text-foreground data-[state=active]:border-b-foreground data-[state=active]:text-foreground data-[state=active]:font-medium data-[state=active]:shadow-none data-[state=active]:bg-transparent transition-colors duration-150"
               >
                 {TAB_LABELS[key]}
               </TabsTrigger>
@@ -88,19 +88,19 @@ export default function Financials() {
           </TabsList>
         </div>
 
-        <TabsContent value="faerslur" className="mt-6">
+        <TabsContent value="faerslur" className="mt-5">
           <TransactionList associationId={association.id} />
         </TabsContent>
 
-        <TabsContent value="flokkun" className="mt-6">
+        <TabsContent value="flokkun" className="mt-5">
           <VendorOverview associationId={association.id} />
         </TabsContent>
 
-        <TabsContent value="greining" className="mt-6">
+        <TabsContent value="greining" className="mt-5">
           <AnalyticsPage />
         </TabsContent>
 
-        <TabsContent value="skyrsla" className="mt-6">
+        <TabsContent value="skyrsla" className="mt-5">
           <ReportsPage />
         </TabsContent>
       </Tabs>

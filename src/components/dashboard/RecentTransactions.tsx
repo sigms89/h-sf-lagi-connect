@@ -23,22 +23,22 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0">
       {transactions.slice(0, 5).map((tx) => (
-        <div key={tx.id} className="flex items-center justify-between py-2.5">
+        <div key={tx.id} className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="text-xs text-zinc-400 tabular-nums w-20 flex-shrink-0">
+            <span className="text-[11px] text-muted-foreground tabular-nums w-[72px] flex-shrink-0">
               {formatDateIs(tx.date)}
             </span>
-            <span className="text-sm text-zinc-900 truncate">{tx.description}</span>
+            <span className="text-[13px] text-foreground truncate">{tx.description}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {tx.category && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                 {tx.category.name_is}
               </span>
             )}
-            <span className={`text-sm font-medium tabular-nums text-right ${tx.is_income ? 'text-teal-600' : 'text-rose-600'}`}>
+            <span className={`text-[13px] font-medium tabular-nums text-right ${tx.is_income ? 'text-financial-income' : 'text-financial-expense'}`}>
               {tx.is_income ? '+' : '-'}{formatIskAmount(Math.abs(tx.amount))}
             </span>
           </div>

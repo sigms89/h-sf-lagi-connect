@@ -146,21 +146,21 @@ const Dashboard = () => {
   const categories = (stats?.category_breakdown ?? []).slice(0, 5);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* ── Page header ───────────────────────────────────── */}
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Yfirlit</h1>
-        <p className="text-sm text-zinc-500 mt-0.5">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Yfirlit</h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">
           {association?.name ?? 'Húsfélagið þitt'} — {label}
         </p>
       </div>
 
       {/* ── Empty state ───────────────────────────────────── */}
       {!isLoading && !hasData && (
-        <div className="rounded-xl border border-dashed border-zinc-300 py-16 text-center">
-          <Upload className="h-10 w-10 text-zinc-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-zinc-900">Engin gögn ennþá</h3>
-          <p className="text-sm text-zinc-500 mt-1 max-w-sm mx-auto">
+        <div className="rounded-lg border border-dashed border-border py-16 text-center">
+          <Upload className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+          <h3 className="font-semibold text-foreground">Engin gögn ennþá</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
             Hladdu upp bankafærslum til að sjá yfirlit yfir rekstrarkostnað húsfélagsins.
           </p>
           <Button onClick={() => navigate('/upload')} size="sm" className="mt-4">
@@ -173,7 +173,7 @@ const Dashboard = () => {
       {(isLoading || hasData) && (
         <>
           {/* ═══ SECTION 1: HERO CARD ═══════════════════════ */}
-          <Card className={`border-l-4 ${heroBorderColor} bg-gradient-to-r from-white to-zinc-50`}>
+          <Card className={`border-l-4 ${heroBorderColor}`}>
             <CardContent className="p-6">
               {isLoading || healthLoading ? (
                 <div className="space-y-4">
@@ -184,16 +184,16 @@ const Dashboard = () => {
               ) : (
                 <div className="flex flex-col lg:flex-row gap-8">
                   {/* Left — Summary */}
-                  <div className="flex-1 min-w-0 space-y-4">
+                  <div className="flex-1 min-w-0 space-y-3">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold text-zinc-900">{statusHeadline}</h2>
+                      <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
                       {actionItems.length === 0 && (
-                        <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                        <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
                           ✓ Ekkert útistandandi
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-zinc-600 leading-relaxed">{summaryText}</p>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
                   </div>
                   {/* Right — Status Summary */}
                   {healthData && (
@@ -208,30 +208,30 @@ const Dashboard = () => {
 
           {/* ═══ SECTION 2: ACTION ITEMS ════════════════════ */}
           {actionItems.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-zinc-900">Þetta þarfnast athygli</h2>
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-medium text-white px-1.5">
+                <h2 className="text-[15px] font-semibold text-foreground">Þetta þarfnast athygli</h2>
+                <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 text-[10px] font-medium text-white px-1">
                   {actionItems.length}
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {actionItems.slice(0, 6).map((item, i) => {
                   const Icon = iconMap[item.icon];
                   return (
                     <div
                       key={i}
-                      className="group flex items-center justify-between p-4 rounded-xl bg-white hover:bg-zinc-50 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer"
+                      className="group flex items-center justify-between p-3.5 rounded-lg bg-card hover:bg-muted/50 shadow-card hover:shadow-card-hover transition-all duration-150 cursor-pointer"
                       onClick={item.onClick}
                     >
                       <div className="flex items-start gap-3">
-                        <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${iconColorMap[item.icon]}`} />
+                        <Icon className={`h-[18px] w-[18px] mt-0.5 shrink-0 ${iconColorMap[item.icon]}`} />
                         <div>
-                          <p className="text-sm font-medium text-zinc-900">{item.title}</p>
-                          <p className="text-xs text-zinc-500 mt-0.5">{item.description}</p>
+                          <p className="text-[13px] font-medium text-foreground">{item.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                     </div>
                   );
                 })}
@@ -243,14 +243,14 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Mánaðarleg þróun</CardTitle>
+                <CardTitle>Mánaðarleg þróun</CardTitle>
                 <TimeRangeSelector />
               </div>
             </CardHeader>
             <CardContent>
               <MonthlyChart data={monthlyData} isLoading={isLoading} bare>
                 {isSpike && latestMonth && (
-                  <p className="text-xs text-zinc-500 mt-3 px-1">
+                  <p className="text-xs text-muted-foreground mt-3 px-1">
                     ↑ Gjöld í {latestMonth.month_label} voru {pctAbove}% yfir meðaltali síðustu 12 mánaða
                   </p>
                 )}
@@ -259,17 +259,17 @@ const Dashboard = () => {
           </Card>
 
           {/* ═══ SECTION 4: BOTTOM ROW ══════════════════════ */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Recent transactions */}
             <Card className="lg:col-span-3">
               <CardHeader>
-                <CardTitle className="text-base">Nýlegar færslur</CardTitle>
+                <CardTitle>Nýlegar færslur</CardTitle>
               </CardHeader>
               <CardContent>
                 <RecentTransactions transactions={txData?.data ?? []} isLoading={txLoading} />
                 <button
                   onClick={() => navigate('/financials')}
-                  className="text-xs text-teal-600 hover:text-teal-700 font-medium mt-4 inline-flex items-center gap-1 transition-colors"
+                  className="text-xs text-accent hover:text-accent/80 font-medium mt-4 inline-flex items-center gap-1 transition-colors"
                 >
                   Sjá allar færslur <ArrowRight className="h-3 w-3" />
                 </button>
@@ -279,28 +279,28 @@ const Dashboard = () => {
             {/* Top expense categories */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-sm font-semibold text-zinc-900">Stærstu gjaldaliðir</CardTitle>
+                <CardTitle>Stærstu gjaldaliðir</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-6 w-full rounded-lg" />)}
+                    {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-6 w-full rounded" />)}
                   </div>
                 ) : categories.length === 0 ? (
-                  <p className="text-sm text-zinc-500 text-center py-4">Engar flokkaðar færslur</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">Engar flokkaðar færslur</p>
                 ) : (
-                  <div>
+                  <div className="space-y-0.5">
                     {categories.map((cat, i) => (
                       <div key={cat.category_id} className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs text-zinc-400 w-4 text-right tabular-nums">{i + 1}.</span>
-                          <span className="text-sm text-zinc-700 truncate">{cat.category_name}</span>
+                          <span className="text-xs text-muted-foreground/60 w-4 text-right tabular-nums">{i + 1}.</span>
+                          <span className="text-[13px] text-foreground truncate">{cat.category_name}</span>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                          <div className="w-16 h-1.5 rounded-full bg-zinc-100 overflow-hidden">
-                            <div className="h-full rounded-full bg-teal-500" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
+                          <div className="w-14 h-1 rounded-full bg-muted overflow-hidden">
+                            <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
                           </div>
-                          <span className="text-xs text-zinc-500 tabular-nums w-10 text-right">{cat.percentage.toFixed(0)}%</span>
+                          <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">{cat.percentage.toFixed(0)}%</span>
                         </div>
                       </div>
                     ))}
