@@ -107,7 +107,7 @@ export default function TaskCard({ task }: TaskCardProps) {
               size="sm"
               onClick={handleAssignSelf}
               disabled={assignTask.isPending}
-              className="h-[44px] px-2 text-xs text-accent hover:text-accent font-medium -my-2"
+              className="h-auto py-1 px-2 text-xs text-accent hover:bg-accent/10 hover:text-accent font-medium"
             >
               Taka að mér
             </Button>
