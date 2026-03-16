@@ -222,7 +222,7 @@ export default function TaskDetailPage() {
             </Button>
           ) : (
             <Button
-              onClick={() => completeTask.mutate(task.id)}
+              onClick={() => completeTask.mutateAsync(task.id).then(() => navigate(-1))}
               disabled={completeTask.isPending}
               className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
             >
