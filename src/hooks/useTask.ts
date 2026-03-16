@@ -110,17 +110,59 @@ export function useAssignTask() {
     mutationFn: async ({ taskId, userId }: { taskId: string; userId?: string }) => {
       const assignTo = userId ?? user?.id;
       if (!assignTo) throw new Error('Notandi ekki skráður inn');
+      if (!user?.id) throw new Error('Notandi ekki skráður inn');
 
+      // Update the task
       const { error } = await db
         .from('tasks')
         .update({ assigned_to: assignTo })
         .eq('id', taskId);
       if (error) throw error;
+
+      // Fetch current user profile name
+      const { data: currentProfile } = await db
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      const currentName = currentProfile?.full_name ?? 'Notandi';
+
+      const isSelf = assignTo === user.id;
+      let commentContent: string;
+
+      if (isSelf) {
+        commentContent = `${currentName} tók að sér verkefni`;
+      } else {
+        // Fetch target user's name
+        const { data: targetProfile } = await db
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', assignTo)
+          .maybeSingle();
+        const targetName = targetProfile?.full_name ?? 'Notandi';
+        commentContent = `${currentName} úthlutar verkefni til ${targetName}`;
+      }
+
+      // Insert system comment
+      await db.from('task_comments').insert({
+        task_id: taskId,
+        user_id: user.id,
+        content: commentContent,
+        is_system: true,
+      });
+
+      return { isSelf, targetName: isSelf ? currentName : commentContent.split(' til ')[1] };
     },
-    onSuccess: (_, { taskId }) => {
+    onSuccess: (result, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
-      toast.success('Verkefni úthlutað');
+      queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
+      if (result?.isSelf) {
+        toast.success('Þú ert nú eigandi þessa verkefnis ✓');
+      } else {
+        toast.success(`Verkefni úthlutað ${result?.targetName}`);
+      }
     },
     onError: (error: Error) => {
       toast.error(`Villa: ${error.message}`);

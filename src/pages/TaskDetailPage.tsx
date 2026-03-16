@@ -10,16 +10,10 @@ import { ArrowLeft, Calendar, User, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useTask, useCompleteTask, useAssignTask } from '@/hooks/useTask';
 import { useTaskComments, useAddComment } from '@/hooks/useTaskComments';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
-import { useAssociationMembers } from '@/hooks/useMembers';
+import AssignTaskModal from '@/components/tasks/AssignTaskModal';
 
 function getStatusDot(status: string, dueDateStr: string | null): { color: string; label: string } {
   if (status === 'done') return { color: 'bg-green-500', label: 'Lokið' };
@@ -41,7 +35,7 @@ export default function TaskDetailPage() {
   const { data: task, isLoading } = useTask(taskId);
   const { data: comments = [] } = useTaskComments(taskId);
   const { data: association } = useCurrentAssociation();
-  const { data: members = [] } = useAssociationMembers(association?.id);
+  // members fetched inside AssignTaskModal
   const completeTask = useCompleteTask();
   const assignTask = useAssignTask();
   const addComment = useAddComment();
@@ -77,11 +71,6 @@ export default function TaskDetailPage() {
     setCommentText('');
   };
 
-  const handleAssignMember = (userId: string) => {
-    if (!taskId) return;
-    assignTask.mutate({ taskId, userId });
-    setAssignModalOpen(false);
-  };
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
@@ -242,27 +231,14 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Member assign modal */}
-      <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Úthluta verkefni</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-1 max-h-[300px] overflow-y-auto">
-            {members.map((member: any) => (
-              <button
-                key={member.id}
-                onClick={() => handleAssignMember(member.user_id)}
-                className="w-full text-left px-3 py-2.5 rounded-md hover:bg-secondary text-sm text-foreground transition-colors"
-              >
-                {member.profile?.full_name ?? member.user_id}
-              </button>
-            ))}
-            {members.length === 0 && (
-              <p className="text-sm text-muted-foreground p-3">Engir meðlimir fundust.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AssignTaskModal
+        open={assignModalOpen}
+        onOpenChange={setAssignModalOpen}
+        taskId={task.id}
+        associationId={association?.id}
+        currentAssigneeId={task.assigned_to}
+        currentAssigneeName={task.assignee_name}
+      />
     </div>
   );
 }
