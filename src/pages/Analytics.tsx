@@ -260,13 +260,10 @@ export default function AnalyticsPage() {
 
   const { range } = useTimeRange();
   const { data: stats, isLoading: statsLoading } = useTransactionStats(associationId, range.from);
-  const { data: alerts = [], isLoading: alertsLoading } = useFinancialAlerts(associationId);
+  const { data: healthData } = useHealthScore(associationId);
   const { data: vendorData = [], isLoading: vendorLoading } = useVendorAnalytics(associationId);
   const { data: yoyData = [], isLoading: yoyLoading } = useYearOverYear(associationId);
   const { data: feeData, isLoading: feeLoading } = useFeeAdequacy(associationId, numUnits);
-
-  const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
-  const warningCount = alerts.filter((a) => a.severity === 'warning').length;
 
   return (
     <div className="space-y-8">
