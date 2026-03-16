@@ -284,7 +284,7 @@ function checkLowBalance(transactions: RawTx[], now: Date): FinancialAlert[] {
       type: 'low_balance',
       severity: 'critical',
       title: 'Mjög lágur sjóðsstaða',
-      description: `Sjóðsstaða (${latestBalance.toLocaleString('is-IS')} kr.) er undir meðalmánaðarútgjöldum (${avgMonthlyExpenses.toFixed(0)} kr.).`,
+      description: `Sjóðsstaða (${formatNumberIs(latestBalance)} kr.) er undir meðalmánaðarútgjöldum (${formatNumberIs(avgMonthlyExpenses)} kr.).`,
       metric: { current: latestBalance, previous: avgMonthlyExpenses, change: ((latestBalance - avgMonthlyExpenses) / avgMonthlyExpenses) * 100 },
       actionLabel: 'Skoða greininguna',
       actionHref: '/analytics',
