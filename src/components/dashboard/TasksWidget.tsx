@@ -209,6 +209,9 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
           )}
         </div>
       )}
+      {associationId && (
+        <CreateTaskModal open={createOpen} onOpenChange={setCreateOpen} associationId={associationId} />
+      )}
     </div>
   );
 }
