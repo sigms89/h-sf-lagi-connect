@@ -81,6 +81,7 @@ export function useTask(taskId: string | undefined) {
 }
 
 export function useCompleteTask() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -90,11 +91,30 @@ export function useCompleteTask() {
         .update({ status: 'done', completed_at: new Date().toISOString() })
         .eq('id', taskId);
       if (error) throw error;
+
+      // Fetch current user's name for system comment
+      if (user?.id) {
+        const { data: profile } = await db
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        const name = profile?.full_name ?? 'Notandi';
+
+        await db.from('task_comments').insert({
+          task_id: taskId,
+          user_id: user.id,
+          content: `${name} kláraði verkefni`,
+          is_system: true,
+        });
+      }
     },
     onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
-      toast.success('Verkefni merkt sem lokið');
+      queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
+      toast.success('Verkefni klárað ✓');
     },
     onError: (error: Error) => {
       toast.error(`Villa: ${error.message}`);
