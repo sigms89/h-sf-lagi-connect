@@ -4,6 +4,7 @@
 // ============================================================
 import {
   LayoutDashboard,
+  Star,
   Receipt,
   Scale,
   Store,
