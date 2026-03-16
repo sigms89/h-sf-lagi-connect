@@ -261,7 +261,7 @@ function VendorTable({
 
                   {/* Count */}
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
-                    {item.count.toLocaleString('is-IS')}
+                    {item.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                   </TableCell>
 
                   {/* Total */}
