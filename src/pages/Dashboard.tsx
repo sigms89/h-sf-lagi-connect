@@ -9,7 +9,7 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { useHealthScore } from '@/hooks/useHealthScore';
 import { useFinancialAlerts } from '@/hooks/useAlerts';
-import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
+import { StatusSummary } from '@/components/dashboard/StatusSummary';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
