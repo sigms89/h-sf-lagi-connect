@@ -80,36 +80,6 @@ const Dashboard = () => {
       ? 'border-l-amber-400'
       : 'border-l-rose-400';
 
-  // ── Build action items ─────────────────────────────────────
-  const actionItems: ActionItem[] = [];
-
-  if (isBalanceLow && avgMonthlyExpense > 0) {
-    actionItems.push({
-      icon: 'warning',
-      title: 'Sjóðsstaða undir meðalgjöldum',
-      description: `Sjóður (${formatIskAmount(currentBalance)}) dugar ekki fyrir meðalmánuð`,
-      onClick: () => navigate('/financials?tab=greining'),
-    });
-  }
-
-  for (const alert of alerts.slice(0, 5)) {
-    const iconType = alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info';
-    actionItems.push({
-      icon: iconType,
-      title: alert.title,
-      description: alert.description,
-      onClick: () => navigate(alert.actionHref ?? '/financials?tab=greining'),
-    });
-  }
-
-  if (uncategorizedCount > 0) {
-    actionItems.push({
-      icon: 'info',
-      title: `${uncategorizedCount} óflokkuð færslur`,
-      description: 'Smelltu til að flokka',
-      onClick: () => navigate('/financials?tab=flokkun'),
-    });
-  }
 
   // ── Chart insight ──────────────────────────────────────────
   const monthlyData = stats?.monthly_data ?? [];
