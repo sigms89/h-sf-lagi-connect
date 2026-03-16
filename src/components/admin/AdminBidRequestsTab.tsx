@@ -233,7 +233,7 @@ export function AdminBidRequestsTab() {
             <CardTitle className="text-base">Tilboðsferlar</CardTitle>
             <CardDescription className="text-xs mt-0.5">
               {data
-                ? `${data.count.toLocaleString('is-IS')} ferlar samtals`
+                ? `${data.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} ferlar samtals`
                 : 'Hleður...'}
             </CardDescription>
           </div>
