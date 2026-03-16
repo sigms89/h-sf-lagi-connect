@@ -53,14 +53,14 @@
 
 ### Forgangsröðun
 
-| # | Vandamál | Alvarleiki | Flækjustig |
-|---|----------|-----------|------------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | Meðal |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | Lágt |
-| 3 | TimeRange hefur ekki áhrif | Meðal | Meðal |
-| 4 | 1000 línu takmörkun | Meðal | Lágt |
-| 5 | Afturkalla upphleðslu | Meðal | Meðal |
-| 6 | Badge ref viðvörun | Lágt | Lágt |
+| # | Vandamál | Alvarleiki | Staða |
+|---|----------|-----------|-------|
+| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
+| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
+| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
+| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
+| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
+| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
 
 ### Tillaga
 
