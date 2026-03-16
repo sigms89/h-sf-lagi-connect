@@ -154,7 +154,7 @@ export function useTransactionStats(associationId: string | null | undefined, da
       for (let i = 11; i >= 0; i--) {
         const d = subMonths(new Date(), i);
         const key = format(d, 'yyyy-MM');
-        monthlyMap.set(key, { month: key, month_label: format(d, 'MMM yyyy'), income: 0, expenses: 0, net: 0 });
+        monthlyMap.set(key, { month: key, month_label: format(d, 'MMM yyyy', { locale: is }), income: 0, expenses: 0, net: 0 });
       }
 
       for (const tx of txList) {
