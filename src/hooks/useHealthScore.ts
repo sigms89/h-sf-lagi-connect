@@ -110,7 +110,7 @@ function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
 
   if (avgMonthlyExpense === 0) {
     score = 50;
-    detail = 'Ekki nóg gögn til að reikna sjóðsstöðu.';
+    detail = 'Ekki næg gögn til að reikna sjóðsstöðu.';
   } else {
     const ratio = latestBalance / avgMonthlyExpense;
     if (ratio >= 3) {
