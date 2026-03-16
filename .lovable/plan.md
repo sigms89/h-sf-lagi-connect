@@ -1,68 +1,40 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Plan: Wire up "Merkja sem lokið" + comment styling
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### 1. Modify: `src/hooks/useTask.ts` — enhance `useCompleteTask`
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+Update the mutation to also insert a system comment and return navigation signal:
+- Fetch current user's profile name
+- Insert system comment: "[Name] kláraði verkefni" (`is_system: true`)
+- Update toast to "Verkefni klárað ✓"
+- Invalidate `dashboard-tasks` and `task-comments` query keys too
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+### 2. Modify: `src/pages/TaskDetailPage.tsx`
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+**Complete button**: After `completeTask.mutate()` succeeds, navigate back. Use `onSuccess` callback or `mutateAsync` + `navigate(-1)`.
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+**Comments styling**: Update the comments rendering (lines 173-192):
+- System comments (`is_system=true`): italic text, `text-zinc-400`, NO background box (no `bg-secondary`, no `px/py`)
+- Human comments: keep `bg-secondary` rounded box with normal text
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+### 3. Modify: `src/components/tasks/TaskCard.tsx`
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+Replace the status dot with a clickable completion circle:
+- Add a `useCompleteTask` hook call
+- Render a circle/checkbox button on the left that stops propagation and calls `completeTask.mutate(task.id)`
+- For `status='done'` tasks: show a filled green check circle (non-clickable)
+- For open tasks: show an empty circle border that becomes a checkmark on click
+- Add a `completing` state + CSS animation (opacity fade-out over ~400ms) before the card disappears
+- Keep the rest of the card clickable for navigation
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+### Files summary
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+| File | Action |
+|------|--------|
+| `src/hooks/useTask.ts` | Enhance `useCompleteTask` with system comment |
+| `src/pages/TaskDetailPage.tsx` | Navigate back on complete + style system comments |
+| `src/components/tasks/TaskCard.tsx` | Add completion circle + fade-out animation |
 
-### 4. Console viðvörun — Badge ref í Settings
-
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
-
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
-
-### 5. TimeRange hefur ekki áhrif á gagnasótt
-
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+No database changes needed.
 
