@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Fixed UUIDs for demo data so teardown can find them
 const DEMO_BATCH_ID = "00000000-dead-beef-0000-000000000001";
-const DEMO_POSTAL = "DEMO";
+// Realistic postal codes for benchmarking
 const DEMO_KENNITALA_PREFIX = "DEMO";
 
 // Fixed IDs for associations so we can reference them
