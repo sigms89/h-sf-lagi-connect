@@ -37,7 +37,7 @@ const Dashboard = () => {
     page_size: 5,
   });
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
-  const { data: alerts = [] } = useFinancialAlerts(association?.id);
+  useAutoTasks(association?.id);
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
