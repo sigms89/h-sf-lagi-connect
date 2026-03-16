@@ -134,11 +134,9 @@ function useCategoryDetail(
 }
 
 function formatISK(amount: number) {
-  return new Intl.NumberFormat('is-IS', {
-    style: 'currency',
-    currency: 'ISK',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  const abs = Math.abs(Math.round(amount));
+  const str = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${amount < 0 ? '-' : ''}${str} ISK`;
 }
 
 function formatDate(dateStr: string) {
