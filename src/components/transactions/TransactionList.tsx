@@ -485,11 +485,6 @@ export function TransactionList({ associationId }: TransactionListProps) {
                         {formatIskAmount(Math.abs(tx.amount))}
                       </TableCell>
 
-                      {/* Balance */}
-                      <TableCell className="text-right text-xs font-mono text-muted-foreground whitespace-nowrap">
-                        {tx.balance != null ? formatIskAmount(tx.balance) : '—'}
-                      </TableCell>
-
                       {/* Category — click to change */}
                       <TableCell>
                         <DropdownMenu>
