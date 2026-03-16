@@ -13,8 +13,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { isPast, isToday, subDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import TaskCard, { type TaskCardData } from '@/components/tasks/TaskCard';
+import { CreateTaskModal } from '@/components/tasks/CreateTaskModal';
 
 interface TasksWidgetProps {
   associationId: string | undefined;
