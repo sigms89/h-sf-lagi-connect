@@ -133,14 +133,12 @@ export function TransactionList({ associationId }: TransactionListProps) {
   // ============================================================
   const handleExport = () => {
     if (!transactions.length || !hasPaidTier) return;
-    const headers = ['Dagsetning', 'Lýsing', 'Upphæð', 'Staða', 'Flokkur', 'Tegund'];
+    const headers = ['Dagsetning', 'Lýsing', 'Upphæð', 'Flokkur'];
     const rows = transactions.map((tx) => [
       formatDateIs(tx.date),
       `"${tx.description.replace(/"/g, '""')}"`,
       tx.amount.toString().replace('.', ','),
-      tx.balance?.toString().replace('.', ',') ?? '',
       tx.category?.name_is ?? 'Óflokkað',
-      tx.is_income ? 'Tekjur' : 'Gjöld',
     ]);
     const csv = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -428,9 +426,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                 <TableHead className="w-24">Dagsetning</TableHead>
                 <TableHead>Lýsing</TableHead>
                 <TableHead className="text-right w-32">Upphæð</TableHead>
-                <TableHead className="text-right w-36">Staða</TableHead>
                 <TableHead className="w-44">Flokkur</TableHead>
-                <TableHead className="w-16 text-center">Tegund</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -441,14 +437,12 @@ export function TransactionList({ associationId }: TransactionListProps) {
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28 ml-auto" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
                     {hasActiveFilters
                       ? 'Engar færslur fundust með þessum skilyrðum'
                       : 'Engar færslur skráðar ennþá'}
@@ -489,11 +483,6 @@ export function TransactionList({ associationId }: TransactionListProps) {
                         {formatIskAmount(Math.abs(tx.amount))}
                       </TableCell>
 
-                      {/* Balance */}
-                      <TableCell className="text-right text-xs font-mono text-muted-foreground whitespace-nowrap">
-                        {tx.balance != null ? formatIskAmount(tx.balance) : '—'}
-                      </TableCell>
-
                       {/* Category — click to change */}
                       <TableCell>
                         <DropdownMenu>
@@ -532,14 +521,6 @@ export function TransactionList({ associationId }: TransactionListProps) {
                         </DropdownMenu>
                       </TableCell>
 
-                      {/* Type icon */}
-                      <TableCell className="text-center">
-                        {tx.is_income ? (
-                          <TrendingUp className="h-4 w-4 text-teal-500 mx-auto" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4 text-rose-500 mx-auto" />
-                        )}
-                      </TableCell>
                     </TableRow>
                   );
                 })
