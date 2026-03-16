@@ -33,8 +33,8 @@ const step1Schema = z.object({
   kennitala: z.string().min(10, 'Kennitala þarf að vera 10 tölustafir').optional().or(z.literal('')),
   description_is: z.string().min(10, 'Lýsing þarf að vera að minnsta kosti 10 stafir'),
   phone: z.string().min(7, 'Símanúmer þarf að vera gilt').optional().or(z.literal('')),
-  email: z.string().email('Ógild netfang'),
-  website: z.string().url('Ógild vefsíðuslóð').optional().or(z.literal('')),
+  email: z.string().email('Ógilt netfang'),
+  website: z.string().url('Ógild vefslóð').optional().or(z.literal('')),
 });
 
 type Step1Values = z.infer<typeof step1Schema>;
