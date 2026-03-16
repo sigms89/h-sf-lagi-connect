@@ -25,6 +25,22 @@ function percentile(arr: number[], p: number): number {
   return sorted[lower] + (sorted[upper] - sorted[lower]) * (idx - lower);
 }
 
+// Region helpers
+function postalToNumber(pc: string | null | undefined): number {
+  if (!pc) return 0;
+  return parseInt(pc, 10) || 0;
+}
+
+function isCapitalArea(pc: string | null | undefined): boolean {
+  const num = postalToNumber(pc);
+  return num >= 100 && num <= 299;
+}
+
+function postalPrefix(pc: string | null | undefined): string {
+  if (!pc || pc.length < 1) return '';
+  return pc.charAt(0);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -48,15 +64,14 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub as string;
+    const userId = user.id;
 
     const { associationId, filters } = await req.json();
     if (!associationId) {
@@ -117,7 +132,7 @@ Deno.serve(async (req) => {
     const minUnits = filters?.minUnits ?? 2;
     const maxUnits = filters?.maxUnits ?? 200;
     const buildingType = filters?.buildingType ?? "all";
-    const postalPrefix = filters?.postalPrefix ?? "all";
+    const region = filters?.region ?? "all";
     const buildingYearFrom = filters?.buildingYearFrom ?? 1900;
     const buildingYearTo = filters?.buildingYearTo ?? new Date().getFullYear();
 
@@ -134,11 +149,19 @@ Deno.serve(async (req) => {
 
     const { data: otherAssocs } = await assocQuery;
 
-    // Filter by postal prefix and building year
+    // Filter by region and building year
+    const myPostalPrefix = postalPrefix(myAssoc.postal_code);
+    const myIsCapital = isCapitalArea(myAssoc.postal_code);
+
     const filteredAssocs = (otherAssocs ?? []).filter((a: any) => {
-      if (postalPrefix !== "all") {
-        if (!(a.postal_code ?? "").startsWith(postalPrefix)) return false;
+      // Region filter
+      if (region === 'local') {
+        if (postalPrefix(a.postal_code) !== myPostalPrefix) return false;
+      } else if (region === 'capital_vs_rural') {
+        const otherIsCapital = isCapitalArea(a.postal_code);
+        if (myIsCapital !== otherIsCapital) return false;
       }
+      // Building year filter
       if (a.building_year != null) {
         if (a.building_year < buildingYearFrom || a.building_year > buildingYearTo) return false;
       }
@@ -151,7 +174,6 @@ Deno.serve(async (req) => {
     // 3. Get transactions for other associations
     let otherTxList: Array<{ association_id: string; category_id: string | null; amount: number }> = [];
     if (otherAssocIds.length > 0) {
-      // Fetch in chunks to avoid query limits
       for (let i = 0; i < otherAssocIds.length; i += 50) {
         const chunk = otherAssocIds.slice(i, i + 50);
         const { data: otherTx } = await db
@@ -201,7 +223,6 @@ Deno.serve(async (req) => {
     for (const [catId, myTotal] of myTotals.entries()) {
       const myCostPerUnit = myTotal / numUnits / 12;
 
-      // Collect per-unit monthly costs from other associations
       const otherCosts: number[] = [];
       for (const [assocId, catMap] of otherTotals.entries()) {
         const otherTotal = catMap.get(catId);
@@ -213,7 +234,6 @@ Deno.serve(async (req) => {
 
       const comparableInCategory = otherCosts.length;
 
-      // Only show data if enough comparable associations
       if (comparableInCategory < MIN_COMPARABLE) {
         const meta = catMeta.get(catId);
         rows.push({
@@ -222,13 +242,8 @@ Deno.serve(async (req) => {
           categoryColor: meta?.color ?? "#94a3b8",
           categoryIcon: meta?.icon ?? "HelpCircle",
           yourCostPerUnit: myCostPerUnit,
-          median: null,
-          p25: null,
-          p75: null,
-          avgCostPerUnit: null,
-          diff: null,
-          diffPercent: null,
-          percentile: null,
+          median: null, p25: null, p75: null, avgCostPerUnit: null,
+          diff: null, diffPercent: null, percentile: null,
           status: "insufficient",
           comparableInCategory,
         });
@@ -255,19 +270,12 @@ Deno.serve(async (req) => {
         categoryColor: meta?.color ?? "#94a3b8",
         categoryIcon: meta?.icon ?? "HelpCircle",
         yourCostPerUnit: myCostPerUnit,
-        median: med,
-        p25,
-        p75,
-        avgCostPerUnit: avg,
-        diff,
-        diffPercent,
-        percentile: pct,
-        status,
-        comparableInCategory,
+        median: med, p25, p75, avgCostPerUnit: avg,
+        diff, diffPercent, percentile: pct,
+        status, comparableInCategory,
       });
     }
 
-    // Sort by biggest absolute difference first
     rows.sort((a, b) => Math.abs(b.diffPercent ?? 0) - Math.abs(a.diffPercent ?? 0));
 
     return new Response(

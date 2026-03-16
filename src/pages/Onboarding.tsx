@@ -379,13 +379,16 @@ export default function Onboarding() {
                 {/* Year + Floors */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="building_year">Byggingarár</Label>
+                    <Label htmlFor="building_year">Byggingarár *</Label>
                     <Input
                       id="building_year"
                       type="number"
                       placeholder="1975"
                       {...form.register('building_year', { valueAsNumber: true })}
                     />
+                    {form.formState.errors.building_year && (
+                      <p className="text-xs text-destructive">{form.formState.errors.building_year.message}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="num_floors">Fjöldi hæða</Label>

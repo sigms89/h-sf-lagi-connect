@@ -100,7 +100,7 @@ export default function Benchmarking() {
         </div>
       ) : (
         <>
-          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingCount} onUpdate={updateFilter} onReset={resetFilters} />
+          <BenchmarkFilters filters={filters} comparableCount={comparableCount} isLoadingCount={isLoadingCount} postalCode={association?.postal_code} onUpdate={updateFilter} onReset={resetFilters} />
           {!isLoadingData && benchmarkRows.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
