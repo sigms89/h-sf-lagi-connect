@@ -76,6 +76,8 @@ export function TransactionList({ associationId }: TransactionListProps) {
   const { data: categories = [] } = useCategories();
   const updateCategory = useUpdateTransactionCategory();
   const { data: association } = useCurrentAssociation();
+  const { data: latestBatch } = useLatestBatch(associationId);
+  const deleteBatch = useDeleteBatch();
   const hasPaidTier =
     association?.subscription_tier === 'plus' ||
     association?.subscription_tier === 'pro';
