@@ -4,6 +4,8 @@
 // ============================================================
 
 import { useState, useCallback } from 'react';
+import { format } from 'date-fns';
+import { is } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +25,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -41,8 +54,10 @@ import {
   Filter,
   FileText,
   X,
+  Trash2,
+  Undo2,
 } from 'lucide-react';
-import { useTransactions, useUpdateTransactionCategory } from '@/hooks/useTransactions';
+import { useTransactions, useUpdateTransactionCategory, useLatestBatch, useDeleteBatch } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
@@ -61,6 +76,8 @@ export function TransactionList({ associationId }: TransactionListProps) {
   const { data: categories = [] } = useCategories();
   const updateCategory = useUpdateTransactionCategory();
   const { data: association } = useCurrentAssociation();
+  const { data: latestBatch } = useLatestBatch(associationId);
+  const deleteBatch = useDeleteBatch();
   const hasPaidTier =
     association?.subscription_tier === 'plus' ||
     association?.subscription_tier === 'pro';
@@ -348,7 +365,47 @@ export function TransactionList({ associationId }: TransactionListProps) {
         </DropdownMenu>
       </div>
 
-      {/* Count info */}
+      {/* Undo last upload + Count info */}
+      {latestBatch && (
+        <div className="flex items-center gap-3 rounded-lg border border-dashed border-muted-foreground/25 bg-muted/30 px-3 py-2 text-sm">
+          <Undo2 className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground flex-1">
+            Síðasta upphleðsla: <span className="font-medium text-foreground">{latestBatch.file_name ?? 'Ónefnd skrá'}</span>
+            {' — '}
+            {latestBatch.row_count ?? '?'} færslur
+            {latestBatch.created_at && `, ${format(new Date(latestBatch.created_at), 'd. MMM yyyy HH:mm', { locale: is })}`}
+          </span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50">
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Afturkalla
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Afturkalla upphleðslu?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Þetta mun eyða <span className="font-semibold">{latestBatch.row_count ?? '?'} færslum</span> úr
+                  {' '}<span className="font-semibold">{latestBatch.file_name ?? 'ónefndri skrá'}</span>.
+                  Þetta er óafturkræft.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Hætta við</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-rose-600 hover:bg-rose-700"
+                  onClick={() => deleteBatch.mutate({ batchId: latestBatch.id, associationId })}
+                  disabled={deleteBatch.isPending}
+                >
+                  {deleteBatch.isPending ? 'Eyði...' : 'Eyða færslum'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           {isLoading

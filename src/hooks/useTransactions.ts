@@ -206,3 +206,60 @@ export function useTransactionStats(associationId: string | null | undefined, da
     staleTime: 5 * 60 * 1000,
   });
 }
+
+// ============================================================
+// Latest upload batch for association
+// ============================================================
+export function useLatestBatch(associationId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['upload_batches', 'latest', associationId ?? ''],
+    queryFn: async () => {
+      if (!associationId) return null;
+      const { data, error } = await db
+        .from('upload_batches')
+        .select('id, file_name, file_type, row_count, created_at')
+        .eq('association_id', associationId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; file_name: string | null; file_type: string | null; row_count: number | null; created_at: string | null } | null;
+    },
+    enabled: !!associationId,
+  });
+}
+
+// ============================================================
+// Delete an upload batch and all its transactions
+// ============================================================
+export function useDeleteBatch() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ batchId, associationId }: { batchId: string; associationId: string }) => {
+      // Delete transactions first
+      const { error: txError } = await db
+        .from('transactions')
+        .delete()
+        .eq('uploaded_batch_id', batchId);
+      if (txError) throw txError;
+
+      // Then delete the batch
+      const { error: batchError } = await db
+        .from('upload_batches')
+        .delete()
+        .eq('id', batchId);
+      if (batchError) throw batchError;
+
+      return { associationId };
+    },
+    onSuccess: ({ associationId }) => {
+      queryClient.invalidateQueries({ queryKey: TRANSACTION_KEYS.byAssociation(associationId) });
+      queryClient.invalidateQueries({ queryKey: ['upload_batches'] });
+      toast.success('Upphleðsla afturkölluð');
+    },
+    onError: (error: Error) => {
+      toast.error(`Villa við eyðingu: ${error.message}`);
+    },
+  });
+}
