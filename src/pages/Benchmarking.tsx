@@ -71,7 +71,7 @@ export default function Benchmarking() {
         {isUnlocked && benchmarkRows.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingDown className="h-4 w-4 text-green-600" />
-            <span>{benchmarkRows.filter((r) => r.status === 'below').length} flokkar undir meðaltali</span>
+            <span>{benchmarkRows.filter((r) => r.status === 'below').length} flokkar undir miðgildi</span>
           </div>
         )}
       </div>

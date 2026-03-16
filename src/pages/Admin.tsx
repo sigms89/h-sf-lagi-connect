@@ -71,7 +71,7 @@ export default function Admin() {
   if (isLoadingProfile) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
-        <div className="text-sm text-muted-foreground">Hleður...</div>
+        <div className="text-sm text-muted-foreground">Hleð...</div>
       </div>
     );
   }

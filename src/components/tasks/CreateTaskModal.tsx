@@ -54,7 +54,7 @@ export function CreateTaskModal({ open, onOpenChange, associationId }: CreateTas
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!user?.id) throw new Error('Ekki innskráð/ur');
+      if (!user?.id) throw new Error('Notandi ekki innskráður');
 
       const { error } = await supabase.from('tasks').insert({
         title: title.trim(),

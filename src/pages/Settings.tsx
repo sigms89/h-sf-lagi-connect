@@ -395,7 +395,7 @@ export default function Settings() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">Formaður</SelectItem>
-                        <SelectItem value="board">Stjórnarsmeðlimur</SelectItem>
+                        <SelectItem value="board">Stjórnarmeðlimur</SelectItem>
                         <SelectItem value="member">Meðlimur</SelectItem>
                       </SelectContent>
                     </Select>

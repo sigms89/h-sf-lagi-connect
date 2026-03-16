@@ -48,7 +48,7 @@ const SERVICE_AREAS = [
   { value: '6', label: 'Norðurland eystra (600–699)' },
   { value: '7', label: 'Austurland (700–799)' },
   { value: '8', label: 'Suðurland (800–899)' },
-  { value: '9', label: 'Suðurland / Norðausturland (900–999)' },
+  { value: '9', label: 'Vestmannaeyjar (900–999)' },
 ];
 
 const TOTAL_STEPS = 3;

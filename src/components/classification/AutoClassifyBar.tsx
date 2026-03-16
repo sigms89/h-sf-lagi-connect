@@ -133,9 +133,9 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
           {uncategorizedCount > 0 && (
             <div className="flex items-center gap-1.5 text-sm">
               <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
-              <span className="text-muted-foreground">Óflokkað:</span>
+              <span className="text-muted-foreground">Óflokkaðar færslur:</span>
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
-                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur
+                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
               </Badge>
             </div>
           )}

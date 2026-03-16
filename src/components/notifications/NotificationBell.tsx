@@ -154,7 +154,7 @@ export function NotificationBell() {
               ) : (
                 <CheckCheck className="h-3 w-3" />
               )}
-              Merkja allt lesið
+              Merkja allt sem lesið
             </Button>
           )}
         </div>
