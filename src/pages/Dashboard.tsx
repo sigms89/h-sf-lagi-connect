@@ -151,6 +151,13 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
+          {/* ── Task completion stats ─────────────────────── */}
+          {taskStats && (taskStats.doneCount > 0 || taskStats.openCount > 0) && (
+            <p className="text-sm text-zinc-500">
+              ✅ {taskStats.doneCount} verkefni kláruð síðastliðna 30 daga · 📋 {taskStats.openCount} opin verkefni
+            </p>
+          )}
+
           {/* ═══ SECTION 2: TASKS ═══════════════════════════ */}
           <TasksWidget associationId={association?.id} />
 
