@@ -6,6 +6,8 @@
 import { useState } from "react";
 import { Download, AlertTriangle, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { is } from "date-fns/locale";
 
 import { useCurrentAssociation } from "@/hooks/useAssociation";
 import { useTransactionStats } from "@/hooks/useTransactions";
@@ -584,11 +586,7 @@ export default function ReportsPage() {
               <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-gray-400">
                 <span>
                   Skýrsla mynduð:{" "}
-                  {new Date().toLocaleDateString("is-IS", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {format(new Date(), "d. MMMM yyyy", { locale: is })}
                 </span>
                 {association?.num_units && (
                   <span>Fjöldi íbúða: {association.num_units}</span>
