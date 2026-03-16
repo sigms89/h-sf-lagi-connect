@@ -561,7 +561,7 @@ export function VendorOverview({ associationId }: VendorOverviewProps) {
       {/* Count footer */}
       {!isLoading && processedItems.length > 0 && (
         <p className="text-xs text-muted-foreground text-right">
-          Sýni {processedItems.length.toLocaleString('is-IS')}{' '}
+          Sýni {processedItems.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}{' '}
           {activeTab === 'income' ? 'tekjuaðila' : 'kostnaðaraðila'}
           {search && ` (síað)`}
         </p>

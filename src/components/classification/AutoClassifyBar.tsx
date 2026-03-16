@@ -198,7 +198,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
             Keyra sjálfvirka flokkun
             {affectedCount > 0 && (
               <span className="ml-1.5 opacity-80">
-                ({affectedCount.toLocaleString('is-IS')})
+                ({affectedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')})
               </span>
             )}
           </Button>

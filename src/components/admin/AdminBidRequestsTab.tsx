@@ -380,7 +380,7 @@ export function AdminBidRequestsTab() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t">
             <span className="text-xs text-muted-foreground">
-              Síða {page} af {totalPages} · {data?.count.toLocaleString('is-IS')} ferlar
+              Síða {page} af {totalPages} · {data?.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} ferlar
             </span>
             <div className="flex gap-1">
               <Button

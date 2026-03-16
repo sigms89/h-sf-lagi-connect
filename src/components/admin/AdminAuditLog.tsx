@@ -187,7 +187,7 @@ export function AdminAuditLog() {
             <div>
               <CardTitle className="text-base">Aðgerðaskrá</CardTitle>
               <CardDescription className="text-xs mt-0.5">
-                {data ? `${data.count.toLocaleString('is-IS')} færslur samtals` : 'Hleður...'}
+                {data ? `${data.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur samtals` : 'Hleður...'}
               </CardDescription>
             </div>
           </div>

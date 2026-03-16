@@ -408,7 +408,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
         <span>
           {isLoading
             ? 'Sæki færslur...'
-            : `${totalCount.toLocaleString('is-IS')} færslur`}
+            : `${totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur`}
         </span>
         {totalPages > 1 && (
           <span>
