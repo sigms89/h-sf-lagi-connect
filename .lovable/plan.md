@@ -1,68 +1,68 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Greining: Samanburðarkerfi — Rétta útfærslan
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### Vandamálið í dag
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+Hookinn `useBenchmarking.ts` reynir að sækja færslur **annarra** húsfélaga beint frá client — en RLS lokar réttilega á þann aðgang. Þess vegna kemur ekkert fram.
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+### Hvað ætti að birta?
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+**Meðaltal og svið (percentile bands) — ekki hæstu/lægstu.**
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+Ástæður:
+- Hæsta/lægsta gildi getur bent beint á eitt tiltekið húsfélag (t.d. ef aðeins 5 sambærileg eru skráð). Það brýtur nafnleynd.
+- **Miðgildi** (median) er betri mælikvarði en meðaltal þar sem eitt dýrt húsfélag skekkir meðaltalið.
+- **25. og 75. hundraðshluti** (percentile) sýnir „svæðið" þar sem flest húsfélög eru, án þess að afhjúpa einstök gögn.
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+**Notandinn sér fyrir hvern flokk:**
+| Dálkur | Lýsing |
+|--------|---------|
+| Þitt húsfélag | Kr/íbúð/mán |
+| Miðgildi | Median kr/íbúð/mán sambærilegra |
+| Svið | 25.–75. percentile (lágmark 5 húsfélög til að birta) |
+| Munur % | Þitt vs miðgildi |
+| Staða | Undir / nálægt / yfir miðgildi |
+| Fjöldi | Hversu mörg húsfélög eru í samanburðinum |
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+**Öryggisregla**: Ef færri en 5 sambærileg húsfélög eru í flokki → birta „Ekki nóg gögn" í stað talna.
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+### Tæknilausn
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+**1. Ný Edge Function: `supabase/functions/benchmark/index.ts`**
 
-### 4. Console viðvörun — Badge ref í Settings
+- Tekur á móti POST með `associationId`, `numUnits`, `filters`
+- Auðkennir notanda með JWT (staðfestir aðild að húsfélaginu)
+- Notar `SUPABASE_SERVICE_ROLE_KEY` til að lesa allar færslur og húsfélög
+- Reiknar per flokk: miðgildi, 25./75. percentile, fjölda
+- Skilar **aðeins samantekt** — aldrei hrágögnum annarra
+- Lágmark 5 sambærileg húsfélög til að birta tölur
 
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
+**2. Uppfæra `src/hooks/useBenchmarking.ts`**
 
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
+- `useBenchmarkData` kallar á edge function í stað beinna Supabase-spurninga
+- Bæta `median`, `p25`, `p75`, `comparableInCategory` við `BenchmarkRow` type
+- `useComparableCount` heldur áfram að nota client-side query (RLS leyfir count á eigin húsfélög)
 
-### 5. TimeRange hefur ekki áhrif á gagnasótt
+**3. Uppfæra UI**
 
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
+- `BenchmarkChart.tsx`: Bæta við „sviði" (p25–p75) sem ljósu bandi á bak við súlurnar
+- `BenchmarkTable.tsx`: Bæta við „Svið" dálki, nota miðgildi í stað meðaltals, sýna „Ekki nóg gögn" ef `comparableInCategory < 5`
+- `BenchmarkWidget.tsx` á dashboard: Sýna fjölda sambærilegra húsfélaga
 
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
+**4. Laga demo gögn í `dev-seed`**
 
-### 6. Supabase 1000 línu takmörkun
+- Gjaldaupphæðir verða neikvæðar (línan `amount` í seed)
+- Þannig virkar samanburður strax með demo pakkanum
 
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
+### Skrár
 
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+| Skrá | Aðgerð |
+|------|--------|
+| `supabase/functions/benchmark/index.ts` | **Ný** — server-side samanburður |
+| `supabase/config.toml` | Skrá benchmark function |
+| `src/hooks/useBenchmarking.ts` | Kalla á edge function, uppfæra types |
+| `src/components/benchmarking/BenchmarkChart.tsx` | Bæta við percentile-bandi |
+| `src/components/benchmarking/BenchmarkTable.tsx` | Miðgildi, svið, lágmarksfjöldi |
+| `supabase/functions/dev-seed/index.ts` | Neikvæðar gjaldaupphæðir |
 
