@@ -35,7 +35,7 @@ export default function TaskDetailPage() {
   const { data: task, isLoading } = useTask(taskId);
   const { data: comments = [] } = useTaskComments(taskId);
   const { data: association } = useCurrentAssociation();
-  const { data: members = [] } = useAssociationMembers(association?.id);
+  // members fetched inside AssignTaskModal
   const completeTask = useCompleteTask();
   const assignTask = useAssignTask();
   const addComment = useAddComment();
