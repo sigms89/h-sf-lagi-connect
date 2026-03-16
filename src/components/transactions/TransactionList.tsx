@@ -46,7 +46,7 @@ import {
   Trash2,
   Undo2,
 } from 'lucide-react';
-import { useTransactions, useUpdateTransactionCategory } from '@/hooks/useTransactions';
+import { useTransactions, useUpdateTransactionCategory, useLatestBatch, useDeleteBatch } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
