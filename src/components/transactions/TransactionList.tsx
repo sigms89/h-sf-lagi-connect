@@ -428,9 +428,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                 <TableHead className="w-24">Dagsetning</TableHead>
                 <TableHead>Lýsing</TableHead>
                 <TableHead className="text-right w-32">Upphæð</TableHead>
-                <TableHead className="text-right w-36">Staða</TableHead>
                 <TableHead className="w-44">Flokkur</TableHead>
-                <TableHead className="w-16 text-center">Tegund</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
