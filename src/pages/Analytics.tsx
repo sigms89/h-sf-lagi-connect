@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import {
   BarChart3, TrendingUp, TrendingDown, Minus, Building2, ArrowUpDown,
-  CalendarDays, ShieldCheck, ShieldAlert, Bell, ArrowRight,
+  CalendarDays, ShieldCheck, ShieldAlert,
 } from 'lucide-react';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
 import { useTransactionStats } from '@/hooks/useTransactions';
