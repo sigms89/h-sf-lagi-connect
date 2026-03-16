@@ -13,8 +13,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { isPast, isToday, subDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import TaskCard, { type TaskCardData } from '@/components/tasks/TaskCard';
+import { CreateTaskModal } from '@/components/tasks/CreateTaskModal';
 
 interface TasksWidgetProps {
   associationId: string | undefined;
@@ -24,6 +24,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [doneOpen, setDoneOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   // Fetch user's role in association
   const { data: memberRole } = useQuery({
@@ -143,7 +144,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
           variant="outline"
           size="sm"
           className="text-xs gap-1"
-          onClick={() => toast('Kemur fljótlega', { description: 'Verkefnaskráning er í vinnslu.' })}
+          onClick={() => setCreateOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />
           Nýtt verkefni
@@ -207,6 +208,9 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
             </Collapsible>
           )}
         </div>
+      )}
+      {associationId && (
+        <CreateTaskModal open={createOpen} onOpenChange={setCreateOpen} associationId={associationId} />
       )}
     </div>
   );
