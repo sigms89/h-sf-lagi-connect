@@ -97,7 +97,7 @@ export function AdminUsersTab() {
             <CardTitle className="text-base">Notendur</CardTitle>
             <CardDescription className="text-xs mt-0.5">
               {data
-                ? `${data.count.toLocaleString('is-IS')} notendur samtals`
+                ? `${data.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} notendur samtals`
                 : 'Hleður...'}
             </CardDescription>
           </div>
