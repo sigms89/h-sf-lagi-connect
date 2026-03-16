@@ -9,7 +9,7 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { useHealthScore } from '@/hooks/useHealthScore';
 import { useFinancialAlerts } from '@/hooks/useAlerts';
-import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
+import { StatusSummary } from '@/components/dashboard/StatusSummary';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
@@ -194,22 +194,11 @@ const Dashboard = () => {
                       )}
                     </div>
                     <p className="text-sm text-zinc-600 leading-relaxed">{summaryText}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 text-xs font-medium tabular-nums text-teal-700">
-                        <TrendingUp className="h-3 w-3" /> Tekjur {formatIskAmount(stats?.total_income ?? 0)}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 text-xs font-medium tabular-nums text-rose-700">
-                        <TrendingDown className="h-3 w-3" /> Gjöld {formatIskAmount(stats?.total_expenses ?? 0)}
-                      </span>
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 text-xs font-medium tabular-nums ${netBalance >= 0 ? 'text-zinc-700' : 'text-rose-700'}`}>
-                        Nettó {formatIskAmount(netBalance)}
-                      </span>
-                    </div>
                   </div>
-                  {/* Right — Health Score Ring */}
-                  {association?.id && (
-                    <div className="w-full lg:w-80 flex-shrink-0 flex items-center justify-center">
-                      <HealthScoreCard associationId={association.id} variant="full" />
+                  {/* Right — Status Summary */}
+                  {healthData && (
+                    <div className="w-full lg:w-80 flex-shrink-0">
+                      <StatusSummary healthData={healthData} />
                     </div>
                   )}
                 </div>
