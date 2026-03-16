@@ -287,10 +287,12 @@ export default function AnalyticsPage() {
             <Bell className={`h-5 w-5 flex-shrink-0 ${criticalCount > 0 ? 'text-rose-600' : 'text-amber-600'}`} />
             <div>
               <p className={`text-sm font-semibold ${criticalCount > 0 ? 'text-rose-800' : 'text-amber-800'}`}>
-                {criticalCount > 0 ? `${criticalCount} mikilvægar viðvaranir` : `${warningCount} viðvaranir`}
+                {criticalCount > 0
+                  ? `${criticalCount} mikilvæg${criticalCount === 1 ? '' : 'ar'} viðvörun${criticalCount === 1 ? '' : 'ir'}`
+                  : `${warningCount} viðvörun${warningCount === 1 ? '' : 'ir'}`}
               </p>
               <p className={`text-xs ${criticalCount > 0 ? 'text-rose-600' : 'text-amber-600'}`}>
-                {alerts.length} viðvaranir og tillögur samtals
+                {alerts.length === 1 ? '1 viðvörun og tillaga' : `${alerts.length} viðvaranir og tillögur`} samtals
               </p>
             </div>
           </div>
