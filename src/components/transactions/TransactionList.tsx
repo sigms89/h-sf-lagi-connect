@@ -43,6 +43,8 @@ import {
   Filter,
   FileText,
   X,
+  Trash2,
+  Undo2,
 } from 'lucide-react';
 import { useTransactions, useUpdateTransactionCategory } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
