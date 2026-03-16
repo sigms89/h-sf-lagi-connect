@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { db } from '@/integrations/supabase/db';
 import { subMonths, format } from 'date-fns';
+import { formatNumberIs } from '@/lib/categories';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -191,7 +192,7 @@ function checkAnomalies(transactions: RawTx[], now: Date): FinancialAlert[] {
         type: 'anomaly',
         severity: 'warning',
         title: `Óvenjuleg upphæð í ${name}`,
-        description: `Útgjöld þessa mánaðar (${currentTotal.toLocaleString('is-IS')} kr.) eru mun yfir meðaltali (${m.toFixed(0)} kr.) í þessum flokki.`,
+        description: `Útgjöld þessa mánaðar (${formatNumberIs(currentTotal)} kr.) eru mun yfir meðaltali (${formatNumberIs(m)} kr.) í þessum flokki.`,
         metric: { current: currentTotal, previous: m, change: ((currentTotal - m) / m) * 100 },
         category: name,
         createdAt: now.toISOString(),
@@ -283,7 +284,7 @@ function checkLowBalance(transactions: RawTx[], now: Date): FinancialAlert[] {
       type: 'low_balance',
       severity: 'critical',
       title: 'Mjög lágur sjóðsstaða',
-      description: `Sjóðsstaða (${latestBalance.toLocaleString('is-IS')} kr.) er undir meðalmánaðarútgjöldum (${avgMonthlyExpenses.toFixed(0)} kr.).`,
+      description: `Sjóðsstaða (${formatNumberIs(latestBalance)} kr.) er undir meðalmánaðarútgjöldum (${formatNumberIs(avgMonthlyExpenses)} kr.).`,
       metric: { current: latestBalance, previous: avgMonthlyExpenses, change: ((latestBalance - avgMonthlyExpenses) / avgMonthlyExpenses) * 100 },
       actionLabel: 'Skoða greininguna',
       actionHref: '/analytics',
@@ -295,7 +296,7 @@ function checkLowBalance(transactions: RawTx[], now: Date): FinancialAlert[] {
       type: 'low_balance',
       severity: 'warning',
       title: 'Lágur sjóðsstaða',
-      description: `Sjóðsstaða (${latestBalance.toLocaleString('is-IS')} kr.) er minni en 1,5× meðalmánaðarútgjöld.`,
+      description: `Sjóðsstaða (${formatNumberIs(latestBalance)} kr.) er minni en 1,5× meðalmánaðarútgjöld.`,
       metric: { current: latestBalance, previous: avgMonthlyExpenses, change: ((latestBalance - avgMonthlyExpenses) / avgMonthlyExpenses) * 100 },
       actionLabel: 'Skoða greininguna',
       actionHref: '/analytics',
@@ -391,7 +392,7 @@ function checkFeeAdequacy(
       type: 'fee_adequacy',
       severity: 'warning',
       title: 'Húsgjöld standa ekki undir kostnaði',
-      description: `Á síðustu 12 mánuðum eru gjöld ${deficit.toLocaleString('is-IS')} kr. umfram tekjur. Ráðlögð hækkun: ${neededIncreasePerUnit.toFixed(0)} kr./íbúð/mán.`,
+      description: `Á síðustu 12 mánuðum eru gjöld ${formatNumberIs(deficit)} kr. umfram tekjur. Ráðlögð hækkun: ${formatNumberIs(neededIncreasePerUnit)} kr./íbúð/mán.`,
       metric: { current: totalExpenses, previous: totalIncome, change: ((totalExpenses - totalIncome) / totalIncome) * 100 },
       actionLabel: 'Skoða greiningu',
       actionHref: '/analytics',

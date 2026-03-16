@@ -261,7 +261,7 @@ function VendorTable({
 
                   {/* Count */}
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
-                    {item.count.toLocaleString('is-IS')}
+                    {item.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                   </TableCell>
 
                   {/* Total */}
@@ -479,7 +479,7 @@ export function VendorOverview({ associationId }: VendorOverviewProps) {
                 className="text-xs bg-yellow-100 text-yellow-800 gap-1"
               >
                 <AlertTriangle className="h-3 w-3" />
-                {uncategorizedCount.toLocaleString('is-IS')} óflokkað
+                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} óflokkað
               </Badge>
             )}
           </div>
@@ -561,7 +561,7 @@ export function VendorOverview({ associationId }: VendorOverviewProps) {
       {/* Count footer */}
       {!isLoading && processedItems.length > 0 && (
         <p className="text-xs text-muted-foreground text-right">
-          Sýni {processedItems.length.toLocaleString('is-IS')}{' '}
+          Sýni {processedItems.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}{' '}
           {activeTab === 'income' ? 'tekjuaðila' : 'kostnaðaraðila'}
           {search && ` (síað)`}
         </p>

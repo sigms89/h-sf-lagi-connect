@@ -89,11 +89,9 @@ function formatDate(iso: string | null): string {
 }
 
 function formatISK(amount: number): string {
-  return new Intl.NumberFormat('is-IS', {
-    style: 'currency',
-    currency: 'ISK',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  const abs = Math.abs(Math.round(amount));
+  const str = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${amount < 0 ? '-' : ''}${str} ISK`;
 }
 
 // ============================================================
@@ -233,7 +231,7 @@ export function AdminBidRequestsTab() {
             <CardTitle className="text-base">Tilboðsferlar</CardTitle>
             <CardDescription className="text-xs mt-0.5">
               {data
-                ? `${data.count.toLocaleString('is-IS')} ferlar samtals`
+                ? `${data.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} ferlar samtals`
                 : 'Hleður...'}
             </CardDescription>
           </div>
@@ -380,7 +378,7 @@ export function AdminBidRequestsTab() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t">
             <span className="text-xs text-muted-foreground">
-              Síða {page} af {totalPages} · {data?.count.toLocaleString('is-IS')} ferlar
+              Síða {page} af {totalPages} · {data?.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} ferlar
             </span>
             <div className="flex gap-1">
               <Button

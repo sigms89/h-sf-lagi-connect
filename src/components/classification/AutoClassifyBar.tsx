@@ -135,7 +135,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
               <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
               <span className="text-muted-foreground">Óflokkað:</span>
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
-                {uncategorizedCount.toLocaleString('is-IS')} færslur
+                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur
               </Badge>
             </div>
           )}
@@ -148,7 +148,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
                 variant="secondary"
                 className="bg-teal-100 text-teal-800 text-xs"
               >
-                {reclassifiableCount.toLocaleString('is-IS')} færslur
+                {reclassifiableCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur
               </Badge>
             </div>
           )}
@@ -156,7 +156,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
           {uncategorizedCount === 0 && reclassifiableCount === 0 && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span>Allar {totalTransactions.toLocaleString('is-IS')} færslur eru flokkaðar</span>
+              <span>Allar {totalTransactions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur eru flokkaðar</span>
             </div>
           )}
         </div>
@@ -198,7 +198,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
             Keyra sjálfvirka flokkun
             {affectedCount > 0 && (
               <span className="ml-1.5 opacity-80">
-                ({affectedCount.toLocaleString('is-IS')})
+                ({affectedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')})
               </span>
             )}
           </Button>

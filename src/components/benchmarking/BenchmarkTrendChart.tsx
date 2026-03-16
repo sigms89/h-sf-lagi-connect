@@ -86,7 +86,7 @@ export function BenchmarkTrendChart({
         <Tooltip
           contentStyle={{ fontSize: 11, padding: '4px 8px', borderRadius: 6 }}
           formatter={(value: number) =>
-            [`${value.toLocaleString('is-IS')} kr.`, 'Kostnaður']
+            [`${Math.abs(Math.round(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kr.`, 'Kostnaður']
           }
         />
         <Line

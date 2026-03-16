@@ -29,7 +29,7 @@ function ChartContent({ data, isLoading, children }: { data: MonthlyData[]; isLo
           <XAxis dataKey="month_label" tick={{ fontSize: 11 }} className="text-zinc-500" />
           <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}þ`} />
           <Tooltip
-            formatter={(value: number) => value.toLocaleString('is-IS') + ' kr.'}
+            formatter={(value: number) => Math.abs(Math.round(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' kr.'}
             labelFormatter={(label) => label}
           />
           <Legend />

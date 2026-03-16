@@ -63,7 +63,7 @@ export function BenchmarkChart({ rows, isLoading }: BenchmarkChartProps) {
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 24, left: 8, bottom: 0 }} barSize={12} barCategoryGap="35%">
           <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-          <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${v.toLocaleString('is-IS')} kr.`} />
+          <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${Math.abs(Math.round(v)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kr.`} />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} width={130} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
           <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 16 }} />
