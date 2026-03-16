@@ -184,7 +184,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
               </div>
               {moreOpenCount > 0 && (
                 <button
-                  onClick={() => navigate('/min-verkefni')}
+                  onClick={() => navigate('/verkefni')}
                   className="text-xs text-accent hover:text-accent/80 font-medium inline-flex items-center gap-1 transition-colors mt-1"
                 >
                   Sjá {moreOpenCount} fleiri opin verkefni <ArrowRight className="h-3 w-3" />

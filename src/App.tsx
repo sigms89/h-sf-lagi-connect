@@ -25,6 +25,7 @@ import ProviderRegister from "@/pages/ProviderRegister";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
 import MinVerkefni from "@/pages/MinVerkefni";
+import OllVerkefni from "@/pages/OllVerkefni";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -52,6 +53,7 @@ const App = () => (
             {/* Primary destinations */}
             <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
             <Route path="/min-verkefni" element={<ProtectedRoute><AppLayout><MinVerkefni /></AppLayout></ProtectedRoute>} />
+            <Route path="/verkefni" element={<ProtectedRoute><AppLayout><OllVerkefni /></AppLayout></ProtectedRoute>} />
             <Route path="/financials" element={<ProtectedRoute><AppLayout><Financials /></AppLayout></ProtectedRoute>} />
             <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
