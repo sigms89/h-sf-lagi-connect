@@ -67,7 +67,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
   }
 
   if (rows.length === 0) {
-    return <div className="rounded-lg border border-dashed py-16 text-center text-sm text-muted-foreground">Ekki nóg gögn til samanburðar enn sem komið er.</div>;
+    return <div className="rounded-lg border border-dashed py-16 text-center text-sm text-muted-foreground">Ekki næg gögn til samanburðar enn sem komið er.</div>;
   }
 
   return (
