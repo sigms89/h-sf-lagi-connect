@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { db } from '@/integrations/supabase/db';
 import { subMonths, format } from 'date-fns';
+import { formatNumberIs } from '@/lib/categories';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
