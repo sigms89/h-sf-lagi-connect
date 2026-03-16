@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { useTimeRange } from '@/hooks/useTimeRange';
 import { Link } from 'react-router-dom';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
-import { HealthScoreCard } from '@/components/shared/HealthScoreCard';
+import { StatusSummary } from '@/components/dashboard/StatusSummary';
+import { useHealthScore } from '@/hooks/useHealthScore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
