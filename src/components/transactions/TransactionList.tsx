@@ -444,7 +444,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
                     {hasActiveFilters
                       ? 'Engar færslur fundust með þessum skilyrðum'
                       : 'Engar færslur skráðar ennþá'}
