@@ -53,6 +53,7 @@ const App = () => (
             {/* Primary destinations */}
             <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
             <Route path="/min-verkefni" element={<ProtectedRoute><AppLayout><MinVerkefni /></AppLayout></ProtectedRoute>} />
+            <Route path="/verkefni" element={<ProtectedRoute><AppLayout><OllVerkefni /></AppLayout></ProtectedRoute>} />
             <Route path="/financials" element={<ProtectedRoute><AppLayout><Financials /></AppLayout></ProtectedRoute>} />
             <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
