@@ -528,6 +528,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          assigned_to: string | null
           association_id: string
           category: string | null
           completed_at: string | null
@@ -535,6 +536,7 @@ export type Database = {
           created_by: string | null
           current_stage: number | null
           description: string | null
+          due_date: string | null
           id: string
           priority: string
           status: string
@@ -544,6 +546,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          assigned_to?: string | null
           association_id: string
           category?: string | null
           completed_at?: string | null
@@ -551,6 +554,7 @@ export type Database = {
           created_by?: string | null
           current_stage?: number | null
           description?: string | null
+          due_date?: string | null
           id?: string
           priority?: string
           status?: string
@@ -560,6 +564,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          assigned_to?: string | null
           association_id?: string
           category?: string | null
           completed_at?: string | null
@@ -567,6 +572,7 @@ export type Database = {
           created_by?: string | null
           current_stage?: number | null
           description?: string | null
+          due_date?: string | null
           id?: string
           priority?: string
           status?: string
@@ -576,6 +582,13 @@ export type Database = {
           visibility?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "tasks_association_id_fkey"
             columns: ["association_id"]

@@ -23,6 +23,7 @@ import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
+import TaskDetailPage from "@/pages/TaskDetailPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
             <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
             <Route path="/vendors/:vendorName" element={<ProtectedRoute><AppLayout><VendorDetailPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/tasks/:taskId" element={<ProtectedRoute><AppLayout><TaskDetailPage /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
