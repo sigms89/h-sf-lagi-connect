@@ -174,20 +174,22 @@ export default function TaskDetailPage() {
         {comments.map((comment) => (
           <div key={comment.id}>
             <div className="flex items-center gap-2 mb-1">
-              <span className={`text-xs font-medium ${comment.is_system ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+              <span className={`text-xs font-medium ${comment.is_system ? 'text-muted-foreground' : 'text-foreground'}`}>
                 {comment.author_name ?? 'Óþekktur'}
               </span>
               <span className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(comment.created_at), { locale: is, addSuffix: true })}
               </span>
             </div>
-            <div className={`text-sm rounded-lg px-3 py-2 ${
-              comment.is_system
-                ? 'bg-secondary text-muted-foreground italic'
-                : 'bg-secondary text-foreground'
-            }`}>
-              {comment.content}
-            </div>
+            {comment.is_system ? (
+              <p className="text-sm italic text-zinc-400 ml-0.5">
+                {comment.content}
+              </p>
+            ) : (
+              <div className="text-sm rounded-lg px-3 py-2 bg-secondary text-foreground">
+                {comment.content}
+              </div>
+            )}
           </div>
         ))}
       </div>
