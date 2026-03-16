@@ -24,6 +24,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [doneOpen, setDoneOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   // Fetch user's role in association
   const { data: memberRole } = useQuery({
