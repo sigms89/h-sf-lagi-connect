@@ -110,7 +110,7 @@ function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
 
   if (avgMonthlyExpense === 0) {
     score = 50;
-    detail = 'Ekki nóg gögn til að reikna sjóðsstöðu.';
+    detail = 'Ekki næg gögn til að reikna sjóðsstöðu.';
   } else {
     const ratio = latestBalance / avgMonthlyExpense;
     if (ratio >= 3) {
@@ -254,7 +254,7 @@ function calcMaintenanceRatio(
 
   if (totalExpenses === 0 || maintenanceCategoryIds.size === 0) {
     score = 50;
-    detail = 'Ekki nóg gögn til að meta viðhaldskostnað.';
+    detail = 'Ekki næg gögn til að meta viðhaldskostnað.';
   } else {
     const pct = (maintenanceExpenses / totalExpenses) * 100;
     const pctStr = pct.toFixed(1);

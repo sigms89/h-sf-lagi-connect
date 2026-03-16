@@ -106,7 +106,7 @@ export default function Benchmarking() {
               <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center"><Scale className="h-6 w-6 text-muted-foreground" /></div>
                 <div>
-                  <h3 className="font-semibold">Ekki nóg gögn enn</h3>
+                  <h3 className="font-semibold">Ekki næg gögn enn</h3>
                   <p className="text-sm text-muted-foreground mt-1 max-w-sm">Þegar fleiri húsfélög eru skráð og hlaðið upp gögnum verður samanburður mögulegur.</p>
                 </div>
               </CardContent>
