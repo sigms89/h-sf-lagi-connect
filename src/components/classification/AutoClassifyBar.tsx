@@ -135,7 +135,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
               <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
               <span className="text-muted-foreground">Óflokkað:</span>
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
-                {uncategorizedCount.toLocaleString('is-IS')} færslur
+                {uncategorizedCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur
               </Badge>
             </div>
           )}
