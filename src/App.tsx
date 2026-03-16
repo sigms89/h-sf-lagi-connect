@@ -25,6 +25,7 @@ import ProviderRegister from "@/pages/ProviderRegister";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
 import MinVerkefni from "@/pages/MinVerkefni";
+import OllVerkefni from "@/pages/OllVerkefni";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
