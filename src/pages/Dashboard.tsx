@@ -19,10 +19,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Upload,
-  AlertCircle,
-  AlertTriangle,
-  Info,
-  ChevronRight,
   TrendingUp,
   TrendingDown,
   ArrowRight,
