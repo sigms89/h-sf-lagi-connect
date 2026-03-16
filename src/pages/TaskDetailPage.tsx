@@ -10,16 +10,10 @@ import { ArrowLeft, Calendar, User, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useTask, useCompleteTask, useAssignTask } from '@/hooks/useTask';
 import { useTaskComments, useAddComment } from '@/hooks/useTaskComments';
 import { useCurrentAssociation } from '@/hooks/useAssociation';
-import { useAssociationMembers } from '@/hooks/useMembers';
+import AssignTaskModal from '@/components/tasks/AssignTaskModal';
 
 function getStatusDot(status: string, dueDateStr: string | null): { color: string; label: string } {
   if (status === 'done') return { color: 'bg-green-500', label: 'Lokið' };
