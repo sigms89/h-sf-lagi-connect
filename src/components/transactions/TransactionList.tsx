@@ -439,9 +439,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28 ml-auto" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : transactions.length === 0 ? (
