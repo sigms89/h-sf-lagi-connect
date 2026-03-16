@@ -3,6 +3,7 @@ import { db } from '@/integrations/supabase/db';
 import type { Transaction, TransactionInsert, TransactionFilters, TransactionStats, MonthlyData, CategoryBreakdown } from '@/types/database';
 import { toast } from 'sonner';
 import { format, subMonths } from 'date-fns';
+import { is } from 'date-fns/locale';
 
 export const TRANSACTION_KEYS = {
   all: ['transactions'] as const,
