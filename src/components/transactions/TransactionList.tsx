@@ -133,14 +133,12 @@ export function TransactionList({ associationId }: TransactionListProps) {
   // ============================================================
   const handleExport = () => {
     if (!transactions.length || !hasPaidTier) return;
-    const headers = ['Dagsetning', 'Lýsing', 'Upphæð', 'Staða', 'Flokkur', 'Tegund'];
+    const headers = ['Dagsetning', 'Lýsing', 'Upphæð', 'Flokkur'];
     const rows = transactions.map((tx) => [
       formatDateIs(tx.date),
       `"${tx.description.replace(/"/g, '""')}"`,
       tx.amount.toString().replace('.', ','),
-      tx.balance?.toString().replace('.', ',') ?? '',
       tx.category?.name_is ?? 'Óflokkað',
-      tx.is_income ? 'Tekjur' : 'Gjöld',
     ]);
     const csv = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
