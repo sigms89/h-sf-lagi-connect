@@ -23,18 +23,16 @@ import { useCurrentAssociation } from '@/hooks/useAssociation';
 import { useYearComparison } from '@/hooks/useYearComparison';
 
 function formatISK(amount: number) {
-  return new Intl.NumberFormat('is-IS', {
-    style: 'currency',
-    currency: 'ISK',
-    maximumFractionDigits: 0,
-  }).format(Math.abs(amount));
+  const abs = Math.abs(Math.round(amount));
+  const str = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${str} ISK`;
 }
 
 function formatCompact(amount: number) {
-  return new Intl.NumberFormat('is-IS', {
-    notation: 'compact',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  const abs = Math.abs(Math.round(amount));
+  if (abs >= 1_000_000) return `${Math.round(abs / 1_000_000)}M`;
+  if (abs >= 1_000) return `${Math.round(abs / 1_000)}þ`;
+  return abs.toString();
 }
 
 interface ChangeBadgeProps {
