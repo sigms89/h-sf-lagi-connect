@@ -484,42 +484,96 @@ export type Database = {
         }
         Relationships: []
       }
+      task_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_system: boolean
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           association_id: string
           category: string | null
           completed_at: string | null
           created_at: string | null
+          created_by: string | null
+          current_stage: number | null
           description: string | null
           id: string
           priority: string
           status: string
           title: string
+          total_stages: number | null
           updated_at: string | null
+          visibility: string
         }
         Insert: {
           association_id: string
           category?: string | null
           completed_at?: string | null
           created_at?: string | null
+          created_by?: string | null
+          current_stage?: number | null
           description?: string | null
           id?: string
           priority?: string
           status?: string
           title: string
+          total_stages?: number | null
           updated_at?: string | null
+          visibility?: string
         }
         Update: {
           association_id?: string
           category?: string | null
           completed_at?: string | null
           created_at?: string | null
+          created_by?: string | null
+          current_stage?: number | null
           description?: string | null
           id?: string
           priority?: string
           status?: string
           title?: string
+          total_stages?: number | null
           updated_at?: string | null
+          visibility?: string
         }
         Relationships: [
           {
@@ -528,6 +582,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "associations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
