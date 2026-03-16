@@ -102,27 +102,27 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-zinc-200">
+    <Sidebar collapsible="icon" className="border-r border-border">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-14 border-b border-zinc-200 px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-12 border-b border-border px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
-        <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-[hsl(213,52%,24%)] to-[hsl(213,52%,32%)] flex items-center justify-center shadow-sm">
-          <Building2 className="h-4 w-4 text-white" />
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+          <Building2 className="h-3.5 w-3.5 text-primary-foreground" />
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1 flex items-center gap-1">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-zinc-900 leading-tight truncate">
+              <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
                 {association?.name ?? "Húsfélagið.is"}
               </p>
-              <p className="text-[11px] text-zinc-500 leading-tight truncate">
+              <p className="text-[11px] text-muted-foreground leading-tight truncate">
                 {association?.address ?? "Fjármálagreining"}
               </p>
             </div>
-            <ChevronDown className="h-3 w-3 text-zinc-400 flex-shrink-0 ml-auto" />
+            <ChevronDown className="h-3 w-3 text-muted-foreground/50 flex-shrink-0 ml-auto" />
           </div>
         )}
       </div>
