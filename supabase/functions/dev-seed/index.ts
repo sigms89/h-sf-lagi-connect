@@ -222,7 +222,7 @@ Deno.serve(async (req) => {
               txDescriptions[txCounter % txDescriptions.length];
             const amount = txDef.income
               ? 50000 + Math.floor(Math.random() * 200000)
-              : 10000 + Math.floor(Math.random() * 150000);
+              : -(10000 + Math.floor(Math.random() * 150000));
             const day = 1 + Math.floor(Math.random() * 27);
             const dateStr = `2025-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             transactions.push({
