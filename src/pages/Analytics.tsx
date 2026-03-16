@@ -276,37 +276,13 @@ export default function AnalyticsPage() {
         <TimeRangeSelector />
       </div>
 
-      {/* ── Alerts banner ─────────────────────────────────────── */}
-      {!alertsLoading && alerts.length > 0 && (
-        <div className={`rounded-xl border p-4 flex items-center justify-between gap-4 ${
-          criticalCount > 0 ? 'bg-rose-50 border-rose-200' : 'bg-amber-50 border-amber-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <Bell className={`h-5 w-5 flex-shrink-0 ${criticalCount > 0 ? 'text-rose-600' : 'text-amber-600'}`} />
-            <div>
-              <p className={`text-sm font-semibold ${criticalCount > 0 ? 'text-rose-800' : 'text-amber-800'}`}>
-                {criticalCount > 0
-                  ? `${criticalCount} mikilvæg${criticalCount === 1 ? '' : 'ar'} viðvörun${criticalCount === 1 ? '' : 'ir'}`
-                  : `${warningCount} viðvörun${warningCount === 1 ? '' : 'ir'}`}
-              </p>
-              <p className={`text-xs ${criticalCount > 0 ? 'text-rose-600' : 'text-amber-600'}`}>
-                {alerts.length === 1 ? '1 viðvörun og tillaga' : `${alerts.length} viðvaranir og tillögur`} samtals
-              </p>
-            </div>
-          </div>
-          <a href="/alerts">
-            <Button size="sm" variant="outline" className={`flex-shrink-0 ${
-              criticalCount > 0 ? 'border-rose-300 text-rose-700 hover:bg-rose-100' : 'border-amber-300 text-amber-700 hover:bg-amber-100'
-            }`}>
-              Sjá allar <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-            </Button>
-          </a>
-        </div>
-      )}
-
-      {/* ── Health Score ──────────────────────────────────────── */}
-      {associationId && (
-        <HealthScoreCard associationId={associationId} variant="full" />
+      {/* ── Ástandsyfirlit ─────────────────────────────────── */}
+      {healthData && (
+        <Card>
+          <CardContent className="pt-5">
+            <StatusSummary healthData={healthData} />
+          </CardContent>
+        </Card>
       )}
 
       {/* ── Monthly Trend Chart ──────────────────────────────── */}
