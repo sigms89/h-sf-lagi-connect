@@ -156,7 +156,7 @@ export function AutoClassifyBar({ associationId }: AutoClassifyBarProps) {
           {uncategorizedCount === 0 && reclassifiableCount === 0 && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span>Allar {totalTransactions.toLocaleString('is-IS')} færslur eru flokkaðar</span>
+              <span>Allar {totalTransactions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} færslur eru flokkaðar</span>
             </div>
           )}
         </div>
