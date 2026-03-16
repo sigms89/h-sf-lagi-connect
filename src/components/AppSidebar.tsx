@@ -86,14 +86,14 @@ export function AppSidebar() {
       <SidebarMenuItem>
         <Link
           to={url}
-          className={`flex items-center gap-2 text-[13px] h-9 px-3 rounded-none transition-colors duration-150 ${
+          className={`flex items-center gap-2 text-[13px] h-8 px-3 rounded-none transition-colors duration-150 ${
             active
-              ? "font-semibold text-zinc-900 border-l-2 border-l-teal-600 ml-[-1px] pl-[calc(0.75rem-1px)]"
-              : "font-normal text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+              ? "font-semibold text-foreground border-l-2 border-l-accent ml-[-1px] pl-[calc(0.75rem-1px)]"
+              : "font-normal text-muted-foreground hover:text-foreground hover:bg-muted/50"
           }`}
         >
-          <Icon className={`h-[18px] w-[18px] flex-shrink-0 transition-colors duration-150 ${
-            active ? "text-teal-600" : "text-zinc-400"
+          <Icon className={`h-[16px] w-[16px] flex-shrink-0 transition-colors duration-150 ${
+            active ? "text-accent" : "text-muted-foreground/60"
           }`} />
           {!collapsed && <span>{title}</span>}
         </Link>
