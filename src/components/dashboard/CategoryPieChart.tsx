@@ -39,7 +39,7 @@ export function CategoryPieChart({ data, isLoading }: CategoryPieChartProps) {
                   <Cell key={i} fill={entry.color || FALLBACK_COLORS[i % FALLBACK_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => value.toLocaleString('is-IS') + ' kr.'} />
+              <Tooltip formatter={(value: number) => Math.abs(Math.round(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' kr.'} />
             </PieChart>
           </ResponsiveContainer>
         )}

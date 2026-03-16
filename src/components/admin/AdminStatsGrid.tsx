@@ -61,7 +61,7 @@ function formatISK(amount: number): string {
   if (amount >= 1_000) {
     return `${Math.round(amount / 1_000)} þ.kr.`;
   }
-  return `${amount.toLocaleString('is-IS')} kr.`;
+  return `${Math.abs(Math.round(amount)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kr.`;
 }
 
 // ============================================================
