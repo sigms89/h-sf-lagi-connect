@@ -40,8 +40,8 @@ const step1Schema = z.object({
 type Step1Values = z.infer<typeof step1Schema>;
 
 const SERVICE_AREAS = [
-  { value: '1', label: 'Höfuðborgarsvæði (100–199)' },
-  { value: '2', label: 'Suðurnes (200–299)' },
+  { value: '1', label: 'Reykjavík (100–199)' },
+  { value: '2', label: 'Kópavogur / Hafnarfjörður / Garðabær (200–299)' },
   { value: '3', label: 'Vesturland (300–399)' },
   { value: '4', label: 'Vestfirðir (400–499)' },
   { value: '5', label: 'Norðurland vestra (500–599)' },
