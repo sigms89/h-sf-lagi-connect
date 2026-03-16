@@ -5,6 +5,7 @@
 import {
   LayoutDashboard,
   Star,
+  ClipboardList,
   Receipt,
   Scale,
   Store,
