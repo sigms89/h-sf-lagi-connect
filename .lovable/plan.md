@@ -1,68 +1,65 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Íslenskuyfirferð — Tillögur að leiðréttingum
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
-
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
-
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
-
-### 2. ProtectedRoute — röng fyrirspurn á profiles
-
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
-
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
-
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
-
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
-
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
-
-### 4. Console viðvörun — Badge ref í Settings
-
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
-
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
-
-### 5. TimeRange hefur ekki áhrif á gagnasótt
-
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
+Ég yfirfór alla skráa sem innihalda íslensku texta í kerfinu. Hér eru allar villur og lagfæringar sem ég fann, flokkaðar eftir alvarleika.
 
 ---
 
-### Forgangsröðun
+### 1. Málfræðivillur — beygingarvillur og orðalag
 
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
+| Skrá | Lína | Nú stendur | Ætti að vera | Ástæða |
+|------|------|-----------|-------------|--------|
+| `Settings.tsx` | 89, 398 | `Stjórnarsmeðlimur` | `Stjórnarmeðlimur` | Rangt samsett orð — „stjórnar" + „meðlimur", ekki „stjórnars" |
+| `Onboarding.tsx` | 47 | `Ólöglegt byggingarár` | `Ógilt byggingarár` | „Ólöglegt" þýðir „illegal" — hér er átt við „invalid" |
+| `Dashboard.tsx` | 90 | `færslur eru óflokkuð` | `færslur eru óflokkaðar` | „Færslur" er kvk.ft., krefst „óflokkaðar" |
+| `ProviderRegister.tsx` | 36 | `Ógild netfang` | `Ógilt netfang` | „Netfang" er hk., krefst „ógilt" |
+| `ProviderRegister.tsx` | 37 | `Ógild vefsíðuslóð` | `Ógild vefslóð` | „Vefsíðuslóð" er ekki raunhæft samsett orð — „vefslóð" er rétt |
+| `Onboarding.tsx` | 45 | `Hlýtur að vera a.m.k. 1 íbúð` | `Þarf að vera a.m.k. 1 íbúð` | „Hlýtur" er óeðlilegt í villuskilaboðum |
+| `ProviderRegister.tsx` | 51 | `Suðurland / Norðausturland (900–999)` | `Vestmannaeyjar / Suðurnesja (900–999)` | 900-svæðið er Vestmannaeyjar, ekki Norðausturland |
 
-### Tillaga
+### 2. Stafsetningarvillur og samræmisvandamál
 
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+| Skrá | Lína | Nú stendur | Ætti að vera | Ástæða |
+|------|------|-----------|-------------|--------|
+| `VendorOverview.tsx` | 482 | `óflokkað` (lágstafir í badge) | `óflokkaðar` eða `Óflokkaðar` | Samræmi við „færslur" (kvk.ft.) |
+| `AutoClassifyBar.tsx` | 138 | `Óflokkað:` + `færslur` | `Óflokkaðar færslur:` | Sama beygingarregla |
+| `CreateTaskModal.tsx` | 57 | `Ekki innskráð/ur` | `Ekki innskráð(ur)` | Betra form, eða „Notandi ekki innskráður" |
+| `Admin.tsx` | 76 | `Hleður...` | `Hleð...` | Samræmi við annars staðar í kerfinu (t.d. Transactions.tsx notar „Hleð...") |
+| `ProviderRegister.tsx` | 43 | `Höfuðborgarsvæði (100–199)` | `Reykjavík (100–199)` | Höfuðborgarsvæðið nær yfir 100-299, ekki bara 100-199. Eins og BenchmarkFilters svæðaskiptingin skilgreinir |
+| `ProviderRegister.tsx` | 44 | `Suðurnes (200–299)` | `Kópavogur / Hafnarfjörður / Garðabær (200–299)` | Suðurnes er 230+, en 200-229 er Kópavogur/Garðabær osfrv. |
+
+### 3. Orðalagstillögur (ekki beinar villur en betri íslenska)
+
+| Skrá | Lína | Nú stendur | Tillaga | Ástæða |
+|------|------|-----------|---------|--------|
+| `Onboarding.tsx` | 100 | `töfrastig` | Fjarlægja/endurskrifa athugasemd | „Töfrastig" er ekki raunhæft íslenskt orð |
+| `ReportsPage.tsx` | 377 | `Meðalsöfnun pr. mánuð` | `Meðalsöfnun á mánuði` | „pr." er dönsk skammstöfun, „á mánuði" er íslenskt |
+| `Analytics.tsx` | 85 | `Birgi` (table header) | `Birgir` eða `Þjónustuaðili` | „Birgi" er nefnifall eintölu en dálkurinn sýnir marga. Betur: „Þjónustuaðili" til samræmis við restina |
+| `NotificationBell.tsx` | 157 | `Merkja allt lesið` | `Merkja allt sem lesið` | Náttúrulegra orðalag |
+| `ReportsPage.tsx` | 330 | `Fjárhagsyfirlit Húsfélags` | `Fjárhagsyfirlit húsfélags` | Lágstafur í „húsfélags" nema nafn |
+| `Benchmarking.tsx` | 74 | `flokkar undir meðaltali` | `flokkar undir miðgildi` | Samræmi við restina — kerfið notar nú miðgildi, ekki meðaltal |
+
+### 4. Samræmi milli skráa
+
+**„Hleð..." vs „Hleður..."**: Flest skrár nota „Hleð..." (réttara, 1. persóna) en `Admin.tsx` notar „Hleður..." — ætti að samræma í „Hleð..."
+
+**„Parhús" vs „Parhús"**: Vantar accent á „Par" — rétt form er „Parhús" (ekki villa, en athuga hvort ætlunin sé „Parhús" eða „Tvíbýlishús")
+
+### Skrár sem þarf að breyta
+
+| Skrá | Fjöldi leiðréttinga |
+|------|---------------------|
+| `src/pages/Onboarding.tsx` | 2 |
+| `src/pages/Settings.tsx` | 2 |
+| `src/pages/Dashboard.tsx` | 1 |
+| `src/pages/Admin.tsx` | 1 |
+| `src/pages/ReportsPage.tsx` | 2 |
+| `src/pages/Analytics.tsx` | 1 |
+| `src/pages/Benchmarking.tsx` | 1 |
+| `src/pages/ProviderRegister.tsx` | 4 |
+| `src/components/classification/VendorOverview.tsx` | 1 |
+| `src/components/classification/AutoClassifyBar.tsx` | 1 |
+| `src/components/tasks/CreateTaskModal.tsx` | 1 |
+| `src/components/notifications/NotificationBell.tsx` | 1 |
 
