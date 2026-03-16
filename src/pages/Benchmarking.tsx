@@ -19,7 +19,7 @@ import { BenchmarkTable } from '@/components/benchmarking/BenchmarkTable';
 
 export default function Benchmarking() {
   const { data: association, isLoading: isLoadingAssoc } = useCurrentAssociation();
-  const { filters, updateFilter, resetFilters } = useBenchmarkFilters();
+  const { filters, updateFilter, resetFilters } = useBenchmarkFilters(association?.building_year);
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
