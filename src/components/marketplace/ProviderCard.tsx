@@ -3,12 +3,14 @@
 // Card for a service provider listing
 // ============================================================
 
-import { Globe, Mail, MapPin, Phone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Globe, Mail, MapPin, Phone, Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ServiceProvider } from '@/types/database';
 import { getCategoryColor } from '@/lib/categories';
+import { useProviderReviewStats } from '@/hooks/useProviderReviews';
 
 interface ProviderCardProps {
   provider: ServiceProvider;
