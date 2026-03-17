@@ -176,8 +176,10 @@ const Dashboard = () => {
       {(isLoading || hasData) && (
         <>
           {/* ═══ SECTION 1: HERO CARD ═══════════════════════ */}
-          <Card className={`border-l-4 ${heroBorderColor}`}>
-            <CardContent className="p-6">
+          <Card className="relative overflow-hidden">
+            {/* Radial glow */}
+            <div className={`absolute -top-16 -left-16 w-56 h-56 rounded-full blur-3xl opacity-[0.18] pointer-events-none ${glowColor}`} />
+            <CardContent className="relative p-6">
               {isLoading || healthLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-6 w-48" />
@@ -189,6 +191,7 @@ const Dashboard = () => {
                   {/* Left — Summary */}
                   <div className="flex-1 min-w-0 space-y-3">
                     <div className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
                       <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
                     </div>
                     <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
