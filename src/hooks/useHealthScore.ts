@@ -134,7 +134,7 @@ function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
   };
 }
 
-/** Factor 3 — Greiðsluhlutfall (20%): % individual payments received last month */
+/** Factor 3: Greiðsluhlutfall (20%): % individual payments received last month */
 function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
   const now = new Date();
   const lastMonthStart = startOfMonth(subMonths(now, 1));
