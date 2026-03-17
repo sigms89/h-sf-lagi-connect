@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Marketplace Page (Full Implementation)
+// Húsfélagið.is: Marketplace Page (Full Implementation)
 // ============================================================
 
 import { useState } from 'react';

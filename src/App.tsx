@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — App Root with Routes (v3: role-based nav)
+// Húsfélagið.is: App Root with Routes (v3: role-based nav)
 // ============================================================
 
 import { Toaster } from "@/components/ui/toaster";

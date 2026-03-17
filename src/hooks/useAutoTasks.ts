@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useAutoTasks
+// Húsfélagið.is: useAutoTasks
 // Auto-creates tasks from financial alert conditions on load.
 // Dedup uses category + related_entity_id to avoid duplicates.
 // ============================================================
@@ -82,7 +82,7 @@ export function useAutoTasks(associationId: string | undefined) {
           if (isDuplicate('vangreiðsla', relId)) continue;
 
           const name = firstName(alert.vendor);
-          // Extract month from alert — createdAt is based on detection time,
+          // Extract month from alert - createdAt is based on detection time,
           // but description references the missing month
           const month = icelandicMonth(alert.createdAt);
 
@@ -109,7 +109,7 @@ export function useAutoTasks(associationId: string | undefined) {
 
           tasksToCreate.push({
             association_id: associationId,
-            title: 'Sjóðsstaða er lág — endurskoða húsgjald',
+            title: 'Sjóðsstaða er lág, endurskoða húsgjald',
             description: alert.description,
             priority: 'critical',
             category: 'sjóðsstaða',
@@ -181,7 +181,7 @@ async function checkMaintenanceCost(
   if (pct > 40) {
     tasksToCreate.push({
       association_id: associationId,
-      title: `Skoða viðhaldskostnað — ${pct.toFixed(0)}% af gjöldum`,
+      title: `Skoða viðhaldskostnað, ${pct.toFixed(0)}% af gjöldum`,
       description: `Viðhaldskostnaður síðustu 12 mánaða er ${pct.toFixed(0)}% af heildargjöldum. Ráðlagt er að meta hvort hægt sé að draga úr kostnaði eða leita tilboða.`,
       priority: 'warning',
       category: 'viðhald',

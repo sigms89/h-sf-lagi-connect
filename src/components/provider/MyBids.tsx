@@ -115,7 +115,7 @@ export function MyBids({ providerId }: MyBidsProps) {
                     <TableCell>
                       <div className="space-y-0.5">
                         <div className="text-sm font-medium line-clamp-1">
-                          {bid.bid_request?.title ?? '—'}
+                          {bid.bid_request?.title ?? '-'}
                         </div>
                         {bid.bid_request?.category && (
                           <Badge className={`${colors.badge} text-[10px] border px-1.5 py-0`}>
@@ -138,7 +138,7 @@ export function MyBids({ providerId }: MyBidsProps) {
                     <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                       {bid.valid_until
                         ? format(new Date(bid.valid_until), 'dd.MM.yyyy')
-                        : '—'}
+                        : '-'}
                     </TableCell>
                   </TableRow>
                 );

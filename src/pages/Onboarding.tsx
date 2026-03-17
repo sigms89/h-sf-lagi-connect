@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Onboarding Page
+// Húsfélagið.is: Onboarding Page
 // First-time setup wizard: create association + invite board members + upload first data
 // ============================================================
 
@@ -40,11 +40,11 @@ import { toast } from 'sonner';
 const onboardingSchema = z.object({
   name: z.string().min(2, 'Nafn verður að vera að minnsta kosti 2 stafir'),
   address: z.string().optional(),
-  postal_code: z.string().min(3, 'Póstnúmer vantar — nauðsynlegt fyrir samanburð'),
+  postal_code: z.string().min(3, 'Póstnúmer vantar, nauðsynlegt fyrir samanburð'),
   city: z.string().default('Reykjavík'),
   num_units: z.number().int().min(1, 'Þarf að vera a.m.k. 1 íbúð').max(999),
   type: z.enum(['fjolbyli', 'radhus', 'parhus']),
-  building_year: z.number({ required_error: 'Byggingarár vantar — nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ógilt byggingarár').max(2030, 'Ógilt byggingarár'),
+  building_year: z.number({ required_error: 'Byggingarár vantar, nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ógilt byggingarár').max(2030, 'Ógilt byggingarár'),
   has_elevator: z.boolean(),
   has_parking: z.boolean(),
   num_floors: z.number().int().min(1),
@@ -97,10 +97,10 @@ function InviteForm({ associationId }: { associationId: string }) {
       return;
     }
     setSending(true);
-    // Boðskerfi er í vinnslu — sýnum UI-only sýndarstöðu
+    // Boðskerfi er í vinnslu - sýnum UI-only sýndarstöðu
     await new Promise((resolve) => setTimeout(resolve, 600));
     setSending(false);
-    toast.info('Boðskerfi er í vinnslu — netföngin verða vistuð þegar kerfið er tilbúið');
+    toast.info('Boðskerfi er í vinnslu, netföngin verða vistuð þegar kerfið er tilbúið');
   };
 
   return (
@@ -187,7 +187,7 @@ export default function Onboarding() {
   const progressPercent = (step / STEPS.length) * 100;
 
   // ============================================================
-  // SUBMIT STEP 2 — Create association
+  // SUBMIT STEP 2: Create association
   // ============================================================
   const handleCreateAssociation = async (data: OnboardingData) => {
     const result = await createAssociation.mutateAsync({
@@ -465,7 +465,7 @@ export default function Onboarding() {
               <InviteForm associationId={createdAssociationId} />
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(4)}>
-                  Sleppa — boða síðar
+                  Sleppa, boða síðar
                 </Button>
                 <Button onClick={() => setStep(4)} className="flex-1">
                   Áfram
@@ -506,7 +506,7 @@ export default function Onboarding() {
                   className="text-muted-foreground text-xs"
                 >
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
-                  Sleppa — hlaða upp síðar
+                  Sleppa, hlaða upp síðar
                 </Button>
               </div>
             </CardContent>

@@ -239,7 +239,7 @@ export function BidRequestDetail({
                       <TableCell>
                         <div className="space-y-0.5">
                           <div className="text-sm font-medium">
-                            {bid.provider?.company_name ?? '—'}
+                            {bid.provider?.company_name ?? '-'}
                           </div>
                           {/* Contact info only revealed after acceptance */}
                           {showContact && bid.provider?.phone && (
@@ -272,12 +272,12 @@ export function BidRequestDetail({
                         {formatIskAmount(bid.amount)}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-xs text-muted-foreground max-w-xs">
-                        <span className="line-clamp-2">{bid.description ?? '—'}</span>
+                        <span className="line-clamp-2">{bid.description ?? '-'}</span>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {bid.valid_until
                           ? format(new Date(bid.valid_until), 'dd. MMM yyyy')
-                          : '—'}
+                          : '-'}
                       </TableCell>
                       <TableCell>
                         <Badge className={`${BID_STATUS_CLASSES[bid.status]} text-xs border`}>

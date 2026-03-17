@@ -338,10 +338,10 @@ export default function CategoryDetail() {
                       {formatDate(tx.date)}
                     </TableCell>
                     <TableCell className="text-sm max-w-[200px] truncate">
-                      {tx.description || '—'}
+                      {tx.description || '-'}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {tx.vendor_name || '—'}
+                      {tx.vendor_name || '-'}
                     </TableCell>
                     <TableCell className="text-right text-sm font-medium text-rose-600">
                       -{formatISK(Math.abs(tx.amount))}

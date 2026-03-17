@@ -57,10 +57,10 @@ function factorStatus(score: number): 'good' | 'warning' | 'critical' {
 }
 
 // ---------------------------------------------------------------
-// Factor calculators — ALL scores are Math.round()'d
+// Factor calculators - ALL scores are Math.round()'d
 // ---------------------------------------------------------------
 
-/** Factor 1 — Tekjur vs gjöld (30%): income/expense ratio */
+/** Factor 1: Tekjur vs gjöld (30%): income/expense ratio */
 function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
   const totalIncome = txs.filter((t) => t.is_income).reduce((s, t) => s + Math.abs(t.amount), 0);
   const totalExpense = txs.filter((t) => !t.is_income).reduce((s, t) => s + Math.abs(t.amount), 0);
@@ -92,7 +92,7 @@ function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
   };
 }
 
-/** Factor 2 — Sjóðsstaða (25%): balance vs avg monthly expenses */
+/** Factor 2: Sjóðsstaða (25%): balance vs avg monthly expenses */
 function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
   const sorted = [...txs].sort((a, b) => b.date.localeCompare(a.date));
   const latestBalance = sorted.find((t) => t.balance != null)?.balance ?? 0;
@@ -134,7 +134,7 @@ function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
   };
 }
 
-/** Factor 3 — Greiðsluhlutfall (20%): % individual payments received last month */
+/** Factor 3: Greiðsluhlutfall (20%): % individual payments received last month */
 function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
   const now = new Date();
   const lastMonthStart = startOfMonth(subMonths(now, 1));
@@ -181,7 +181,7 @@ function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 4 — Viðvaranir (15%)
+ * Factor 4: Viðvaranir (15%)
  */
 function calcAlerts(txs: TxRow[]): HealthScoreFactor {
   const now = new Date();
@@ -237,7 +237,7 @@ function calcAlerts(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 5 — Viðhaldskostnaður (10%)
+ * Factor 5: Viðhaldskostnaður (10%)
  */
 function calcMaintenanceRatio(
   txs: TxRow[],
@@ -261,13 +261,13 @@ function calcMaintenanceRatio(
 
     if (pct >= 15 && pct <= 25) {
       score = 100;
-      detail = `Viðhaldskostnaður er ${pctStr}% af heildargjöldum — innan við markmiðsbils.`;
+      detail = `Viðhaldskostnaður er ${pctStr}% af heildargjöldum, innan við markmiðsbils.`;
     } else if (pct < 15) {
       score = Math.round(clamp((pct / 15) * 100));
-      detail = `Viðhaldskostnaður er ${pctStr}% — lægri en ráðlögð 15–25%.`;
+      detail = `Viðhaldskostnaður er ${pctStr}%, lægri en ráðlögð 15–25%.`;
     } else {
       score = Math.round(clamp(((50 - pct) / 25) * 100));
-      detail = `Viðhaldskostnaður er ${pctStr}% — hærri en ráðlögð 15–25%.`;
+      detail = `Viðhaldskostnaður er ${pctStr}%, hærri en ráðlögð 15–25%.`;
     }
   }
 

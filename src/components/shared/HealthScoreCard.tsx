@@ -1,5 +1,5 @@
 // ============================================================
-// HealthScoreCard.tsx — Health score display with rounded scores
+// HealthScoreCard.tsx: Health score display with rounded scores
 // ============================================================
 
 import { useHealthScore } from '@/hooks/useHealthScore';

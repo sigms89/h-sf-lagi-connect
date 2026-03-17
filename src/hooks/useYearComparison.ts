@@ -136,7 +136,7 @@ export function useYearComparison(
         return Math.round(((curr - prev) / prev) * 100);
       }
 
-      // Build category comparisons — union of all category IDs
+      // Build category comparisons - union of all category IDs
       const allCatIds = new Set([
         ...current.catMap.keys(),
         ...previous.catMap.keys(),

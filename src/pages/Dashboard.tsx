@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Dashboard v3
+// Húsfélagið.is: Dashboard v3
 // Financial advisor style: hero card, action items, trend, bottom row
 // ============================================================
 
@@ -94,7 +94,7 @@ const Dashboard = () => {
   const score = healthData?.score ?? 0;
   const avgMonthlyExpense = (stats?.total_expenses ?? 0) / 12;
   const currentBalance = stats?.current_balance ?? 0;
-  const balanceMonths = avgMonthlyExpense > 0 ? (currentBalance / avgMonthlyExpense).toFixed(1) : '—';
+  const balanceMonths = avgMonthlyExpense > 0 ? (currentBalance / avgMonthlyExpense).toFixed(1) : '-';
   const isBalanceLow = currentBalance < avgMonthlyExpense && avgMonthlyExpense > 0;
   const netBalance = stats?.net_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;

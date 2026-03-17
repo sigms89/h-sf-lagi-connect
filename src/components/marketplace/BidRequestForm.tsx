@@ -110,7 +110,7 @@ export function BidRequestForm({ open, onClose, association }: BidRequestFormPro
     if (!cat) return;
     form.setValue(
       'title',
-      `Tilboðsbeiðni: ${cat.nameIs} — ${association.name}`
+      `Tilboðsbeiðni: ${cat.nameIs}, ${association.name}`
     );
     form.setValue('description', generateDescription(association, cat.nameIs));
   }, [selectedCategoryId, association, form]);

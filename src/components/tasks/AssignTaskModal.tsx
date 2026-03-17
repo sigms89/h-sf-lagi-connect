@@ -1,5 +1,5 @@
 // ============================================================
-// AssignTaskModal — Member selection modal for task assignment
+// AssignTaskModal: Member selection modal for task assignment
 // ============================================================
 
 import {

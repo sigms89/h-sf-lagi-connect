@@ -1,5 +1,5 @@
 // ============================================================
-// TaskDetailPage — Full task detail with comments
+// TaskDetailPage: Full task detail with comments
 // ============================================================
 
 import { useState } from 'react';
@@ -19,7 +19,7 @@ function getStatusDot(status: string, dueDateStr: string | null): { color: strin
   if (status === 'done') return { color: 'bg-green-500', label: 'Lokið' };
   if (status === 'waiting') return { color: 'bg-[hsl(38,92%,50%)]', label: 'Í bið' };
 
-  // open — check overdue
+  // open - check overdue
   if (dueDateStr) {
     const dueDate = new Date(dueDateStr + 'T00:00:00');
     const today = new Date();

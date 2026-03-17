@@ -93,7 +93,7 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success(data?.message ?? `${label} — lokið!`);
+      toast.success(data?.message ?? `${label}, lokið!`);
 
       // Invalidate everything so UI refreshes
       await queryClient.invalidateQueries();
@@ -108,7 +108,7 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
-          tooltip="Þróunarverkfæri — Skipta um hlutverk"
+          tooltip="Þróunarverkfæri: Skipta um hlutverk"
           className="text-amber-500 hover:text-amber-400"
           disabled={switching || seeding}
         >

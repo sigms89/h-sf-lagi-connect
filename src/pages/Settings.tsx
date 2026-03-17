@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Settings Page
+// Húsfélagið.is: Settings Page
 // Association settings form + member management
 // ============================================================
 

@@ -70,7 +70,7 @@ export function BenchmarkFilters({
           </Select>
         </div>
 
-        {/* Region — three tiers */}
+        {/* Region - three tiers */}
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Svæði</Label>
           <Select

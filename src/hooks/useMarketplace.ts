@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Marketplace Hooks
+// Húsfélagið.is: Marketplace Hooks
 // TanStack Query hooks for bid requests and service providers
 // ============================================================
 
@@ -240,7 +240,7 @@ export function useAcceptBid() {
       });
     },
     onSuccess: () => {
-      toast.success('Tilboð samþykkt — önnur tilboð hafnað');
+      toast.success('Tilboð samþykkt, önnur tilboð hafnað');
     },
     onError: (error: Error) => {
       toast.error(`Villa: ${error.message}`);

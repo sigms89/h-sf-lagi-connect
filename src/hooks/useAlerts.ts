@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useAlerts: Financial Alert Detection Engine
+// Húsfélagið.is: useAlerts: Financial Alert Detection Engine
 // Runs statistical checks on transaction history to surface
 // price increases, anomalies, missing payments, and more.
 // ============================================================
@@ -68,7 +68,7 @@ function monthKey(dateStr: string): string {
   return dateStr.slice(0, 7);
 }
 
-/** Severity sort order — lower = more important */
+/** Severity sort order - lower = more important */
 const SEVERITY_ORDER: Record<AlertSeverity, number> = {
   critical: 0,
   warning: 1,
@@ -235,7 +235,7 @@ function checkMissingPayments(transactions: RawTx[], now: Date): FinancialAlert[
         id: `missing_payment_${payer.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'missing_payment',
         severity: 'warning',
-        title: `Vangreiðsla — ${payer}`,
+        title: `Vangreiðsla: ${payer}`,
         description: `Engin greiðsla frá ${payer} í ${lastMonth.slice(0, 7)} þótt greitt hafi verið mánuðinn á undan.`,
         vendor: payer,
         actionLabel: 'Skoða greiðslur',
@@ -347,7 +347,7 @@ function checkBidRecommendations(transactions: RawTx[], now: Date): FinancialAle
         id: `bid_recommendation_${vendor.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'bid_recommendation',
         severity: 'suggestion',
-        title: `Tilboð mælt með — ${vendor}`,
+        title: `Tilboð mælt með: ${vendor}`,
         description: `Þjónustuverð frá ${vendor} hefur hækkað um ${cumulativeIncrease.toFixed(0)}% á 3+ árum. Íhugaðu að finna tilboð.`,
         vendor,
         metric: { current: lastAvg, previous: firstAvg, change: cumulativeIncrease },
@@ -472,7 +472,7 @@ function checkSeasonalPatterns(transactions: RawTx[], now: Date): FinancialAlert
         id: `seasonal_${name.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'seasonal',
         severity: 'info',
-        title: `Árstíðabundin hækkun — ${name}`,
+        title: `Árstíðabundin hækkun: ${name}`,
         description: `Sögulega er kostnaður í ${name} þennan mánuð ${((historicalMean / mean(allEntries.map(([, v]) => v)) - 1) * 100).toFixed(0)}% yfir ársmeðaltali.`,
         category: name,
         createdAt: now.toISOString(),
@@ -500,7 +500,7 @@ export function useFinancialAlerts(associationId: string | null | undefined) {
 
       const numUnits: number = assoc?.num_units ?? 1;
 
-      // Fetch all transactions (no pagination — alerts need full history)
+      // Fetch all transactions (no pagination - alerts need full history)
       const { data: rawTransactions, error } = await db
         .from('transactions')
         .select(`
@@ -541,6 +541,6 @@ export function useFinancialAlerts(associationId: string | null | undefined) {
       return sortAlerts(alerts);
     },
     enabled: !!associationId,
-    staleTime: 10 * 60 * 1000, // 10 minutes — alerts don't need real-time refresh
+    staleTime: 10 * 60 * 1000, // 10 minutes - alerts don't need real-time refresh
   });
 }

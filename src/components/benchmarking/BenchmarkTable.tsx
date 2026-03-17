@@ -99,17 +99,17 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   </TableCell>
                   <TableCell className="text-sm tabular-nums">{formatIskAmount(row.yourCostPerUnit, true)}</TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">
-                    {isInsufficient ? <span className="text-xs italic">—</span> : formatIskAmount(row.median ?? 0, true)}
+                    {isInsufficient ? <span className="text-xs italic">-</span> : formatIskAmount(row.median ?? 0, true)}
                   </TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">
                     {isInsufficient
-                      ? <span className="text-xs italic">—</span>
+                      ? <span className="text-xs italic">-</span>
                       : <span>{formatIskAmount(row.p25 ?? 0, true)} – {formatIskAmount(row.p75 ?? 0, true)}</span>
                     }
                   </TableCell>
                   <TableCell>
                     {isInsufficient
-                      ? <span className="text-xs italic text-muted-foreground">—</span>
+                      ? <span className="text-xs italic text-muted-foreground">-</span>
                       : (
                         <span className={cn('text-sm font-semibold tabular-nums', (row.diffPercent ?? 0) < -10 ? 'text-teal-700' : (row.diffPercent ?? 0) > 10 ? 'text-rose-700' : 'text-yellow-700')}>
                           {(row.diffPercent ?? 0) > 0 ? '+' : ''}{(row.diffPercent ?? 0).toFixed(1)}%
@@ -124,7 +124,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   <TableRow key={`${row.categoryId}-expanded`} className="bg-muted/10 hover:bg-muted/10">
                     <TableCell colSpan={7} className="pt-2 pb-4 px-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground font-medium">Þróun kostnaðar — síðustu 12 mánuðir</span>
+                        <span className="text-xs text-muted-foreground font-medium">Þróun kostnaðar, síðustu 12 mánuðir</span>
                         <span className="text-xs text-muted-foreground">{row.comparableInCategory} húsfélög í samanburði</span>
                       </div>
                       <BenchmarkTrendChart associationId={associationId} categoryId={row.categoryId} numUnits={undefined} />

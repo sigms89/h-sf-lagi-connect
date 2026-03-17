@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — TasksWidget (v2)
+// Húsfélagið.is: TasksWidget (v2)
 // Dashboard task section: Yfirfallin → Opin → Lokið nýlega
 // ============================================================
 
@@ -161,7 +161,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {/* YFIRFALLIN — Overdue (red) */}
+          {/* YFIRFALLIN - Overdue (red) */}
           {overdue.length > 0 && (
             <div className="space-y-1.5">
               <p className="text-[11px] font-semibold tracking-wider uppercase text-[hsl(347,77%,50%)]">
@@ -173,7 +173,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
             </div>
           )}
 
-          {/* OPIN — Open (teal) */}
+          {/* OPIN - Open (teal) */}
           {displayedOpen.length > 0 && (
             <div className="space-y-1.5">
               <p className="text-[11px] font-semibold tracking-wider uppercase text-secondary">
@@ -193,7 +193,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
             </div>
           )}
 
-          {/* LOKIÐ NÝLEGA — Recently done (green, collapsed) */}
+          {/* LOKIÐ NÝLEGA - Recently done (green, collapsed) */}
           {recentlyDone.length > 0 && (
             <Collapsible open={doneOpen} onOpenChange={setDoneOpen}>
               <CollapsibleTrigger asChild>

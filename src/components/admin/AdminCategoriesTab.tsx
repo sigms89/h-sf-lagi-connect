@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminCategoriesTab (NEW)
+// Húsfélagið.is: AdminCategoriesTab (NEW)
 // Full CRUD for categories table + merge categories feature
 // Create / Edit / Delete / Merge via dialogs
 // ============================================================
@@ -64,7 +64,7 @@ const EMPTY_FORM: CategoryInsert = {
 };
 
 // ============================================================
-// CategoryForm — shared between create and edit dialogs
+// CategoryForm: shared between create and edit dialogs
 // ============================================================
 
 interface CategoryFormProps {
@@ -240,8 +240,8 @@ export function AdminCategoriesTab() {
   // ---- Helpers ----
 
   function parentName(id: string | null): string {
-    if (!id) return '—';
-    return categories.find((c) => c.id === id)?.name_is ?? '—';
+    if (!id) return '-';
+    return categories.find((c) => c.id === id)?.name_is ?? '-';
   }
 
   return (
@@ -485,7 +485,7 @@ export function AdminCategoriesTab() {
                     </TableCell>
                     <TableCell className="text-xs font-medium">{cat.name_is}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {cat.name_en ?? '—'}
+                      {cat.name_en ?? '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
@@ -496,7 +496,7 @@ export function AdminCategoriesTab() {
                           />
                         )}
                         <span className="text-[10px] font-mono text-muted-foreground">
-                          {cat.color ?? '—'}
+                          {cat.color ?? '-'}
                         </span>
                       </div>
                     </TableCell>

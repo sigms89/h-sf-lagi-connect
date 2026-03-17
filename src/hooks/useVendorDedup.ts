@@ -2,7 +2,7 @@
 // useVendorDedup.ts
 // Finds duplicate/similar vendor names using fuzzy matching and
 // provides merge + dismiss actions. Uses local Levenshtein
-// implementation — no external library required.
+// implementation - no external library required.
 // ============================================================
 
 import { useState, useMemo } from 'react';
@@ -170,7 +170,7 @@ function generateSuggestions(vendors: VendorAggregate[]): DedupSuggestion[] {
 }
 
 // ---------------------------------------------------------------
-// Query function — fetch unique vendor descriptions with aggregates
+// Query function - fetch unique vendor descriptions with aggregates
 // ---------------------------------------------------------------
 
 async function fetchVendorAggregates(associationId: string): Promise<VendorAggregate[]> {
@@ -239,7 +239,7 @@ export function useVendorDedup(associationId: string | null | undefined): {
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Compute suggestions (memoized — only recompute when aggregates change)
+  // Compute suggestions (memoized - only recompute when aggregates change)
   const allSuggestions = useMemo<DedupSuggestion[]>(
     () => (aggregates ? generateSuggestions(aggregates) : []),
     [aggregates],

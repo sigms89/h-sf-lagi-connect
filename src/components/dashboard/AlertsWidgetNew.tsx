@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AlertsWidgetNew: Compact Dashboard Widget
+// Húsfélagið.is: AlertsWidgetNew: Compact Dashboard Widget
 // Replaces the old AlertsWidget. Shows top 3 most severe
 // alerts with a "Sjá allt" link to the full alerts page.
 // ============================================================
@@ -150,7 +150,7 @@ export function AlertsWidgetNew({
             <div>
               <p className="text-sm font-medium">Ekkert athugavert</p>
               <p className="text-xs text-muted-foreground">
-                Allt er í lagi — engar viðvaranir
+                Allt er í lagi, engar viðvaranir
               </p>
             </div>
           </div>

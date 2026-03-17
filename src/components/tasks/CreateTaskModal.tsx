@@ -104,7 +104,7 @@ export function CreateTaskModal({ open, onOpenChange, associationId }: CreateTas
               autoFocus
               value={title}
               onChange={(e) => { setTitle(e.target.value); setTitleError(false); }}
-              placeholder="Byrjaðu á sögninni — Laga, Senda, Hringja í..."
+              placeholder="Byrjaðu á sögninni, t.d. Laga, Senda, Hringja í..."
               className={cn('text-base h-11', titleError && 'border-destructive')}
             />
             {titleError && (

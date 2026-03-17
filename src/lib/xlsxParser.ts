@@ -38,7 +38,7 @@ export async function parseXlsxFile(file: File): Promise<ParseResult & { warning
   }
 
   if (workbook.SheetNames.length > 1) {
-    warnings.push(`xlsx skrá inniheldur ${workbook.SheetNames.length} vinnublöð — aðeins fyrsta blaðið ("${sheetName}") er lesið.`);
+    warnings.push(`xlsx skrá inniheldur ${workbook.SheetNames.length} vinnublöð, aðeins fyrsta blaðið ("${sheetName}") er lesið.`);
   }
 
   const sheet = workbook.Sheets[sheetName];

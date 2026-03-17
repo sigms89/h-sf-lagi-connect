@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Classification Hooks
+// Húsfélagið.is: Classification Hooks
 // Smart vendor summary, bulk re-classification, and auto-classify
 // mutations for the transaction categorization engine.
 // ============================================================
@@ -54,8 +54,8 @@ export interface BulkReclassifyInput {
 
 export interface RunAutoClassifyInput {
   associationId: string;
-  /** 'uncategorized' — only rows with category_id = null
-   *  'all' — re-run on every transaction for this association */
+  /** 'uncategorized' - only rows with category_id = null
+   *  'all' - re-run on every transaction for this association */
   scope: 'uncategorized' | 'all';
 }
 

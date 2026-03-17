@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Service Provider Hooks
+// Húsfélagið.is: Service Provider Hooks
 // TanStack Query hooks for the provider dashboard
 // ============================================================
 
@@ -160,7 +160,7 @@ export function useCreateProvider() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROVIDER_KEYS.current() });
-      toast.success('Skráning móttekin — bíður samþykktar stjórnanda');
+      toast.success('Skráning móttekin, bíður samþykktar stjórnanda');
     },
     onError: (error: Error) => {
       toast.error(`Villa við skráningu: ${error.message}`);

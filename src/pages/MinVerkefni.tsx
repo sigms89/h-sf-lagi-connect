@@ -1,5 +1,5 @@
 // ============================================================
-// Mín Verkefni — Personal task view grouped by time
+// Mín Verkefni: Personal task view grouped by time
 // ============================================================
 
 import { useMemo } from "react";
@@ -137,7 +137,7 @@ export default function MinVerkefni() {
             <>
               <div className="border-t border-border my-6" />
               <TaskSection
-                title="Óúthlutað — Gæti þurft á þér að halda"
+                title="Óúthlutað: Gæti þurft á þér að halda"
                 tasks={unassignedTasks}
               />
             </>

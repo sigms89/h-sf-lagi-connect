@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Provider Profile Page
+// Húsfélagið.is: Provider Profile Page
 // Provider can manage their profile, portfolio, and reviews
 // ============================================================
 

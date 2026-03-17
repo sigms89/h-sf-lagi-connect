@@ -53,7 +53,7 @@ const ROLE_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
 // ============================================================
 
 function formatDate(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try {
     return format(new Date(iso), 'dd. MMM yyyy', { locale: is });
   } catch {
@@ -167,7 +167,7 @@ export function AdminUsersTab() {
                     )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {user.association?.name ?? '—'}
+                    {user.association?.name ?? '-'}
                   </TableCell>
                   <TableCell>
                     <Badge

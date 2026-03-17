@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useProviderPortfolio
+// Húsfélagið.is: useProviderPortfolio
 // CRUD for provider portfolio images via storage
 // ============================================================
 

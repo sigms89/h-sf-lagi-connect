@@ -66,7 +66,7 @@ function pctChange(prev: number, curr: number): number | null {
 }
 
 function PctBadge({ pct }: { pct: number | null }) {
-  if (pct === null) return <span className="text-muted-foreground">—</span>;
+  if (pct === null) return <span className="text-muted-foreground">-</span>;
   const up = pct > 0;
   const neutral = Math.abs(pct) < 0.5;
   return (
@@ -164,7 +164,7 @@ export function VendorDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <KpiCard label="Miðgildi færslu" value={formatIskAmount(data.avgPerTx ?? 0)} />
             <KpiCard label="Hæsta færsla" value={formatIskAmount(data.maxTx ?? 0)} />
-            <KpiCard label="Þróun (seinni hluti)" value={data.trendPct != null ? `${data.trendPct > 0 ? '+' : ''}${data.trendPct.toFixed(1)}%` : '—'}
+            <KpiCard label="Þróun (seinni hluti)" value={data.trendPct != null ? `${data.trendPct > 0 ? '+' : ''}${data.trendPct.toFixed(1)}%` : '-'}
               valueClass={data.trendPct == null ? 'text-muted-foreground' : data.trendPct > 5 ? 'text-red-600' : data.trendPct < -5 ? 'text-emerald-600' : 'text-foreground'} />
           </div>
 

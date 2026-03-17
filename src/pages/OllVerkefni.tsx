@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Öll verkefni (All Tasks) page
+// Húsfélagið.is: Öll verkefni (All Tasks) page
 // Full filterable task list with sorting and count summary
 // ============================================================
 
@@ -137,7 +137,7 @@ export default function OllVerkefni() {
       if (aOverdue && !bOverdue) return -1;
       if (!aOverdue && bOverdue) return 1;
 
-      // Both have same overdue status — sort by due_date
+      // Both have same overdue status - sort by due_date
       if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date);
       if (a.due_date && !b.due_date) return -1;
       if (!a.due_date && b.due_date) return 1;

@@ -37,7 +37,7 @@ export function BalanceCard({ label, amount, isLoading, type, subtitle }: Balanc
           <Skeleton className="h-7 w-32" />
         ) : (
           <div className={`text-2xl font-bold tabular-nums ${colorMap[type]}`}>
-            {amount != null ? formatIskAmount(amount) : '—'}
+            {amount != null ? formatIskAmount(amount) : '-'}
           </div>
         )}
         {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}

@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminStatsGrid (REPLACE)
+// Húsfélagið.is: AdminStatsGrid (REPLACE)
 // KPI cards for the super admin dashboard
 // Updated: real activeUsers, MRR card, Churn placeholder (7 cards total)
 // ============================================================
@@ -123,7 +123,7 @@ export function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps) {
       <StatCard
         icon={TrendingDown}
         label="Churn"
-        value="—"
+        value="-"
         sub="Kemur bráðlega"
         bgClass="bg-muted"
         iconClass="text-muted-foreground"

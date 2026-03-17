@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Provider Register Page
+// Húsfélagið.is: Provider Register Page
 // Multi-step registration for new service providers
 // ============================================================
 

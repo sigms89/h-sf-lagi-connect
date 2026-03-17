@@ -1,5 +1,5 @@
 // ============================================================
-// useTaskComments — Fetch and add comments on a task
+// useTaskComments: Fetch and add comments on a task
 // ============================================================
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

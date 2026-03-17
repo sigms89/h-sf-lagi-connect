@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Benchmarking Hooks
+// Húsfélagið.is: Benchmarking Hooks
 // TanStack Query hooks for benchmarking / comparison data
 // ============================================================
 

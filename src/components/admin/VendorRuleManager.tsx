@@ -226,7 +226,7 @@ function RulesTable({
                       {rule.category.name_is}
                     </Badge>
                   ) : (
-                    '—'
+                    '-'
                   )}
                 </TableCell>
                 <TableCell className="tabular-nums text-sm">{rule.priority}</TableCell>

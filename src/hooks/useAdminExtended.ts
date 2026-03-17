@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Admin Extended Hooks (NEW)
+// Húsfélagið.is: Admin Extended Hooks (NEW)
 // TanStack Query hooks for new admin tabs:
 // Audit log, Users, Categories (CRUD + merge), Bid requests
 // ============================================================
@@ -173,7 +173,7 @@ export function useAuditLog(
 
 // ============================================================
 // useAllUsers
-// All users across all associations — join association_members + profiles + associations
+// All users across all associations - join association_members + profiles + associations
 // ============================================================
 export function useAllUsers(search?: string, page = 1, pageSize = 25) {
   const from = (page - 1) * pageSize;
@@ -233,7 +233,7 @@ export function useAllUsers(search?: string, page = 1, pageSize = 25) {
         };
       }
 
-      // No search — use server-side pagination
+      // No search - use server-side pagination
       query = query.range(from, to);
       const { data, error, count } = await query;
       if (error) throw error;

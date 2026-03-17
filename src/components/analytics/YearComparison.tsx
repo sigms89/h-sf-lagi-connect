@@ -41,7 +41,7 @@ interface ChangeBadgeProps {
 }
 
 function ChangeBadge({ pct, inverse = false }: ChangeBadgeProps) {
-  if (pct === null) return <span className="text-xs text-muted-foreground">—</span>;
+  if (pct === null) return <span className="text-xs text-muted-foreground">-</span>;
   const isPositive = pct > 0;
   const isBad = inverse ? isPositive : !isPositive;
 

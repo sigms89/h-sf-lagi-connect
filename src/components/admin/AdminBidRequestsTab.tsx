@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminBidRequestsTab (NEW)
+// Húsfélagið.is: AdminBidRequestsTab (NEW)
 // Global view of ALL bid_requests across all associations
 // Table: title, association, category, status, deadline, bid_count, created_at
 // Filter by status, search by title, paginated
@@ -80,7 +80,7 @@ const BID_STATUS_LABELS: Record<string, string> = {
 // ============================================================
 
 function formatDate(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try {
     return format(new Date(iso), 'dd. MMM yyyy', { locale: is });
   } catch {
@@ -95,7 +95,7 @@ function formatISK(amount: number): string {
 }
 
 // ============================================================
-// BidDetail — expanded row showing bids for a bid_request
+// BidDetail: expanded row showing bids for a bid_request
 // ============================================================
 
 interface BidDetailProps {
@@ -336,10 +336,10 @@ export function AdminBidRequestsTab() {
                         {req.title}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-[140px] truncate">
-                        {req.association?.name ?? '—'}
+                        {req.association?.name ?? '-'}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {req.category?.name_is ?? '—'}
+                        {req.category?.name_is ?? '-'}
                       </TableCell>
                       <TableCell>
                         <Badge

@@ -85,7 +85,7 @@ function actionLabel(action: string): string {
 }
 
 function metadataSummary(meta: Record<string, unknown> | null): string {
-  if (!meta || Object.keys(meta).length === 0) return '—';
+  if (!meta || Object.keys(meta).length === 0) return '-';
   const keys = Object.keys(meta);
   if (keys.length <= 2) {
     return keys.map((k) => `${k}: ${String(meta[k])}`).join(', ');
@@ -118,11 +118,11 @@ function MetadataDialog({ entry, onClose }: MetadataDialogProps) {
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-24 flex-shrink-0">Tegund:</span>
-            <span className="font-medium">{entry.entity_type ?? '—'}</span>
+            <span className="font-medium">{entry.entity_type ?? '-'}</span>
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-24 flex-shrink-0">Eininga-ID:</span>
-            <span className="font-mono text-[11px] break-all">{entry.entity_id ?? '—'}</span>
+            <span className="font-mono text-[11px] break-all">{entry.entity_id ?? '-'}</span>
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-24 flex-shrink-0">Tími:</span>
@@ -276,7 +276,7 @@ export function AdminAuditLog() {
                     <TableCell className="text-xs">
                       {entry.profile?.full_name ?? (
                         <span className="text-muted-foreground font-mono text-[10px]">
-                          {entry.user_id ? entry.user_id.slice(0, 8) + '…' : '—'}
+                          {entry.user_id ? entry.user_id.slice(0, 8) + '…' : '-'}
                         </span>
                       )}
                     </TableCell>
@@ -289,10 +289,10 @@ export function AdminAuditLog() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {entry.entity_type ?? '—'}
+                      {entry.entity_type ?? '-'}
                     </TableCell>
                     <TableCell className="text-[10px] font-mono text-muted-foreground max-w-[120px] truncate">
-                      {entry.entity_id ?? '—'}
+                      {entry.entity_id ?? '-'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate">
                       {metadataSummary(entry.metadata)}

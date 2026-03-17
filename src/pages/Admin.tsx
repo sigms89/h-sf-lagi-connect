@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — Admin Page (REPLACE)
-// Super admin dashboard — protected, only for role_type = 'super_admin'
+// Húsfélagið.is: Admin Page (REPLACE)
+// Super admin dashboard - protected, only for role_type = 'super_admin'
 // Updated: added Notendur, Flokkar, Tilboðsferlar, Aðgerðaskrá tabs
 // Tab order: Yfirlit, Húsfélög, Notendur, Þjónustuaðilar, Flokkar,
 //            Tilboðsferlar, Flokkareglur, Tilkynningar, Aðgerðaskrá
@@ -36,7 +36,7 @@ import { db } from '@/integrations/supabase/db';
 import type { Profile } from '@/types/database';
 
 // ============================================================
-// useCurrentProfile — get the full profile with role_type
+// useCurrentProfile: get the full profile with role_type
 // ============================================================
 function useCurrentProfile() {
   const { user } = useAuth();
