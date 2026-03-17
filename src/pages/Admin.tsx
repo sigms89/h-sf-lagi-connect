@@ -32,6 +32,7 @@ import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { useAdminStats } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { db } from '@/integrations/supabase/db';
 import type { Profile } from '@/types/database';
 
@@ -64,6 +65,8 @@ function useCurrentProfile() {
 // ============================================================
 
 export default function Admin() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'overview';
   const { data: profile, isLoading: isLoadingProfile } = useCurrentProfile();
   const { data: stats, isLoading: isLoadingStats } = useAdminStats();
 
@@ -111,7 +114,7 @@ export default function Admin() {
         <Badge variant="outline" className="text-xs ml-2">Super Admin</Badge>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })}>
         <TabsList className="flex-wrap h-auto">
           {/* 1. Yfirlit */}
           <TabsTrigger value="overview" className="gap-1.5">

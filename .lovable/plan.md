@@ -71,7 +71,7 @@
 | 6 | Laga mánaðarleg þróun til að virða tímabilsval | Meðal | ✅ Leyst |
 | 7 | Dashboard avgMonthlyExpense miðast við valið tímabil | Meðal | ✅ Leyst |
 | 8 | Innleiða raunverulegt boðskerfi (invite flow) | Meðal | 🔲 Eftir |
-| 9 | Admin flipar í URL query params | Lágt | 🔲 Eftir |
-| 10 | Bæta við Error Boundary | Lágt | 🔲 Eftir |
-| 11 | Skipta notification polling yfir í Realtime | Lágt | 🔲 Eftir |
+| 9 | Admin flipar í URL query params | Lágt | ✅ Leyst |
+| 10 | Bæta við Error Boundary | Lágt | ✅ Leyst |
+| 11 | Skipta notification polling yfir í Realtime | Lágt | ✅ Leyst |
 | 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
