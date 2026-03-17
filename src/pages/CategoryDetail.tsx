@@ -338,7 +338,7 @@ export default function CategoryDetail() {
                       {formatDate(tx.date)}
                     </TableCell>
                     <TableCell className="text-sm max-w-[200px] truncate">
-                      {tx.description || '—'}
+                      {tx.description || '-'}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {tx.vendor_name || '—'}
