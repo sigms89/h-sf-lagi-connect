@@ -276,7 +276,7 @@ export function AdminAuditLog() {
                     <TableCell className="text-xs">
                       {entry.profile?.full_name ?? (
                         <span className="text-muted-foreground font-mono text-[10px]">
-                          {entry.user_id ? entry.user_id.slice(0, 8) + '…' : '—'}
+                          {entry.user_id ? entry.user_id.slice(0, 8) + '…' : '-'}
                         </span>
                       )}
                     </TableCell>
