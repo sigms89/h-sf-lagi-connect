@@ -34,6 +34,27 @@ import { formatIskAmount } from '@/lib/categories';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Check role for redirect
+  const { data: dashProfile } = useQuery({
+    queryKey: ['profile-dash-redirect', user?.id],
+    queryFn: async (): Promise<Profile | null> => {
+      if (!user) return null;
+      const { data } = await db.from('profiles').select('role_type').eq('user_id', user.id).maybeSingle();
+      return data as Profile | null;
+    },
+    enabled: !!user,
+    staleTime: 0,
+  });
+
+  // Redirect provider and admin to their respective dashboards
+  if (dashProfile?.role_type === 'service_provider') {
+    return <Navigate to="/provider" replace />;
+  }
+  if (dashProfile?.role_type === 'super_admin') {
+    return <Navigate to="/admin" replace />;
+  }
   const { data: association, isLoading: assocLoading } = useCurrentAssociation();
   const { range, label } = useTimeRange();
   const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
