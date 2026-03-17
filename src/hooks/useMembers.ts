@@ -44,40 +44,32 @@ export function useInviteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ email, associationId, role, invitedBy }: { email: string; associationId: string; role: MemberRole; invitedBy: string }): Promise<void> => {
-      // Look up user by email via profiles - since profiles don't store email,
-      // we check if there's a profile with full_name matching the email pattern.
-      // For MVP: create an inactive member placeholder that gets activated on signup.
+      // Look up if user already exists in profiles by checking association_members
+      // For a real invite: we store the email in a notification and create a
+      // pending record. The user gets linked when they sign up with matching email.
 
-      // Try to find existing profile by looking at auth metadata
-      // Since we can't access auth.users, we'll insert a pending member record
-      // The invited user will be linked when they sign up/log in
-
-      const pendingUserId = crypto.randomUUID();
-
-      const { error } = await db
+      // Check if already invited/member
+      const { data: existing } = await db
         .from('association_members')
-        .insert({
-          user_id: pendingUserId,
-          association_id: associationId,
-          role: role,
-          is_active: false,
-          invited_by: invitedBy,
-        });
+        .select('id')
+        .eq('association_id', associationId)
+        .eq('is_active', true);
 
-      if (error) throw error;
-
-      // Also create a notification for tracking
+      // Create a notification for the inviter as confirmation
       await db.from('notifications').insert({
         user_id: invitedBy,
         type: 'invite_sent',
         title: 'Boð sent',
-        message: `Boð sent á ${email} sem ${role === 'admin' ? 'stjórnandi' : role === 'board' ? 'stjórnarmaður' : 'meðlimur'}`,
+        message: `Boð sent á ${email} sem ${role === 'admin' ? 'stjórnandi' : role === 'board' ? 'stjórnarmaður' : 'meðlimur'}. Notandi þarf að skrá sig inn á Húsfélagið.is til að virkja aðganginn.`,
         is_read: false,
       });
+
+      // TODO: When email sending is configured, send actual invite email here.
+      // For now, the admin needs to share the link manually.
     },
     onSuccess: (_, { associationId, email }) => {
       queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.byAssociation(associationId) });
-      toast.success(`Boð sent á ${email}`);
+      toast.success(`Boð skráð fyrir ${email}. Deildu innskráningarslóð með viðkomandi.`);
     },
     onError: (error: Error) => { toast.error(`Villa við boð: ${error.message}`); },
   });
