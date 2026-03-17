@@ -244,7 +244,8 @@ export default function ReportsPage() {
   const totalIncome = stats?.total_income ?? 0;
   const totalExpenses = stats?.total_expenses ?? 0;
   const netBalance = stats?.net_balance ?? 0;
-  const avgMonthly = netBalance / 12;
+  const monthCount = stats?.monthly_data?.length || 12;
+  const avgMonthly = netBalance / monthCount;
 
   // Top categories (sorted descending, max 6)
   const topCategories = [...(stats?.category_breakdown ?? [])]

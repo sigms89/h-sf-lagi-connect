@@ -199,9 +199,11 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-border">
         <SidebarMenu className="gap-0.5">
-          <SidebarMenuItem>
-            <DevRoleSwitcher collapsed={collapsed} />
-          </SidebarMenuItem>
+          {import.meta.env.DEV && (
+            <SidebarMenuItem>
+              <DevRoleSwitcher collapsed={collapsed} />
+            </SidebarMenuItem>
+          )}
 
           <NavItem title="Stillingar" url="/settings" icon={Settings} />
 

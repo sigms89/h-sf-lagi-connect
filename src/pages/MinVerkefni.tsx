@@ -39,11 +39,24 @@ export default function MinVerkefni() {
       if (!user || !association) return [];
       const { data, error } = await db
         .from("tasks")
-        .select("id, title, status, due_date, assigned_to, visibility, profiles!tasks_assigned_to_fkey(full_name)")
+        .select("id, title, status, due_date, assigned_to, visibility")
         .eq("association_id", association.id)
         .neq("status", "done");
 
       if (error) throw error;
+
+      // Gather unique assigned_to IDs and fetch profiles separately
+      const assignedIds = [...new Set((data ?? []).map((t) => t.assigned_to).filter(Boolean))] as string[];
+      let profileMap = new Map<string, string>();
+      if (assignedIds.length > 0) {
+        const { data: profiles } = await db
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", assignedIds);
+        for (const p of profiles ?? []) {
+          if (p.full_name) profileMap.set(p.user_id, p.full_name);
+        }
+      }
 
       return (data ?? []).filter(
         (t) => t.assigned_to === user.id || t.assigned_to === null
@@ -53,8 +66,8 @@ export default function MinVerkefni() {
         status: t.status,
         due_date: t.due_date,
         assigned_to: t.assigned_to,
-        visibility: (t as any).visibility as string,
-        assignee_name: (t.profiles as any)?.full_name ?? null,
+        visibility: t.visibility as string,
+        assignee_name: t.assigned_to ? (profileMap.get(t.assigned_to) ?? null) : null,
       }));
     },
     enabled: !!user && !!association,
