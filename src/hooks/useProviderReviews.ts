@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useProviderReviews
+// Húsfélagið.is: useProviderReviews
 // CRUD for provider reviews + average rating
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Admin Hooks (REPLACE)
+// Húsfélagið.is: Admin Hooks (REPLACE)
 // TanStack Query hooks for the super admin panel
 // Updated: real activeUsers count, MRR calculation, churn placeholder
 // ============================================================

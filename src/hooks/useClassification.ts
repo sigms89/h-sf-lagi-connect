@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Classification Hooks
+// Húsfélagið.is: Classification Hooks
 // Smart vendor summary, bulk re-classification, and auto-classify
 // mutations for the transaction categorization engine.
 // ============================================================

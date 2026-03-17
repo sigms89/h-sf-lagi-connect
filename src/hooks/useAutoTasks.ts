@@ -82,7 +82,7 @@ export function useAutoTasks(associationId: string | undefined) {
           if (isDuplicate('vangreiðsla', relId)) continue;
 
           const name = firstName(alert.vendor);
-          // Extract month from alert — createdAt is based on detection time,
+          // Extract month from alert - createdAt is based on detection time,
           // but description references the missing month
           const month = icelandicMonth(alert.createdAt);
 

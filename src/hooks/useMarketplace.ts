@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Marketplace Hooks
+// Húsfélagið.is: Marketplace Hooks
 // TanStack Query hooks for bid requests and service providers
 // ============================================================
 

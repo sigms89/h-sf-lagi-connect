@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useAnalytics: Extended Analytics Hooks
+// Húsfélagið.is: useAnalytics: Extended Analytics Hooks
 // Provides vendor analysis, year-over-year comparison,
 // and fee adequacy calculations.
 // ============================================================

@@ -1,5 +1,5 @@
 // ============================================================
-// useTask — Single task fetch + mutations (assign, complete)
+// useTask: Single task fetch + mutations (assign, complete)
 // ============================================================
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
