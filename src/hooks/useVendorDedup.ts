@@ -239,7 +239,7 @@ export function useVendorDedup(associationId: string | null | undefined): {
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Compute suggestions (memoized — only recompute when aggregates change)
+  // Compute suggestions (memoized - only recompute when aggregates change)
   const allSuggestions = useMemo<DedupSuggestion[]>(
     () => (aggregates ? generateSuggestions(aggregates) : []),
     [aggregates],

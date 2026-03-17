@@ -541,6 +541,6 @@ export function useFinancialAlerts(associationId: string | null | undefined) {
       return sortAlerts(alerts);
     },
     enabled: !!associationId,
-    staleTime: 10 * 60 * 1000, // 10 minutes — alerts don't need real-time refresh
+    staleTime: 10 * 60 * 1000, // 10 minutes - alerts don't need real-time refresh
   });
 }

@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Service Provider Hooks
+// Húsfélagið.is: Service Provider Hooks
 // TanStack Query hooks for the provider dashboard
 // ============================================================
 

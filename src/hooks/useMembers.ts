@@ -44,7 +44,7 @@ export function useInviteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ email, associationId, role, invitedBy }: { email: string; associationId: string; role: MemberRole; invitedBy: string }): Promise<void> => {
-      // Look up user by email via profiles — since profiles don't store email,
+      // Look up user by email via profiles - since profiles don't store email,
       // we check if there's a profile with full_name matching the email pattern.
       // For MVP: create an inactive member placeholder that gets activated on signup.
 

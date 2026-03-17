@@ -237,7 +237,7 @@ function calcAlerts(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 5 — Viðhaldskostnaður (10%)
+ * Factor 5: Viðhaldskostnaður (10%)
  */
 function calcMaintenanceRatio(
   txs: TxRow[],
