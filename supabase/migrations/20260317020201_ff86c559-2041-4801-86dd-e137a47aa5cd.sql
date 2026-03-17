@@ -1,0 +1,1 @@
+UPDATE public.tasks SET title = REGEXP_REPLACE(title, '^Senda áminningu til (.+) vegna húsgjalds (.+)$', 'Áminning: \1, húsgjald \2') WHERE title LIKE 'Senda áminningu til%vegna húsgjalds%';
