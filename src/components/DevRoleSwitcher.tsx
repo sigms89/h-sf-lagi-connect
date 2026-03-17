@@ -25,6 +25,7 @@ const ROLES = [
 
 export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [switching, setSwitching] = useState(false);
   const [seeding, setSeeding] = useState(false);
