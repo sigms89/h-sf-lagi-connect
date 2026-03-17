@@ -68,7 +68,7 @@ function monthKey(dateStr: string): string {
   return dateStr.slice(0, 7);
 }
 
-/** Severity sort order — lower = more important */
+/** Severity sort order - lower = more important */
 const SEVERITY_ORDER: Record<AlertSeverity, number> = {
   critical: 0,
   warning: 1,
