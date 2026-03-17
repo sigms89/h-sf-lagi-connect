@@ -45,20 +45,24 @@ export const ANALYTICS_KEYS = {
 
 // ── Hook: useVendorAnalytics ──────────────────────────────────────────────────
 
-export function useVendorAnalytics(associationId: string | null | undefined) {
+export function useVendorAnalytics(associationId: string | null | undefined, dateFrom?: string | null) {
   return useQuery({
-    queryKey: ANALYTICS_KEYS.vendors(associationId ?? ''),
+    queryKey: ANALYTICS_KEYS.vendors(associationId ?? '', dateFrom),
     queryFn: async (): Promise<VendorStat[]> => {
       if (!associationId) return [];
 
-      // Fetch all expense transactions (no pagination)
-      const { data, error } = await db
+      // Fetch expense transactions with optional date filter
+      let query = db
         .from('transactions')
         .select('id, date, description, amount, is_income')
         .eq('association_id', associationId)
         .eq('is_income', false)
         .order('date', { ascending: true })
         .limit(10000);
+
+      if (dateFrom) {
+        query = query.gte('date', dateFrom);
+      }
 
       if (error) throw error;
 
