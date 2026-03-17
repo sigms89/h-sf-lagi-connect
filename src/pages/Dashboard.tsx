@@ -35,6 +35,15 @@ import { formatIskAmount } from '@/lib/categories';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: association, isLoading: assocLoading } = useCurrentAssociation();
+  const { range, label } = useTimeRange();
+  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
+  const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
+    page: 1,
+    page_size: 5,
+  });
+  const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
+  useAutoTasks(association?.id);
 
   // Check role for redirect
   const { data: dashProfile } = useQuery({
@@ -55,15 +64,6 @@ const Dashboard = () => {
   if (dashProfile?.role_type === 'super_admin') {
     return <Navigate to="/admin" replace />;
   }
-  const { data: association, isLoading: assocLoading } = useCurrentAssociation();
-  const { range, label } = useTimeRange();
-  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
-  const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
-    page: 1,
-    page_size: 5,
-  });
-  const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
-  useAutoTasks(association?.id);
 
   // Task completion stats
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
