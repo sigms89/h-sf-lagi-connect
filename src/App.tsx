@@ -22,6 +22,7 @@ import Onboarding from "@/pages/Onboarding";
 import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
+import ProviderPublicProfile from "@/components/marketplace/ProviderPublicProfile";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
 import MinVerkefni from "@/pages/MinVerkefni";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/financials" element={<ProtectedRoute><AppLayout><Financials /></AppLayout></ProtectedRoute>} />
             <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
+            <Route path="/marketplace/provider/:providerId" element={<ProtectedRoute><AppLayout><ProviderPublicProfile /></AppLayout></ProtectedRoute>} />
 
             {/* Legacy redirects → /financials with correct tab */}
             <Route path="/transactions" element={<Navigate to="/financials?tab=faerslur" replace />} />

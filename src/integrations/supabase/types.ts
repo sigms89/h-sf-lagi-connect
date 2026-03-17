@@ -397,6 +397,105 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_portfolio_images: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          provider_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          provider_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          provider_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_portfolio_images_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_reviews: {
+        Row: {
+          association_id: string
+          bid_request_id: string
+          comment: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          provider_id: string
+          provider_response: string | null
+          rating: number
+          response_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          association_id: string
+          bid_request_id: string
+          comment?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          provider_id: string
+          provider_response?: string | null
+          rating: number
+          response_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          association_id?: string
+          bid_request_id?: string
+          comment?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          provider_id?: string
+          provider_response?: string | null
+          rating?: number
+          response_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_reviews_association_id_fkey"
+            columns: ["association_id"]
+            isOneToOne: false
+            referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_reviews_bid_request_id_fkey"
+            columns: ["bid_request_id"]
+            isOneToOne: false
+            referencedRelation: "bid_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_reviews_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_provider_categories: {
         Row: {
           category_id: string
