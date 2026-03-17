@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bug, ChevronDown, Check, Sprout, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/integrations/supabase/db";
