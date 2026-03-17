@@ -235,7 +235,7 @@ function checkMissingPayments(transactions: RawTx[], now: Date): FinancialAlert[
         id: `missing_payment_${payer.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'missing_payment',
         severity: 'warning',
-        title: `Vangreiðsla — ${payer}`,
+        title: `Vangreiðsla: ${payer}`,
         description: `Engin greiðsla frá ${payer} í ${lastMonth.slice(0, 7)} þótt greitt hafi verið mánuðinn á undan.`,
         vendor: payer,
         actionLabel: 'Skoða greiðslur',
