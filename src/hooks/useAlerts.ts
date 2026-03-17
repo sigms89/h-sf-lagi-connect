@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useAlerts: Financial Alert Detection Engine
+// Húsfélagið.is: useAlerts: Financial Alert Detection Engine
 // Runs statistical checks on transaction history to surface
 // price increases, anomalies, missing payments, and more.
 // ============================================================
