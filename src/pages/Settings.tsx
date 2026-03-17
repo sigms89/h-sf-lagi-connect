@@ -183,10 +183,39 @@ export default function Settings() {
     inviteForm.reset();
   };
 
-  if (assocLoading) {
+  if (assocLoading && !isProvider) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Providers see simplified settings
+  if (isProvider) {
+    return (
+      <div className="space-y-8 max-w-3xl">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Stillingar</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Reikningsstillingar
+          </p>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Reikningur</CardTitle>
+            <CardDescription>Innskráningarupplýsingar</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Netfang</Label>
+              <Input value={user?.email ?? ''} disabled />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Til að breyta prófílupplýsingum þjónustuaðila, farðu á Prófíll síðuna.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
