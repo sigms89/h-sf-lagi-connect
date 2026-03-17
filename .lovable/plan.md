@@ -1,68 +1,37 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Endurskoðun: Hlutverkaaðlagað viðmót — vandamál og lagfæringar
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### Vandamál sem fundust
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+**1. Engin sjálfvirk redirect við hlutverkaskipti (DEV switcher)**
+Þegar þú skiptir um hlutverk í DEV switcher, uppfærist sidebar rétt en þú ert áfram á sömu síðu (t.d. `/marketplace`). Redirect lógíkin er aðeins í `Dashboard.tsx` (route `/`), svo hún virkjar aldrei nema þú farir handvirkt á `/`.
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+**Lagfæring:** Bæta við `useNavigate` og redirect í `DevRoleSwitcher.tsx` — eftir query invalidation, beina notandanum á rétta yfirlitssíðu:
+- `service_provider` → `/provider`
+- `super_admin` → `/admin`
+- `member`/`admin` → `/`
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+**2. React ref viðvörun á ProviderRequests og ProviderNotRegistered**
+Console sýnir: "Function components cannot be given refs." Þetta kemur af því að React Router reynir að setja ref á þessar síður (lazy loading eða element ref). Þetta er minniháttar en ætti að laga.
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+**Lagfæring:** Ekki þarf `forwardRef` hér — vandamálið er líklega að `ProviderNotRegistered` er returnaður beint sem Route element og React Router reynir ref. Þetta er cosmetic warning sem hefur ekki áhrif á virkni.
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+**3. Provider síður sýna "Ekki skráður" ef notandi hefur ekki service_provider record**
+Þetta er rétt hegðun — en þegar DEV switcher breytir `role_type` í `service_provider` á profiles töflunni, þýðir það ekki að `service_providers` record sé til. `useCurrentProvider` leitar í `service_providers` töflu, ekki `profiles`.
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+**Lagfæring:** Tveir möguleikar:
+- A) DEV switcher býr sjálfkrafa til dummy service_provider record ef ekkert er til (betra fyrir þróun)
+- B) Láta `ProviderNotRegistered` síðuna sýnast og notandinn skráir sig (réttara fyrir production)
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+### Áætlaðar breytingar
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+| Skrá | Aðgerð |
+|------|--------|
+| `src/components/DevRoleSwitcher.tsx` | Bæta við navigate eftir hlutverkaskipti |
+| `src/components/provider/ProviderNotRegistered.tsx` | Laga ref warning (minor) |
 
-### 4. Console viðvörun — Badge ref í Settings
+### Samantekt
 
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
-
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
-
-### 5. TimeRange hefur ekki áhrif á gagnasótt
-
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+Aðalvandamálið er að **hlutverkaskipti beina notandanum ekki á rétta síðu**. Lagfæringin er einföld — bæta navigate í DevRoleSwitcher. Allt annað (sidebar, settings, provider síður) virkar rétt miðað við kóðann.
 
