@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminBidRequestsTab (NEW)
+// Húsfélagið.is: AdminBidRequestsTab (NEW)
 // Global view of ALL bid_requests across all associations
 // Table: title, association, category, status, deadline, bid_count, created_at
 // Filter by status, search by title, paginated
