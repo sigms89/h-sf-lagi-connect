@@ -1,68 +1,97 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Áætlun: Umsagnakerfi og myndagallerí — uppfært
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### Umsagnir: Hver má skrifa og hvað birtist
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+**Aðeins stjórnandi (admin/board) húsfélagsins** getur skrifað umsögn — ekki allir meðlimir. RLS policy á INSERT athugar `is_association_admin(association_id)`.
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+**Nafnleysi með samhengi:** Í stað nafns húsfélagsins birtist lýsandi texti sem dreginn er sjálfkrafa úr `associations` töflunni:
+> „82 íbúða húsfélag í póstnúmeri 104"
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+Þetta gefur þjónustuaðilanum og lesendum mikilvægar upplýsingar (stærð og staðsetning) án þess að gefa upp nafn húsfélagsins.
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+### Umsagnir sem breytast yfir tíma
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+Þetta er raunverulegt vandamál — þjónusta getur versnað eftir að umsögn er skrifuð. Tvær þekktar aðferðir:
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+**Aðferð A: Breytanleg umsögn (valin aðferð)**
+- Stjórnandi getur **uppfært sína umsögn hvenær sem er** — breytt einkunn og texta
+- Sýna `updated_at` dagsetningu ef hún er frábrugðin `created_at`: „Uppfært í mars 2026"
+- Þetta endurspeglar núverandi upplifun, ekki sögulega
+- Einfalt og heiðarlegt — húsfélagið á alltaf rétt á að breyta sinni umsögn
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+**Aðferð B (ekki valin):** Leyfa margar umsagnir yfir tíma — flóknara og opnar fyrir spam
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+### Gagnagrunnur
 
-### 4. Console viðvörun — Badge ref í Settings
+**Ný tafla: `provider_reviews`**
+| Dálkur | Tegund | Athugasemd |
+|--------|--------|------------|
+| id | uuid PK | |
+| provider_id | uuid FK → service_providers | |
+| association_id | uuid FK → associations | Til að sækja num_units + postal_code |
+| bid_request_id | uuid FK → bid_requests | Sönnun um viðskipti |
+| created_by | uuid | auth.uid() stjórnandans |
+| rating | integer 1-5 | |
+| comment | text | |
+| provider_response | text NULL | Svar þjónustuaðila |
+| response_at | timestamptz NULL | |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+| UNIQUE(provider_id, association_id) | | Ein umsögn per húsfélag |
 
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
+**RLS:**
+- SELECT: allir innskráðir (opinbert)
+- INSERT: `is_association_admin(association_id)` + EXISTS accepted bid
+- UPDATE eigin umsögn: `is_association_admin(association_id)` + `association_id` matchar
+- UPDATE provider_response: eigandi þjónustuaðilans
 
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
+**Ný tafla: `provider_portfolio_images`**
+| Dálkur | Tegund |
+|--------|--------|
+| id | uuid PK |
+| provider_id | uuid FK |
+| image_url | text |
+| caption | text NULL |
+| sort_order | integer default 0 |
+| created_at | timestamptz |
 
-### 5. TimeRange hefur ekki áhrif á gagnasótt
+**RLS:** SELECT opinbert, INSERT/UPDATE/DELETE aðeins eigandi provider
 
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
+**Storage bucket:** `provider-media` (public) fyrir myndir
 
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
+### UI breytingar
 
-### 6. Supabase 1000 línu takmörkun
+1. **ProviderPublicProfile.tsx** (nýtt) — heilsíðuprófíll:
+   - Hero: lógó, nafn, lýsing, þjónustuflokkur, svæði
+   - Myndagallerí (grid)
+   - Umsagnir: stjörnur, texti, „82 íbúða húsfélag í póstnúmeri 104", dagsetning/uppfært
+   - Svar þjónustuaðila (ef til)
+   - „Skrifa umsögn" hnappur (sýnilegur aðeins ef admin með accepted bid og engin fyrri umsögn)
 
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
+2. **ProviderCard.tsx** — bæta við meðaleinkunn (stjörnur) og fjölda umsagna
 
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
+3. **ProviderProfile.tsx** (eigandi) — nýr flipi:
+   - Myndaupphleðsla (drag & drop / velja skrá)
+   - Sýna umsagnir og svara þeim
 
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
+4. **Hooks:**
+   - `useProviderReviews.ts` — CRUD umsagna + meðaleinkunn
+   - `useProviderPortfolio.ts` — CRUD mynda í storage
 
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
+### Skrár
 
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+| Skrá | Aðgerð |
+|------|--------|
+| DB migration | `provider_reviews`, `provider_portfolio_images`, storage bucket, RLS |
+| `src/hooks/useProviderReviews.ts` | Nýr |
+| `src/hooks/useProviderPortfolio.ts` | Nýr |
+| `src/components/marketplace/ProviderPublicProfile.tsx` | Nýr |
+| `src/components/marketplace/ProviderGallery.tsx` | Nýr |
+| `src/components/marketplace/WriteReviewDialog.tsx` | Nýr |
+| `src/components/marketplace/ProviderCard.tsx` | Uppfæra með stjörnum |
+| `src/components/provider/ProviderProfile.tsx` | Bæta við portfolio og umsagnasýn |
+| `src/pages/Marketplace.tsx` | Routing til prófíls |
+| `src/App.tsx` | Bæta við route `/marketplace/provider/:id` |
 
