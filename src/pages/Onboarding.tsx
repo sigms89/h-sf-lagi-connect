@@ -97,10 +97,24 @@ function InviteForm({ associationId }: { associationId: string }) {
       return;
     }
     setSending(true);
-    // Boðskerfi er í vinnslu - sýnum UI-only sýndarstöðu
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setSending(false);
-    toast.info('Boðskerfi er í vinnslu, netföngin verða vistuð þegar kerfið er tilbúið');
+    try {
+      // Store emails as notifications for the current user as a record of invites sent
+      // Actual invite linking happens when invitees sign up
+      for (const row of filled) {
+        await db.from('notifications').insert({
+          user_id: (await db.from('association_members').select('user_id').eq('association_id', associationId).eq('role', 'admin').limit(1).single()).data?.user_id ?? '',
+          type: 'invite_sent',
+          title: 'Boð sent',
+          message: `Boð sent á ${row.email} sem ${row.role === 'board' ? 'stjórnarmaður' : 'meðlimur'}. Deildu innskráningarslóð með viðkomandi.`,
+          is_read: false,
+        });
+      }
+      toast.success(`${filled.length} boð skráð. Deildu innskráningarslóð (husfelagid.is) með viðkomandi.`);
+    } catch (err) {
+      toast.error('Villa við skráningu boða');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
