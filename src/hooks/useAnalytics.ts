@@ -65,7 +65,7 @@ export function useVendorAnalytics(associationId: string | null | undefined, dat
       }
 
       const { data, error } = await query;
-
+      if (error) throw error;
 
       const transactions: { id: string; date: string; description: string; amount: number }[] =
         (data ?? []).filter((t: any) => t.amount < 0);
