@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — AppSidebar v3
-// Linear-style: left-border active accent, no bg highlight
+// Húsfélagið.is — AppSidebar v4
+// Role-based navigation: association, provider, admin
 // ============================================================
 import {
   LayoutDashboard,
@@ -14,6 +14,13 @@ import {
   Briefcase,
   Building2,
   ChevronDown,
+  FileText,
+  List,
+  User,
+  Users,
+  FolderTree,
+  ScrollText,
+  Layers,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -33,13 +40,33 @@ import { db } from "@/integrations/supabase/db";
 import type { Profile } from "@/types/database";
 import { DevRoleSwitcher } from "@/components/DevRoleSwitcher";
 
-const primaryItems = [
+// ── Menu definitions per role ────────────────────────────────
+const associationItems = [
   { title: "Yfirlit", url: "/", icon: LayoutDashboard },
   { title: "Mín verkefni", url: "/min-verkefni", icon: Star },
   { title: "Öll verkefni", url: "/verkefni", icon: ClipboardList },
   { title: "Fjármál", url: "/financials", icon: Receipt },
   { title: "Samanburður", url: "/benchmarking", icon: Scale },
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
+];
+
+const providerItems = [
+  { title: "Yfirlit", url: "/provider", icon: LayoutDashboard },
+  { title: "Tilboðsbeiðnir", url: "/provider/requests", icon: FileText },
+  { title: "Mín tilboð", url: "/provider/bids", icon: List },
+  { title: "Prófíll", url: "/provider/profile", icon: User },
+  { title: "Markaðstorg", url: "/marketplace", icon: Store },
+];
+
+const adminItems = [
+  { title: "Yfirlit", url: "/admin", icon: LayoutDashboard },
+  { title: "Húsfélög", url: "/admin?tab=husfelag", icon: Building2 },
+  { title: "Notendur", url: "/admin?tab=notendur", icon: Users },
+  { title: "Þjónustuaðilar", url: "/admin?tab=thjonustuadilar", icon: Briefcase },
+  { title: "Flokkar", url: "/admin?tab=flokkar", icon: FolderTree },
+  { title: "Tilboðsferlar", url: "/admin?tab=tilbodsferlar", icon: Layers },
+  { title: "Markaðstorg", url: "/marketplace", icon: Store },
+  { title: "Aðgerðaskrá", url: "/admin?tab=adgerdaskra", icon: ScrollText },
 ];
 
 export function AppSidebar() {
@@ -70,12 +97,39 @@ export function AppSidebar() {
   const isServiceProvider = roleType === "service_provider";
   const avatarLetter = user?.email?.charAt(0)?.toUpperCase() ?? "?";
 
+  // Select menu items based on role
+  const primaryItems = isSuperAdmin
+    ? adminItems
+    : isServiceProvider
+      ? providerItems
+      : associationItems;
+
+  // Workspace label
+  const workspaceName = isSuperAdmin
+    ? "Kerfisstjórnun"
+    : isServiceProvider
+      ? "Þjónustugátt"
+      : (association?.name ?? "Húsfélagið.is");
+
+  const workspaceSubtitle = isSuperAdmin
+    ? "Húsfélagið.is"
+    : isServiceProvider
+      ? "Húsfélagið.is"
+      : (association?.address ?? "Fjármálagreining");
+
   const isActive = (url: string) => {
+    // For admin tab links
+    if (url.includes("?tab=")) {
+      const urlTab = new URLSearchParams(url.split("?")[1]).get("tab");
+      const currentTab = new URLSearchParams(location.search).get("tab");
+      return location.pathname === "/admin" && urlTab === currentTab;
+    }
     if (url === "/") return location.pathname === "/";
+    if (url === "/admin") return location.pathname === "/admin" && !location.search.includes("tab=");
     return location.pathname.startsWith(url);
   };
 
-  const isFinancialsActive = isActive("/financials") ||
+  const isFinancialsActive = location.pathname.startsWith("/financials") ||
     location.pathname.startsWith("/transactions") ||
     location.pathname.startsWith("/classification") ||
     location.pathname.startsWith("/analytics") ||
@@ -120,10 +174,10 @@ export function AppSidebar() {
           <div className="min-w-0 flex-1 flex items-center gap-1">
             <div className="min-w-0">
               <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-                {association?.name ?? "Húsfélagið.is"}
+                {workspaceName}
               </p>
               <p className="text-[11px] text-muted-foreground leading-tight truncate">
-                {association?.address ?? "Fjármálagreining"}
+                {workspaceSubtitle}
               </p>
             </div>
             <ChevronDown className="h-3 w-3 text-muted-foreground/50 flex-shrink-0 ml-auto" />
@@ -136,21 +190,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
               {primaryItems.map((item) => (
-                <NavItem key={item.title} {...item} />
+                <NavItem key={item.url} {...item} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {isServiceProvider && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5">
-                <NavItem title="Þjónustugátt" url="/provider" icon={Briefcase} />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border">
@@ -160,10 +204,6 @@ export function AppSidebar() {
           </SidebarMenuItem>
 
           <NavItem title="Stillingar" url="/settings" icon={Settings} />
-
-          {isSuperAdmin && (
-            <NavItem title="Kerfisstjórnun" url="/admin" icon={Shield} />
-          )}
 
           {!collapsed && (
             <SidebarMenuItem>
