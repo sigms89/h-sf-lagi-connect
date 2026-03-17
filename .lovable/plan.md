@@ -77,3 +77,23 @@
 | 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
 | 13 | Herða bid_messages RLS (aðeins þátttakendur) | Meðal (öryggi) | ✅ Leyst |
 | 14 | Eyða tvíteknu NotificationBell skrá | Lágt | ✅ Leyst |
+
+---
+
+## Yfirferðarskýrsla 3: Rökfræði, upplifun og virkni
+
+| # | Verkefni | Alvarleiki | Staða |
+|---|---------|-----------|-------|
+| 1 | Laga Admin sidebar tab links til að matcha tab values | Hátt (brotið) | ✅ Leyst |
+| 2 | Laga DevRoleSwitcher conflict við trigger | Hátt (brotið) | ✅ Leyst |
+| 3 | Laga `isAdmin={true}` í Marketplace | Hátt (UX/öryggi) | ✅ Leyst |
+| 4 | Laga profiles SELECT RLS svo meðlimir sjái nöfn annarra | Hátt (brotið) | ✅ Leyst |
+| 5 | Laga MinVerkefni FK join | Meðal | ✅ Leyst |
+| 6 | Laga ReportsPage avgMonthly / 12 bug | Meðal | ✅ Leyst |
+| 7 | Bæta við "Gleymt lykilorð" flæði á Auth síðu | Meðal | ✅ Leyst |
+| 8 | Fela DevRoleSwitcher í production | Meðal (öryggi) | ✅ Leyst |
+| 9 | Bæta við DELETE á notifications | Lágt | ✅ Leyst |
+| 10 | Laga staleTime: 0 á profile queries | Lágt | ✅ Leyst |
+| 11 | Láta useVendorAnalytics og useYearOverYear virða tímabilsval | Meðal | 🔲 Eftir |
+| 12 | Klára em-dash hreinsun í athugasemdum (294 tilvik) | Lágt | 🔲 Eftir |
+| 13 | Sameina profile queries í shared hook | Lágt | 🔲 Eftir |
