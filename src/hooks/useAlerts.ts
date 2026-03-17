@@ -500,7 +500,7 @@ export function useFinancialAlerts(associationId: string | null | undefined) {
 
       const numUnits: number = assoc?.num_units ?? 1;
 
-      // Fetch all transactions (no pagination — alerts need full history)
+      // Fetch all transactions (no pagination - alerts need full history)
       const { data: rawTransactions, error } = await db
         .from('transactions')
         .select(`
