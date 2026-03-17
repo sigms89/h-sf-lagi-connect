@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — Admin Page (REPLACE)
-// Super admin dashboard — protected, only for role_type = 'super_admin'
+// Húsfélagið.is: Admin Page (REPLACE)
+// Super admin dashboard - protected, only for role_type = 'super_admin'
 // Updated: added Notendur, Flokkar, Tilboðsferlar, Aðgerðaskrá tabs
 // Tab order: Yfirlit, Húsfélög, Notendur, Þjónustuaðilar, Flokkar,
 //            Tilboðsferlar, Flokkareglur, Tilkynningar, Aðgerðaskrá
