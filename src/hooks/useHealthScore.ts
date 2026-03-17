@@ -261,7 +261,7 @@ function calcMaintenanceRatio(
 
     if (pct >= 15 && pct <= 25) {
       score = 100;
-      detail = `Viðhaldskostnaður er ${pctStr}% af heildargjöldum — innan við markmiðsbils.`;
+      detail = `Viðhaldskostnaður er ${pctStr}% af heildargjöldum, innan við markmiðsbils.`;
     } else if (pct < 15) {
       score = Math.round(clamp((pct / 15) * 100));
       detail = `Viðhaldskostnaður er ${pctStr}% — lægri en ráðlögð 15–25%.`;
