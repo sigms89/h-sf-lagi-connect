@@ -80,7 +80,7 @@ const BID_STATUS_LABELS: Record<string, string> = {
 // ============================================================
 
 function formatDate(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try {
     return format(new Date(iso), 'dd. MMM yyyy', { locale: is });
   } catch {
