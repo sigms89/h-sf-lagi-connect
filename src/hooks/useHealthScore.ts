@@ -267,7 +267,7 @@ function calcMaintenanceRatio(
       detail = `Viðhaldskostnaður er ${pctStr}%, lægri en ráðlögð 15–25%.`;
     } else {
       score = Math.round(clamp(((50 - pct) / 25) * 100));
-      detail = `Viðhaldskostnaður er ${pctStr}% — hærri en ráðlögð 15–25%.`;
+      detail = `Viðhaldskostnaður er ${pctStr}%, hærri en ráðlögð 15–25%.`;
     }
   }
 

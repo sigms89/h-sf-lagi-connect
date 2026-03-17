@@ -339,7 +339,7 @@ export function AdminBidRequestsTab() {
                         {req.association?.name ?? '-'}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {req.category?.name_is ?? '—'}
+                        {req.category?.name_is ?? '-'}
                       </TableCell>
                       <TableCell>
                         <Badge

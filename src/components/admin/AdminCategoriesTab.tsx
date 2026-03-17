@@ -485,7 +485,7 @@ export function AdminCategoriesTab() {
                     </TableCell>
                     <TableCell className="text-xs font-medium">{cat.name_is}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {cat.name_en ?? '—'}
+                      {cat.name_en ?? '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">

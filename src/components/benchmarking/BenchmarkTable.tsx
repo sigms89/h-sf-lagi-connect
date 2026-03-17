@@ -124,7 +124,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   <TableRow key={`${row.categoryId}-expanded`} className="bg-muted/10 hover:bg-muted/10">
                     <TableCell colSpan={7} className="pt-2 pb-4 px-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground font-medium">Þróun kostnaðar — síðustu 12 mánuðir</span>
+                        <span className="text-xs text-muted-foreground font-medium">Þróun kostnaðar, síðustu 12 mánuðir</span>
                         <span className="text-xs text-muted-foreground">{row.comparableInCategory} húsfélög í samanburði</span>
                       </div>
                       <BenchmarkTrendChart associationId={associationId} categoryId={row.categoryId} numUnits={undefined} />

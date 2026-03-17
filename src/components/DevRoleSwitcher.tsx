@@ -93,7 +93,7 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success(data?.message ?? `${label} — lokið!`);
+      toast.success(data?.message ?? `${label}, lokið!`);
 
       // Invalidate everything so UI refreshes
       await queryClient.invalidateQueries();

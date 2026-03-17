@@ -309,7 +309,7 @@ function VendorTable({
                         {suggestedCat.name_is}
                       </Badge>
                     ) : (
-                      <span className="text-xs text-muted-foreground/50">—</span>
+                      <span className="text-xs text-muted-foreground/50">-</span>
                     )}
                   </TableCell>
 
