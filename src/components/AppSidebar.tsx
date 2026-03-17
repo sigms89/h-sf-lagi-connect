@@ -89,7 +89,7 @@ export function AppSidebar() {
       return data as Profile | null;
     },
     enabled: !!user,
-    staleTime: 0,
+    staleTime: 2 * 60 * 1000,
   });
 
   const roleType = profile?.role_type ?? "member";
