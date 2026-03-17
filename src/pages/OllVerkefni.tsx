@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Öll verkefni (All Tasks) page
+// Húsfélagið.is: Öll verkefni (All Tasks) page
 // Full filterable task list with sorting and count summary
 // ============================================================
 
