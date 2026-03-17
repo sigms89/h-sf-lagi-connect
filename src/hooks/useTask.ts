@@ -171,7 +171,12 @@ export function useAssignTask() {
         is_system: true,
       });
 
-      return { isSelf, targetName: isSelf ? currentName : commentContent.split(' til ')[1] };
+      // Extract target name from the structured comment
+      const extractedName = isSelf ? currentName : (await (async () => {
+        const { data: tp } = await db.from('profiles').select('full_name').eq('user_id', assignTo).maybeSingle();
+        return tp?.full_name ?? 'Notandi';
+      })());
+      return { isSelf, targetName: extractedName };
     },
     onSuccess: (result, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
