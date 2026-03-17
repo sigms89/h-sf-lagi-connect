@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Financials (Combined page)
+// Húsfélagið.is: Financials (Combined page)
 // Tabs: Færslur | Flokkun | Greining | Skýrslur
 // ============================================================
 
