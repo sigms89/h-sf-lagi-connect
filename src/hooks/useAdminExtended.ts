@@ -173,7 +173,7 @@ export function useAuditLog(
 
 // ============================================================
 // useAllUsers
-// All users across all associations — join association_members + profiles + associations
+// All users across all associations - join association_members + profiles + associations
 // ============================================================
 export function useAllUsers(search?: string, page = 1, pageSize = 25) {
   const from = (page - 1) * pageSize;
