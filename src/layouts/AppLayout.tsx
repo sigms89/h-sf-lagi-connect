@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is — AppLayout v3
-// bg-zinc-50 main content area
+// Húsfélagið.is — AppLayout v4
+// Aurora background + glass header
 // ============================================================
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -17,8 +17,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
-          <header className="h-12 flex items-center justify-between border-b border-border px-6 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex-1 flex flex-col min-w-0 aurora-bg">
+          <header className="h-12 flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] px-6 bg-[hsl(240,20%,6%,0.8)] backdrop-blur-xl sticky top-0 z-10">
             <SidebarTrigger />
             <div className="flex items-center gap-2.5">
               <span className="text-[12px] text-muted-foreground hidden sm:inline">

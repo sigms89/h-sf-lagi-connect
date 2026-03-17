@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is: AppSidebar v4
-// Role-based navigation: association, provider, admin
+// Húsfélagið.is: AppSidebar v5
+// Dark mode glassmorphism sidebar with glow active state
 // ============================================================
 import {
   LayoutDashboard,
@@ -144,14 +144,14 @@ export function AppSidebar() {
       <SidebarMenuItem>
         <Link
           to={url}
-          className={`flex items-center gap-2 text-[13px] h-8 px-3 rounded-none transition-colors duration-150 ${
+          className={`flex items-center gap-2.5 text-[13px] h-8 px-3 rounded-md transition-all duration-150 ${
             active
-              ? "font-semibold text-foreground border-l-2 border-l-accent ml-[-1px] pl-[calc(0.75rem-1px)]"
-              : "font-normal text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              ? "font-semibold text-foreground bg-[rgba(255,255,255,0.08)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+              : "font-normal text-muted-foreground hover:text-foreground hover:bg-[rgba(255,255,255,0.04)]"
           }`}
         >
-          <Icon className={`h-[16px] w-[16px] flex-shrink-0 transition-colors duration-150 ${
-            active ? "text-accent" : "text-muted-foreground/60"
+          <Icon className={`h-[15px] w-[15px] flex-shrink-0 transition-colors duration-150 ${
+            active ? "text-primary" : "text-muted-foreground/60"
           }`} />
           {!collapsed && <span>{title}</span>}
         </Link>
@@ -160,14 +160,14 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="icon" className="border-r border-[rgba(255,255,255,0.06)]">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-12 border-b border-border px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-12 border-b border-[rgba(255,255,255,0.06)] px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-[0_0_12px_rgba(99,102,241,0.3)]">
           <Building2 className="h-3.5 w-3.5 text-primary-foreground" />
         </div>
         {!collapsed && (
@@ -188,7 +188,7 @@ export function AppSidebar() {
       <SidebarContent className="pt-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu className="gap-0.5 px-2">
               {primaryItems.map((item) => (
                 <NavItem key={item.url} {...item} />
               ))}
@@ -197,8 +197,8 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border">
-        <SidebarMenu className="gap-0.5">
+      <SidebarFooter className="border-t border-[rgba(255,255,255,0.06)]">
+        <SidebarMenu className="gap-0.5 px-2">
           {import.meta.env.DEV && (
             <SidebarMenuItem>
               <DevRoleSwitcher collapsed={collapsed} />
@@ -210,8 +210,8 @@ export function AppSidebar() {
           {!collapsed && (
             <SidebarMenuItem>
               <div className="flex items-center gap-2.5 px-3 py-2">
-                <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] font-semibold text-muted-foreground">{avatarLetter}</span>
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] font-semibold text-primary">{avatarLetter}</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground truncate">
                   {user?.email}
