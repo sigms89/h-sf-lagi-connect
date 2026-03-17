@@ -108,7 +108,7 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
-          tooltip="Þróunarverkfæri — Skipta um hlutverk"
+          tooltip="Þróunarverkfæri: Skipta um hlutverk"
           className="text-amber-500 hover:text-amber-400"
           disabled={switching || seeding}
         >

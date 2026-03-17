@@ -100,7 +100,7 @@ function InviteForm({ associationId }: { associationId: string }) {
     // Boðskerfi er í vinnslu — sýnum UI-only sýndarstöðu
     await new Promise((resolve) => setTimeout(resolve, 600));
     setSending(false);
-    toast.info('Boðskerfi er í vinnslu — netföngin verða vistuð þegar kerfið er tilbúið');
+    toast.info('Boðskerfi er í vinnslu, netföngin verða vistuð þegar kerfið er tilbúið');
   };
 
   return (

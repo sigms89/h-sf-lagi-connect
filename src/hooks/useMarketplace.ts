@@ -240,7 +240,7 @@ export function useAcceptBid() {
       });
     },
     onSuccess: () => {
-      toast.success('Tilboð samþykkt — önnur tilboð hafnað');
+      toast.success('Tilboð samþykkt, önnur tilboð hafnað');
     },
     onError: (error: Error) => {
       toast.error(`Villa: ${error.message}`);

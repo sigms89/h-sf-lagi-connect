@@ -109,7 +109,7 @@ export function useAutoTasks(associationId: string | undefined) {
 
           tasksToCreate.push({
             association_id: associationId,
-            title: 'Sjóðsstaða er lág — endurskoða húsgjald',
+            title: 'Sjóðsstaða er lág, endurskoða húsgjald',
             description: alert.description,
             priority: 'critical',
             category: 'sjóðsstaða',

@@ -160,7 +160,7 @@ export function useCreateProvider() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROVIDER_KEYS.current() });
-      toast.success('Skráning móttekin — bíður samþykktar stjórnanda');
+      toast.success('Skráning móttekin, bíður samþykktar stjórnanda');
     },
     onError: (error: Error) => {
       toast.error(`Villa við skráningu: ${error.message}`);
