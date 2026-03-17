@@ -65,6 +65,8 @@ function useCurrentProfile() {
 // ============================================================
 
 export default function Admin() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'overview';
   const { data: profile, isLoading: isLoadingProfile } = useCurrentProfile();
   const { data: stats, isLoading: isLoadingStats } = useAdminStats();
 
