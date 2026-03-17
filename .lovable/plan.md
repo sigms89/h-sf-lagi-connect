@@ -1,5 +1,6 @@
 
 
+
 ## Yfirferð: Glufur og vandamál í Húsfélagið.is
 
 ### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
@@ -43,12 +44,6 @@
 
 **Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
 
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
 ---
 
 ### Forgangsröðun
@@ -62,7 +57,21 @@
 | 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
 | 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
 
-### Tillaga
+---
 
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+## Yfirferðarskýrsla 2: Heildarúttekt
 
+| # | Verkefni | Alvarleiki | Staða |
+|---|---------|-----------|-------|
+| 1 | Loka profiles UPDATE RLS gegn role_type breytingum | Hátt (öryggi) | ✅ Leyst |
+| 2 | Bæta við RLS takmörkunum á categories töfluna | Hátt (öryggi) | ✅ Leyst |
+| 3 | Em-dash hreinsun (notenda-sýnileg) | Meðal | ✅ Leyst |
+| 4 | Laga `in_progress` → `waiting` í useAutoTasks dedup | Meðal | ✅ Leyst |
+| 5 | Bæta `.limit(10000)` á useHealthScore og useClassification | Meðal | ✅ Leyst |
+| 6 | Laga mánaðarleg þróun til að virða tímabilsval | Meðal | ✅ Leyst |
+| 7 | Dashboard avgMonthlyExpense miðast við valið tímabil | Meðal | ✅ Leyst |
+| 8 | Innleiða raunverulegt boðskerfi (invite flow) | Meðal | 🔲 Eftir |
+| 9 | Admin flipar í URL query params | Lágt | 🔲 Eftir |
+| 10 | Bæta við Error Boundary | Lágt | 🔲 Eftir |
+| 11 | Skipta notification polling yfir í Realtime | Lágt | 🔲 Eftir |
+| 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
