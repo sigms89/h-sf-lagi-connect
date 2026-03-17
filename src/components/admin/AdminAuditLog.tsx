@@ -85,7 +85,7 @@ function actionLabel(action: string): string {
 }
 
 function metadataSummary(meta: Record<string, unknown> | null): string {
-  if (!meta || Object.keys(meta).length === 0) return '—';
+  if (!meta || Object.keys(meta).length === 0) return '-';
   const keys = Object.keys(meta);
   if (keys.length <= 2) {
     return keys.map((k) => `${k}: ${String(meta[k])}`).join(', ');
