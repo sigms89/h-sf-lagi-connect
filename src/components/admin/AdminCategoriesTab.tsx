@@ -240,8 +240,8 @@ export function AdminCategoriesTab() {
   // ---- Helpers ----
 
   function parentName(id: string | null): string {
-    if (!id) return '—';
-    return categories.find((c) => c.id === id)?.name_is ?? '—';
+    if (!id) return '-';
+    return categories.find((c) => c.id === id)?.name_is ?? '-';
   }
 
   return (
