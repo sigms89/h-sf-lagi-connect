@@ -1,68 +1,72 @@
 
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
+## Áætlun: Hlutverkaaðlagað viðmót (Role-based UI)
 
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
+### Vandamálið
 
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
+Eins og er sér **þjónustuaðili** alla húsfélagsvalmyndina (Yfirlit, Fjármál, Samanburður) sem tengist honum ekki. Hann þarf að fara á `/provider` handvirkt. Á sama hátt sér **kerfisstjóri** allt í einum haug.
 
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
+### Tillaga: Þrír aðskildir sidebar-modes
 
-### 2. ProtectedRoute — röng fyrirspurn á profiles
+Sidebar og layout aðlagast hlutverki notandans sjálfkrafa:
 
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
+```text
+┌─────────────────┬──────────────────────┬──────────────────────┐
+│  Húsfélagsmaður │  Þjónustuaðili       │  Kerfisstjóri        │
+├─────────────────┼──────────────────────┼──────────────────────┤
+│  Yfirlit        │  Yfirlit (provider)  │  Yfirlit (admin)     │
+│  Mín verkefni   │  Tilboðsbeiðnir      │  Húsfélög            │
+│  Öll verkefni   │  Mín tilboð          │  Notendur            │
+│  Fjármál        │  Prófíll             │  Þjónustuaðilar      │
+│  Samanburður    │  Markaðstorg (skoða) │  Flokkar             │
+│  Markaðstorg    │                      │  Tilboðsferlar       │
+│  ──────────     │  ──────────          │  Markaðstorg         │
+│  Stillingar     │  Stillingar          │  ──────────          │
+│                 │                      │  Aðgerðaskrá         │
+│                 │                      │  Stillingar          │
+└─────────────────┴──────────────────────┴──────────────────────┘
+```
 
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
+### Breytingar
 
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
+**1. `AppSidebar.tsx` — hlutverkaaðlagaðar valmyndir**
+- Í stað eins `primaryItems` lista, skipta í 3 lista eftir hlutverki
+- Þjónustuaðili: sér aðeins provider-tengda hlekki, ekki húsfélagssíður
+- Kerfisstjóri: sér admin-flipana sem beina valmyndaratriði (ekki falið neðst)
+- Húsfélagsmaður (member/admin): óbreytt frá því sem er
 
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
+**2. `AppLayout.tsx` — engar breytingar** (layout er hlutlaust)
 
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
+**3. `ProviderDashboard.tsx` — splitta í sidebar-stýrt**
+- Færa flipana (Yfirlit, Tilboðsbeiðnir, Mín tilboð, Prófíll) úr tabs yfir í aðskildar sidebar-síður
+- Nýjar routes: `/provider/requests`, `/provider/bids`, `/provider/profile`
+- `/provider` verður provider yfirlit (ProviderDashboardOverview)
 
-### 4. Console viðvörun — Badge ref í Settings
+**4. `Admin.tsx` — splitta í sidebar-stýrt (síðar, ef óskað)**
+- Hægt að gera sama og provider: admin-fliparnir verða sidebar-hlekki
+- Þetta er valfrjálst í fyrstu útfærslu
 
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
+**5. `Settings.tsx` — sýna mismunandi stillingar eftir hlutverki**
+- Þjónustuaðili sér ekki húsfélagsstillingar (meðlimir, byggingarupplýsingar)
+- Heldur sér aðeins eigin reikningsstillingar
 
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
+### Röð útfærslu
 
-### 5. TimeRange hefur ekki áhrif á gagnasótt
+1. **Sidebar aðlögun** — 3 valmyndalista eftir hlutverki í `AppSidebar.tsx`
+2. **Provider routes** — splitta ProviderDashboard í 4 síður með eigin routes
+3. **Settings aðlögun** — fela húsfélagsspjöld ef notandi er þjónustuaðili
+4. **Home redirect** — `/` vísar á rétta yfirlitssíðu eftir hlutverki
 
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
+### Skrár sem breytast
 
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
-
-### 7. Upload Batches — vantar UPDATE/DELETE RLS
-
-**Vandamálið:** `upload_batches` tafla leyfir ekki UPDATE eða DELETE. Þetta kemur í veg fyrir „afturkalla upphleðslu" virkni og gerir ómögulegt að hreinsa rangan import.
-
-**Lausn:** Bæta við DELETE policy fyrir admin notendur á `upload_batches` og `transactions` (þar sem transactions DELETE er þegar til).
-
----
-
-### Forgangsröðun
-
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
-
-### Tillaga
-
-Byrja á #2 (einnar línu fix), síðan #1 (tvítekningagreining), og #4 (1000 línu vörn). Hinar eru mikilvægar en hafa minni áhrif á réttmæti gagna.
+| Skrá | Aðgerð |
+|------|--------|
+| `src/components/AppSidebar.tsx` | 3 valmyndalista eftir hlutverki |
+| `src/App.tsx` | Nýjar provider routes |
+| `src/pages/ProviderDashboard.tsx` | Einfalda — aðeins overview |
+| `src/pages/ProviderRequests.tsx` | Nýtt — tilboðsbeiðnir |
+| `src/pages/ProviderBidsPage.tsx` | Nýtt — mín tilboð |
+| `src/pages/ProviderProfilePage.tsx` | Nýtt — prófíll |
+| `src/pages/Settings.tsx` | Fela húsfélagsspjöld fyrir providers |
+| `src/pages/Dashboard.tsx` | Redirect provider → `/provider` |
 
