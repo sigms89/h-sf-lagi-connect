@@ -36,7 +36,7 @@ import { db } from '@/integrations/supabase/db';
 import type { Profile } from '@/types/database';
 
 // ============================================================
-// useCurrentProfile — get the full profile with role_type
+// useCurrentProfile: get the full profile with role_type
 // ============================================================
 function useCurrentProfile() {
   const { user } = useAuth();

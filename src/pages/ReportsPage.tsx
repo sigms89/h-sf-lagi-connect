@@ -1,6 +1,6 @@
 // ============================================================
 // ReportsPage.tsx
-// Aðalfundarskýrsla — Print-ready annual meeting financial report
+// Aðalfundarskýrsla: Print-ready annual meeting financial report
 // ============================================================
 
 import { useState } from "react";

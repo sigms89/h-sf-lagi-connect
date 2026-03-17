@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AnalyticsPage (v3)
+// Húsfélagið.is: AnalyticsPage (v3)
 // Removed duplicate KPI cards. Starts with alerts + health score.
 // Colors: teal for income, rose for expenses.
 // ============================================================

@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — ClassificationPage
+// Húsfélagið.is: ClassificationPage
 // Page wrapper for the smart vendor overview / classification UI.
 // Resolves the current association and renders VendorOverview.
 // ============================================================

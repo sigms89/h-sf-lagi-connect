@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Dashboard v3
+// Húsfélagið.is: Dashboard v3
 // Financial advisor style: hero card, action items, trend, bottom row
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Provider Bid Requests Page
+// Húsfélagið.is: Provider Bid Requests Page
 // Shows open bid requests matching provider's categories/area
 // ============================================================
 

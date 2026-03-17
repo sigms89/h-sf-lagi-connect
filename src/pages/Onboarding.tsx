@@ -187,7 +187,7 @@ export default function Onboarding() {
   const progressPercent = (step / STEPS.length) * 100;
 
   // ============================================================
-  // SUBMIT STEP 2 — Create association
+  // SUBMIT STEP 2: Create association
   // ============================================================
   const handleCreateAssociation = async (data: OnboardingData) => {
     const result = await createAssociation.mutateAsync({

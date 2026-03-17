@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Provider My Bids Page
+// Húsfélagið.is: Provider My Bids Page
 // Shows all bids submitted by the current provider
 // ============================================================
 

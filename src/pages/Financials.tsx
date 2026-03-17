@@ -72,7 +72,7 @@ export default function Financials() {
         )}
       </div>
 
-      {/* Tabs — bottom-border underline style */}
+      {/* Tabs - bottom-border underline style */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <div className="border-b border-border">
           <TabsList className="bg-transparent p-0 h-auto gap-5">
