@@ -109,7 +109,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   </TableCell>
                   <TableCell>
                     {isInsufficient
-                      ? <span className="text-xs italic text-muted-foreground">—</span>
+                      ? <span className="text-xs italic text-muted-foreground">-</span>
                       : (
                         <span className={cn('text-sm font-semibold tabular-nums', (row.diffPercent ?? 0) < -10 ? 'text-teal-700' : (row.diffPercent ?? 0) > 10 ? 'text-rose-700' : 'text-yellow-700')}>
                           {(row.diffPercent ?? 0) > 0 ? '+' : ''}{(row.diffPercent ?? 0).toFixed(1)}%
