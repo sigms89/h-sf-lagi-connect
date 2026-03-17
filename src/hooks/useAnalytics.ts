@@ -37,7 +37,7 @@ export interface FeeAdequacy {
 // ── Query keys ────────────────────────────────────────────────────────────────
 
 export const ANALYTICS_KEYS = {
-  vendors: (assocId: string) => ['analytics', 'vendors', assocId] as const,
+  vendors: (assocId: string, dateFrom?: string | null) => ['analytics', 'vendors', assocId, dateFrom ?? 'all'] as const,
   yoy: (assocId: string) => ['analytics', 'yoy', assocId] as const,
   feeAdequacy: (assocId: string, numUnits: number) =>
     ['analytics', 'fee_adequacy', assocId, numUnits] as const,
