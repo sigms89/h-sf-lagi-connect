@@ -60,13 +60,13 @@ const providerItems = [
 
 const adminItems = [
   { title: "Yfirlit", url: "/admin", icon: LayoutDashboard },
-  { title: "Húsfélög", url: "/admin?tab=husfelag", icon: Building2 },
-  { title: "Notendur", url: "/admin?tab=notendur", icon: Users },
-  { title: "Þjónustuaðilar", url: "/admin?tab=thjonustuadilar", icon: Briefcase },
-  { title: "Flokkar", url: "/admin?tab=flokkar", icon: FolderTree },
-  { title: "Tilboðsferlar", url: "/admin?tab=tilbodsferlar", icon: Layers },
+  { title: "Húsfélög", url: "/admin?tab=associations", icon: Building2 },
+  { title: "Notendur", url: "/admin?tab=users", icon: Users },
+  { title: "Þjónustuaðilar", url: "/admin?tab=providers", icon: Briefcase },
+  { title: "Flokkar", url: "/admin?tab=categories", icon: FolderTree },
+  { title: "Tilboðsferlar", url: "/admin?tab=bidrequests", icon: Layers },
   { title: "Markaðstorg", url: "/marketplace", icon: Store },
-  { title: "Aðgerðaskrá", url: "/admin?tab=adgerdaskra", icon: ScrollText },
+  { title: "Aðgerðaskrá", url: "/admin?tab=auditlog", icon: ScrollText },
 ];
 
 export function AppSidebar() {
