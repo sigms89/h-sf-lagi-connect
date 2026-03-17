@@ -99,7 +99,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   </TableCell>
                   <TableCell className="text-sm tabular-nums">{formatIskAmount(row.yourCostPerUnit, true)}</TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">
-                    {isInsufficient ? <span className="text-xs italic">—</span> : formatIskAmount(row.median ?? 0, true)}
+                    {isInsufficient ? <span className="text-xs italic">-</span> : formatIskAmount(row.median ?? 0, true)}
                   </TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">
                     {isInsufficient
