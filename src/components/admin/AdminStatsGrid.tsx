@@ -123,7 +123,7 @@ export function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps) {
       <StatCard
         icon={TrendingDown}
         label="Churn"
-        value="—"
+        value="-"
         sub="Kemur bráðlega"
         bgClass="bg-muted"
         iconClass="text-muted-foreground"

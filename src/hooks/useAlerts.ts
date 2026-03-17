@@ -472,7 +472,7 @@ function checkSeasonalPatterns(transactions: RawTx[], now: Date): FinancialAlert
         id: `seasonal_${name.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'seasonal',
         severity: 'info',
-        title: `Árstíðabundin hækkun — ${name}`,
+        title: `Árstíðabundin hækkun: ${name}`,
         description: `Sögulega er kostnaður í ${name} þennan mánuð ${((historicalMean / mean(allEntries.map(([, v]) => v)) - 1) * 100).toFixed(0)}% yfir ársmeðaltali.`,
         category: name,
         createdAt: now.toISOString(),

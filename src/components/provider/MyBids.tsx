@@ -138,7 +138,7 @@ export function MyBids({ providerId }: MyBidsProps) {
                     <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                       {bid.valid_until
                         ? format(new Date(bid.valid_until), 'dd.MM.yyyy')
-                        : '—'}
+                        : '-'}
                     </TableCell>
                   </TableRow>
                 );

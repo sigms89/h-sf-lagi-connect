@@ -123,7 +123,7 @@ export function AssociationTable() {
                 <TableRow key={assoc.id}>
                   <TableCell className="font-medium text-sm">{assoc.name}</TableCell>
                   <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
-                    {assoc.address ?? '—'}
+                    {assoc.address ?? '-'}
                     {assoc.postal_code && `, ${assoc.postal_code}`}
                   </TableCell>
                   <TableCell className="text-sm tabular-nums">{assoc.num_units}</TableCell>

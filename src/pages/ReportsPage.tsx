@@ -571,7 +571,7 @@ export default function ReportsPage() {
               {showIndividualNotes && (
                 <div>
                   <SectionHeader>
-                    Athugasemdir vegna einstaklinga — útlagður kostnaður
+                    Athugasemdir vegna einstaklinga, útlagður kostnaður
                   </SectionHeader>
                   <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-4">
                     <p className="text-sm text-gray-500 italic">

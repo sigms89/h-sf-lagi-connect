@@ -167,7 +167,7 @@ export function AdminUsersTab() {
                     )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {user.association?.name ?? '—'}
+                    {user.association?.name ?? '-'}
                   </TableCell>
                   <TableCell>
                     <Badge

@@ -102,7 +102,7 @@ export function BidMessageThread({ bidId, label }: BidMessageThreadProps) {
       <CardHeader className="pb-3 border-b flex-shrink-0">
         <CardTitle className="text-base flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          {label ? `Skilaboð — ${label}` : 'Skilaboð'}
+          {label ? `Skilaboð: ${label}` : 'Skilaboð'}
         </CardTitle>
       </CardHeader>
 

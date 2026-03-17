@@ -61,8 +61,8 @@ function presetLabel(range: TimeRangeValue): string {
     case 'ytd':
       return 'Á þessu ári';
     case 'custom': {
-      const fromStr = range.from ?? '—';
-      const toStr = range.to ?? '—';
+      const fromStr = range.from ?? '-';
+      const toStr = range.to ?? '-';
       return `${fromStr} – ${toStr}`;
     }
   }

@@ -292,7 +292,7 @@ export function AdminAuditLog() {
                       {entry.entity_type ?? '-'}
                     </TableCell>
                     <TableCell className="text-[10px] font-mono text-muted-foreground max-w-[120px] truncate">
-                      {entry.entity_id ?? '—'}
+                      {entry.entity_id ?? '-'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate">
                       {metadataSummary(entry.metadata)}
