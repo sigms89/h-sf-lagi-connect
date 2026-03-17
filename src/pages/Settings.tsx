@@ -112,6 +112,19 @@ export default function Settings() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
 
+  // Check if user is a service provider
+  const { data: settingsProfile } = useQuery({
+    queryKey: ['profile-settings', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await db.from('profiles').select('role_type').eq('user_id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+    staleTime: 0,
+  });
+  const isProvider = settingsProfile?.role_type === 'service_provider';
+
   const form = useForm<AssociationFormData>({
     resolver: zodResolver(associationSchema),
     defaultValues: {
