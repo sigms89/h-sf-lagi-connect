@@ -58,6 +58,7 @@ const App = () => (
             <Route path="/financials" element={<ProtectedRoute><AppLayout><Financials /></AppLayout></ProtectedRoute>} />
             <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
+            <Route path="/marketplace/provider/:providerId" element={<ProtectedRoute><AppLayout><ProviderPublicProfile /></AppLayout></ProtectedRoute>} />
 
             {/* Legacy redirects → /financials with correct tab */}
             <Route path="/transactions" element={<Navigate to="/financials?tab=faerslur" replace />} />

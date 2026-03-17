@@ -26,8 +26,14 @@ function getInitials(name: string): string {
 }
 
 export function ProviderCard({ provider }: ProviderCardProps) {
+  const navigate = useNavigate();
+  const stats = useProviderReviewStats(provider.id);
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => navigate(`/marketplace/provider/${provider.id}`)}
+    >
       <CardContent className="p-4 space-y-3">
         {/* Top: avatar + name */}
         <div className="flex items-center gap-3">
@@ -39,9 +45,17 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           </Avatar>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">{provider.company_name}</p>
-            {provider.kennitala && (
+            {stats.reviewCount > 0 ? (
+              <div className="flex items-center gap-1 mt-0.5">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                <span className="text-xs font-medium">{stats.averageRating.toFixed(1)}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  ({stats.reviewCount})
+                </span>
+              </div>
+            ) : provider.kennitala ? (
               <p className="text-xs text-muted-foreground">Kt. {provider.kennitala}</p>
-            )}
+            ) : null}
           </div>
         </div>
 
