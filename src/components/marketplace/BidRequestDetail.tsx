@@ -239,7 +239,7 @@ export function BidRequestDetail({
                       <TableCell>
                         <div className="space-y-0.5">
                           <div className="text-sm font-medium">
-                            {bid.provider?.company_name ?? '—'}
+                            {bid.provider?.company_name ?? '-'}
                           </div>
                           {/* Contact info only revealed after acceptance */}
                           {showContact && bid.provider?.phone && (
