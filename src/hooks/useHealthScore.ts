@@ -92,7 +92,7 @@ function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
   };
 }
 
-/** Factor 2 — Sjóðsstaða (25%): balance vs avg monthly expenses */
+/** Factor 2: Sjóðsstaða (25%): balance vs avg monthly expenses */
 function calcCashPosition(txs: TxRow[]): HealthScoreFactor {
   const sorted = [...txs].sort((a, b) => b.date.localeCompare(a.date));
   const latestBalance = sorted.find((t) => t.balance != null)?.balance ?? 0;
