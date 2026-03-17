@@ -118,7 +118,7 @@ export default function Marketplace() {
             <BidRequestDetail
               bidRequestId={selectedRequestId}
               associationId={association.id}
-              isAdmin={true}
+              isAdmin={!!association && !!user}
               onBack={() => setSelectedRequestId(null)}
             />
           ) : (
