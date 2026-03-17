@@ -170,7 +170,7 @@ function generateSuggestions(vendors: VendorAggregate[]): DedupSuggestion[] {
 }
 
 // ---------------------------------------------------------------
-// Query function — fetch unique vendor descriptions with aggregates
+// Query function - fetch unique vendor descriptions with aggregates
 // ---------------------------------------------------------------
 
 async function fetchVendorAggregates(associationId: string): Promise<VendorAggregate[]> {
