@@ -79,6 +79,8 @@ export function useMyNotifications(limit = 20) {
 
 export function useUnreadCount() {
   const { user } = useAuth();
+  useNotificationRealtime(user?.id);
+
   return useQuery({
     queryKey: NOTIFICATION_KEYS.unreadCount(user?.id ?? ''),
     queryFn: async (): Promise<number> => {
@@ -92,7 +94,7 @@ export function useUnreadCount() {
       return count ?? 0;
     },
     enabled: !!user,
-    refetchInterval: 30_000,
+    staleTime: 60_000,
   });
 }
 
