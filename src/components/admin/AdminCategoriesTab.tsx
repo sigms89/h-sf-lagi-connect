@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminCategoriesTab (NEW)
+// Húsfélagið.is: AdminCategoriesTab (NEW)
 // Full CRUD for categories table + merge categories feature
 // Create / Edit / Delete / Merge via dialogs
 // ============================================================
