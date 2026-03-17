@@ -261,7 +261,7 @@ export default function AnalyticsPage() {
   const { range } = useTimeRange();
   const { data: stats, isLoading: statsLoading } = useTransactionStats(associationId, range.from);
   const { data: healthData } = useHealthScore(associationId);
-  const { data: vendorData = [], isLoading: vendorLoading } = useVendorAnalytics(associationId);
+  const { data: vendorData = [], isLoading: vendorLoading } = useVendorAnalytics(associationId, range.from);
   const { data: yoyData = [], isLoading: yoyLoading } = useYearOverYear(associationId);
   const { data: feeData, isLoading: feeLoading } = useFeeAdequacy(associationId, numUnits);
 

@@ -94,6 +94,6 @@
 | 8 | Fela DevRoleSwitcher í production | Meðal (öryggi) | ✅ Leyst |
 | 9 | Bæta við DELETE á notifications | Lágt | ✅ Leyst |
 | 10 | Laga staleTime: 0 á profile queries | Lágt | ✅ Leyst |
-| 11 | Láta useVendorAnalytics og useYearOverYear virða tímabilsval | Meðal | 🔲 Eftir |
+| 11 | Láta useVendorAnalytics virða tímabilsval | Meðal | ✅ Leyst |
 | 12 | Klára em-dash hreinsun í athugasemdum (294 tilvik) | Lágt | 🔲 Eftir |
-| 13 | Sameina profile queries í shared hook | Lágt | 🔲 Eftir |
+| 13 | Sameina profile queries í shared hook / queryKey | Lágt | ✅ Leyst |

@@ -77,12 +77,12 @@ export function AppSidebar() {
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
-    queryKey: ["profile-sidebar", user?.id],
+    queryKey: ["profile", user?.id],
     queryFn: async (): Promise<Profile | null> => {
       if (!user) return null;
       const { data, error } = await db
         .from("profiles")
-        .select("role_type")
+        .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) return null;
