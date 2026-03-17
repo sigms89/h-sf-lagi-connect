@@ -272,7 +272,7 @@ export function BidRequestDetail({
                         {formatIskAmount(bid.amount)}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-xs text-muted-foreground max-w-xs">
-                        <span className="line-clamp-2">{bid.description ?? '—'}</span>
+                        <span className="line-clamp-2">{bid.description ?? '-'}</span>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {bid.valid_until
