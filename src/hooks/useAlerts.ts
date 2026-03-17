@@ -347,7 +347,7 @@ function checkBidRecommendations(transactions: RawTx[], now: Date): FinancialAle
         id: `bid_recommendation_${vendor.slice(0, 20).replace(/\s/g, '_')}`,
         type: 'bid_recommendation',
         severity: 'suggestion',
-        title: `Tilboð mælt með — ${vendor}`,
+        title: `Tilboð mælt með: ${vendor}`,
         description: `Þjónustuverð frá ${vendor} hefur hækkað um ${cumulativeIncrease.toFixed(0)}% á 3+ árum. Íhugaðu að finna tilboð.`,
         vendor,
         metric: { current: lastAvg, previous: firstAvg, change: cumulativeIncrease },
