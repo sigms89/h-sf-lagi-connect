@@ -336,7 +336,7 @@ export function AdminBidRequestsTab() {
                         {req.title}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-[140px] truncate">
-                        {req.association?.name ?? '—'}
+                        {req.association?.name ?? '-'}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {req.category?.name_is ?? '—'}
