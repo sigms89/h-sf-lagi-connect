@@ -506,7 +506,7 @@ export default function Onboarding() {
                   className="text-muted-foreground text-xs"
                 >
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
-                  Sleppa — hlaða upp síðar
+                  Sleppa, hlaða upp síðar
                 </Button>
               </div>
             </CardContent>
