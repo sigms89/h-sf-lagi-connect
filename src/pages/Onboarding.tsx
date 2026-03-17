@@ -4,6 +4,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { db } from '@/integrations/supabase/db';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
