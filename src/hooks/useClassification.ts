@@ -246,7 +246,7 @@ export function useRunAutoClassify() {
         txQuery = txQuery.is('category_id', null);
       }
 
-      const { data: txRows, error: txError } = await txQuery;
+      const { data: txRows, error: txError } = await txQuery.limit(10000);
       if (txError) throw txError;
 
       if (!txRows || txRows.length === 0) {

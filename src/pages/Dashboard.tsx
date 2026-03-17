@@ -147,7 +147,7 @@ const Dashboard = () => {
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Yfirlit</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          {association?.name ?? 'Húsfélagið þitt'} — {label}
+          {association?.name ?? 'Húsfélagið þitt'} · {label}
         </p>
       </div>
 

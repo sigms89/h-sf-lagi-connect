@@ -937,6 +937,7 @@ export type Database = {
     Functions: {
       is_association_admin: { Args: { assoc_id: string }; Returns: boolean }
       is_association_member: { Args: { assoc_id: string }; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

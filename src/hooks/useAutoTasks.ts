@@ -58,7 +58,7 @@ export function useAutoTasks(associationId: string | undefined) {
         .from('tasks')
         .select('category, related_entity_id')
         .eq('association_id', associationId)
-        .in('status', ['open', 'in_progress'])
+        .in('status', ['open', 'waiting'])
         .eq('source', 'auto');
 
       // Build a dedup set: "category|related_entity_id"

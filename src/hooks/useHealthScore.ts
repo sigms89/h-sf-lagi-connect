@@ -322,7 +322,7 @@ async function fetchHealthScore(associationId: string): Promise<HealthScoreResul
 
   const transactions: TxRow[] = txs ?? [];
 
-  const { data: cats, error: catError } = await (db as any)
+  const { data: cats, error: catError } = await db
     .from('categories')
     .select('id, name_is');
 
