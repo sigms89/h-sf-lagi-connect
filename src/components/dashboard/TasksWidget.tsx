@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — TasksWidget (v2)
+// Húsfélagið.is: TasksWidget (v2)
 // Dashboard task section: Yfirfallin → Opin → Lokið nýlega
 // ============================================================
 
