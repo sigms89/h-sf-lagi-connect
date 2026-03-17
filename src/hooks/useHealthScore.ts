@@ -57,7 +57,7 @@ function factorStatus(score: number): 'good' | 'warning' | 'critical' {
 }
 
 // ---------------------------------------------------------------
-// Factor calculators — ALL scores are Math.round()'d
+// Factor calculators - ALL scores are Math.round()'d
 // ---------------------------------------------------------------
 
 /** Factor 1 — Tekjur vs gjöld (30%): income/expense ratio */
