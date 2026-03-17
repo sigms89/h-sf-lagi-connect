@@ -2,7 +2,7 @@
 // useVendorDedup.ts
 // Finds duplicate/similar vendor names using fuzzy matching and
 // provides merge + dismiss actions. Uses local Levenshtein
-// implementation — no external library required.
+// implementation - no external library required.
 // ============================================================
 
 import { useState, useMemo } from 'react';
