@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AlertsWidgetNew: Compact Dashboard Widget
+// Húsfélagið.is: AlertsWidgetNew: Compact Dashboard Widget
 // Replaces the old AlertsWidget. Shows top 3 most severe
 // alerts with a "Sjá allt" link to the full alerts page.
 // ============================================================
