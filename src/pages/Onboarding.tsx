@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Onboarding Page
+// Húsfélagið.is: Onboarding Page
 // First-time setup wizard: create association + invite board members + upload first data
 // ============================================================
 
