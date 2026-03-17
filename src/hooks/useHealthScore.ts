@@ -60,7 +60,7 @@ function factorStatus(score: number): 'good' | 'warning' | 'critical' {
 // Factor calculators - ALL scores are Math.round()'d
 // ---------------------------------------------------------------
 
-/** Factor 1 — Tekjur vs gjöld (30%): income/expense ratio */
+/** Factor 1: Tekjur vs gjöld (30%): income/expense ratio */
 function calcIncomeExpense(txs: TxRow[]): HealthScoreFactor {
   const totalIncome = txs.filter((t) => t.is_income).reduce((s, t) => s + Math.abs(t.amount), 0);
   const totalExpense = txs.filter((t) => !t.is_income).reduce((s, t) => s + Math.abs(t.amount), 0);
