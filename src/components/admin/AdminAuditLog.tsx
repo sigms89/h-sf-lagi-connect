@@ -122,7 +122,7 @@ function MetadataDialog({ entry, onClose }: MetadataDialogProps) {
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-24 flex-shrink-0">Eininga-ID:</span>
-            <span className="font-mono text-[11px] break-all">{entry.entity_id ?? '—'}</span>
+            <span className="font-mono text-[11px] break-all">{entry.entity_id ?? '-'}</span>
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-24 flex-shrink-0">Tími:</span>
