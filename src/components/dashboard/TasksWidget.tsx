@@ -173,7 +173,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
             </div>
           )}
 
-          {/* OPIN — Open (teal) */}
+          {/* OPIN - Open (teal) */}
           {displayedOpen.length > 0 && (
             <div className="space-y-1.5">
               <p className="text-[11px] font-semibold tracking-wider uppercase text-secondary">
