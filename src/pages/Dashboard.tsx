@@ -122,12 +122,18 @@ const Dashboard = () => {
       ? 'Nokkur atriði þarfnast athygli'
       : 'Viðbrögð þarf';
 
-  // ── Hero border color ──────────────────────────────────────
-  const heroBorderColor = score >= 75
-    ? 'border-l-emerald-400'
+  // ── Hero glow + dot colors ──────────────────────────────────
+  const glowColor = score >= 75
+    ? 'bg-emerald-400'
     : score >= 50
-      ? 'border-l-amber-400'
-      : 'border-l-rose-400';
+      ? 'bg-amber-400'
+      : 'bg-rose-400';
+
+  const dotColor = score >= 75
+    ? 'bg-emerald-500'
+    : score >= 50
+      ? 'bg-amber-500'
+      : 'bg-rose-500';
 
 
   // ── Chart insight ──────────────────────────────────────────
