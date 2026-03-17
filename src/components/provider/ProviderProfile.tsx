@@ -1,13 +1,15 @@
 // ============================================================
 // Húsfélagið.is — ProviderProfile
-// Edit form for service provider profile
+// Edit form for service provider profile + portfolio + reviews
 // ============================================================
 
 import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ImagePlus, Loader2, MapPin, Upload } from 'lucide-react';
+import { format } from 'date-fns';
+import { is as isLocale } from 'date-fns/locale';
+import { ImagePlus, Loader2, MapPin, MessageSquare, Plus, Star, Trash2, Upload } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -23,12 +25,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ServiceProvider } from '@/types/database';
 import { useUpdateProvider } from '@/hooks/useServiceProvider';
 import { useCategories } from '@/hooks/useCategories';
 import { getCategoryColor } from '@/lib/categories';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useProviderReviews, useRespondToReview } from '@/hooks/useProviderReviews';
+import { usePortfolioImages, useUploadPortfolioImage, useDeletePortfolioImage } from '@/hooks/useProviderPortfolio';
 
 const profileSchema = z.object({
   company_name: z.string().min(2, 'Nafn þarf að vera að minnsta kosti 2 stafir'),
