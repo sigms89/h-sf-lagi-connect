@@ -1,0 +1,1 @@
+UPDATE public.tasks SET title = REPLACE(title, ' — ', ', ') WHERE title LIKE '%—%';
