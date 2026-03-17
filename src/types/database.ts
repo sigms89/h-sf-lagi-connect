@@ -257,3 +257,32 @@ export interface AppNotification {
   related_entity_id: string | null;
   created_at: string;
 }
+
+// ============================================================
+// Provider Reviews & Portfolio
+// ============================================================
+
+export interface ProviderReview {
+  id: string;
+  provider_id: string;
+  association_id: string;
+  bid_request_id: string;
+  created_by: string;
+  rating: number;
+  comment: string | null;
+  provider_response: string | null;
+  response_at: string | null;
+  created_at: string;
+  updated_at: string;
+  association_num_units?: number;
+  association_postal_code?: string | null;
+}
+
+export interface PortfolioImage {
+  id: string;
+  provider_id: string;
+  image_url: string;
+  caption: string | null;
+  sort_order: number;
+  created_at: string;
+}
