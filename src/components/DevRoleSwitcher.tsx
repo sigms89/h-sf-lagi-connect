@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bug, ChevronDown, Check, Sprout, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/integrations/supabase/db";
@@ -24,6 +25,7 @@ const ROLES = [
 
 export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [switching, setSwitching] = useState(false);
   const [seeding, setSeeding] = useState(false);
@@ -67,6 +69,11 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
         `Hlutverk breytt í: ${ROLES.find((r) => r.value === role)?.label}`,
         { description: "Síðan uppfærist sjálfkrafa." }
       );
+
+      // Redirect to correct home page for the new role
+      if (role === 'service_provider') navigate('/provider');
+      else if (role === 'super_admin') navigate('/admin');
+      else navigate('/');
     } catch (e: any) {
       toast.error(`Villa: ${e.message}`);
     } finally {
