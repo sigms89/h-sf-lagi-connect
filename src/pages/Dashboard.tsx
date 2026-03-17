@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is: Dashboard v3
-// Financial advisor style: hero card, action items, trend, bottom row
+// Húsfélagið.is: Dashboard v4
+// Dark mode + Bento grid + Bold typography + Glassmorphism
 // ============================================================
 
 import { useCurrentAssociation } from '@/hooks/useAssociation';
@@ -19,13 +19,12 @@ import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
+import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Upload,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +44,7 @@ const Dashboard = () => {
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
   useAutoTasks(association?.id);
 
-  // Check role for redirect (use shared profile hook pattern)
+  // Check role for redirect
   const { data: dashProfile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async (): Promise<Profile | null> => {
@@ -57,7 +56,6 @@ const Dashboard = () => {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Redirect provider and admin to their respective dashboards
   if (dashProfile?.role_type === 'service_provider') {
     return <Navigate to="/provider" replace />;
   }
@@ -122,19 +120,12 @@ const Dashboard = () => {
       ? 'Nokkur atriði þarfnast athygli'
       : 'Viðbrögð þarf';
 
-  // ── Hero glow + dot colors ──────────────────────────────────
-  const glowColor = score >= 75
+  // ── Status dot color ───────────────────────────────────────
+  const dotColor = score >= 75
     ? 'bg-emerald-400'
     : score >= 50
       ? 'bg-amber-400'
       : 'bg-rose-400';
-
-  const dotColor = score >= 75
-    ? 'bg-emerald-500'
-    : score >= 50
-      ? 'bg-amber-500'
-      : 'bg-rose-500';
-
 
   // ── Chart insight ──────────────────────────────────────────
   const monthlyData = stats?.monthly_data ?? [];
@@ -160,7 +151,7 @@ const Dashboard = () => {
 
       {/* ── Empty state ───────────────────────────────────── */}
       {!isLoading && !hasData && (
-        <div className="rounded-lg border border-dashed border-border py-16 text-center">
+        <div className="glass-card rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] py-16 text-center">
           <Upload className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
           <h3 className="font-semibold text-foreground">Engin gögn ennþá</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
@@ -175,50 +166,97 @@ const Dashboard = () => {
 
       {(isLoading || hasData) && (
         <>
-          {/* ═══ SECTION 1: HERO CARD ═══════════════════════ */}
-          <Card className="relative overflow-hidden">
-            {/* Radial glow */}
-            <div className={`absolute -top-16 -left-16 w-56 h-56 rounded-full blur-3xl opacity-[0.18] pointer-events-none ${glowColor}`} />
-            <CardContent className="relative p-6">
-              {isLoading || healthLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-6 w-48" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-8 w-64" />
-                </div>
-              ) : (
-                <div className="flex flex-col lg:flex-row gap-8">
-                  {/* Left — Summary */}
-                  <div className="flex-1 min-w-0 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
-                      <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
-                    </div>
-                    <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
+          {/* ═══ BENTO ROW 1: Hero (2col) + Quick Stats (1col) ═══ */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Hero card — spans 2 columns */}
+            <Card className="lg:col-span-2 animate-fade-in">
+              <CardContent className="p-6">
+                {isLoading || healthLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-8 w-64" />
                   </div>
-                  {/* Right — Status Summary */}
-                  {healthData && (
-                    <div className="w-full lg:w-80 flex-shrink-0">
-                      <StatusSummary healthData={healthData} />
+                ) : (
+                  <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Left — Summary */}
+                    <div className="flex-1 min-w-0 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor} shadow-[0_0_8px_currentColor]`} />
+                        <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
+                      </div>
+                      <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
                     </div>
-                  )}
-                </div>
+                    {/* Right — Status Summary */}
+                    {healthData && (
+                      <div className="w-full lg:w-80 flex-shrink-0">
+                        <StatusSummary healthData={healthData} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick stats card */}
+            <div className="flex flex-col gap-4 animate-fade-in stagger-1">
+              {taskStats && (taskStats.doneCount > 0 || taskStats.openCount > 0) && (
+                <Card>
+                  <CardContent className="p-5">
+                    <span className="card-label">Verkefni (30 dagar)</span>
+                    <div className="flex items-baseline gap-3 mt-2">
+                      <span className="kpi-number text-foreground">{taskStats.doneCount}</span>
+                      <span className="text-sm text-muted-foreground">kláruð</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      📋 {taskStats.openCount} opin verkefni
+                    </p>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
+              <BalanceCard
+                label="Sjóðsstaða"
+                amount={currentBalance}
+                isLoading={isLoading}
+                type="balance"
+                subtitle={avgMonthlyExpense > 0 ? `${balanceMonths} mán. stuðpúði` : undefined}
+              />
+            </div>
+          </div>
 
-          {/* ── Task completion stats ─────────────────────── */}
-          {taskStats && (taskStats.doneCount > 0 || taskStats.openCount > 0) && (
-            <p className="text-sm text-zinc-500">
-              ✅ {taskStats.doneCount} verkefni kláruð síðastliðna 30 daga · 📋 {taskStats.openCount} opin verkefni
-            </p>
-          )}
+          {/* ═══ BENTO ROW 2: KPI Cards ═══════════════════════ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="animate-fade-in stagger-2">
+              <BalanceCard
+                label="Tekjur"
+                amount={stats?.total_income}
+                isLoading={isLoading}
+                type="income"
+              />
+            </div>
+            <div className="animate-fade-in stagger-3">
+              <BalanceCard
+                label="Gjöld"
+                amount={stats?.total_expenses}
+                isLoading={isLoading}
+                type="expense"
+              />
+            </div>
+            <div className="animate-fade-in stagger-4">
+              <BalanceCard
+                label="Nettó"
+                amount={netBalance}
+                isLoading={isLoading}
+                type={netBalance >= 0 ? 'income' : 'expense'}
+              />
+            </div>
+          </div>
 
-          {/* ═══ SECTION 2: TASKS ═══════════════════════════ */}
+          {/* ═══ SECTION: TASKS ═══════════════════════════════ */}
           <TasksWidget associationId={association?.id} />
 
-          {/* ═══ SECTION 3: TREND CHART ═════════════════════ */}
-          <Card>
+          {/* ═══ SECTION: TREND CHART (full width) ════════════ */}
+          <Card className="animate-fade-in stagger-5">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Mánaðarleg þróun</CardTitle>
@@ -236,9 +274,8 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* ═══ SECTION 4: BOTTOM ROW ══════════════════════ */}
+          {/* ═══ BOTTOM ROW: Txns (3col) + Categories (2col) ══ */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            {/* Recent transactions */}
             <Card className="lg:col-span-3">
               <CardHeader>
                 <CardTitle>Nýlegar færslur</CardTitle>
@@ -254,7 +291,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Top expense categories */}
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Stærstu gjaldaliðir</CardTitle>
@@ -275,8 +311,8 @@ const Dashboard = () => {
                           <span className="text-[13px] text-foreground truncate">{cat.category_name}</span>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                          <div className="w-14 h-1 rounded-full bg-muted overflow-hidden">
-                            <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
+                          <div className="w-14 h-1 rounded-full bg-secondary overflow-hidden">
+                            <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
                           </div>
                           <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">{cat.percentage.toFixed(0)}%</span>
                         </div>
