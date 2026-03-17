@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Admin Extended Hooks (NEW)
+// Húsfélagið.is: Admin Extended Hooks (NEW)
 // TanStack Query hooks for new admin tabs:
 // Audit log, Users, Categories (CRUD + merge), Bid requests
 // ============================================================
