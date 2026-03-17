@@ -690,7 +690,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-base">
-                  Forskoðun — {enriched.length} færslur
+                  Forskoðun · {enriched.length} færslur
                   {testMode && (
                     <Badge variant="outline" className="ml-2 text-xs font-normal">Prófunarhamur</Badge>
                   )}
