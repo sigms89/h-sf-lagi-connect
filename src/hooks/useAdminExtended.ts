@@ -233,7 +233,7 @@ export function useAllUsers(search?: string, page = 1, pageSize = 25) {
         };
       }
 
-      // No search — use server-side pagination
+      // No search - use server-side pagination
       query = query.range(from, to);
       const { data, error, count } = await query;
       if (error) throw error;
