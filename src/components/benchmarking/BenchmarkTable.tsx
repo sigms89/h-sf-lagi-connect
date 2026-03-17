@@ -103,7 +103,7 @@ export function BenchmarkTable({ rows, isLoading, associationId }: BenchmarkTabl
                   </TableCell>
                   <TableCell className="text-sm tabular-nums text-muted-foreground">
                     {isInsufficient
-                      ? <span className="text-xs italic">—</span>
+                      ? <span className="text-xs italic">-</span>
                       : <span>{formatIskAmount(row.p25 ?? 0, true)} – {formatIskAmount(row.p75 ?? 0, true)}</span>
                     }
                   </TableCell>
