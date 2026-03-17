@@ -465,7 +465,7 @@ export default function Onboarding() {
               <InviteForm associationId={createdAssociationId} />
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(4)}>
-                  Sleppa — boða síðar
+                  Sleppa, boða síðar
                 </Button>
                 <Button onClick={() => setStep(4)} className="flex-1">
                   Áfram
