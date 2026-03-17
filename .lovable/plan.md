@@ -1,99 +1,111 @@
 
 
+# Hönnunarkerfi 2.0: Dark Mode + Glassmorphism + Aurora + Bento
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
-
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
-
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
-
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
-
-### 2. ProtectedRoute — röng fyrirspurn á profiles
-
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
-
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
-
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
-
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
-
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
-
-### 4. Console viðvörun — Badge ref í Settings
-
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
-
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
-
-### 5. TimeRange hefur ekki áhrif á gagnasótt
-
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
+Þetta er stór umbreyting. Núverandi kerfi er light-mode Mercury/Linear stíll. Nýja kerfið verður dark-mode-first með glassmorphism spjöldum, aurora bakgrunni og bento grid. Skiptum í 3 fasa til að halda verkefninu stöðugu.
 
 ---
 
-### Forgangsröðun
+## Fasi 1: Grunnkerfi (CSS variables + dark mode sem default)
 
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
+**`src/index.css`** — Endurskrifa CSS breyturnar:
+- Snúa við: dark mode verður `:root`, light mode fer í `.light`
+- Nýir bakgrunnslitir: `#0f0f1a` (base), `#1a1a2e` (cards), `#252540` (elevated)
+- Glassmorphism breytur: `--glass-bg`, `--glass-border`, `--glass-blur`
+- Aurora gradient breytur fyrir bakgrunn
+- Uppfæra skugga til að virka á dökku: innri glow í stað drop-shadow
 
----
+**`index.html`** — Bæta `class="dark"` á `<html>` (eða fjarlægja dark class logic og gera dark sem default)
 
-## Yfirferðarskýrsla 2: Heildarúttekt
+**`tailwind.config.ts`** — Bæta við:
+- `glass` boxShadow og backdrop-blur utilities
+- Nýjar keyframes: `aurora-shift` (mjúk bakgrunnshreyfing), `count-up`, `lift`
+- Nýjar animations: `hover-lift`, `press`, `stagger-in`
 
-| # | Verkefni | Alvarleiki | Staða |
-|---|---------|-----------|-------|
-| 1 | Loka profiles UPDATE RLS gegn role_type breytingum | Hátt (öryggi) | ✅ Leyst |
-| 2 | Bæta við RLS takmörkunum á categories töfluna | Hátt (öryggi) | ✅ Leyst |
-| 3 | Em-dash hreinsun (notenda-sýnileg) | Meðal | ✅ Leyst |
-| 4 | Laga `in_progress` → `waiting` í useAutoTasks dedup | Meðal | ✅ Leyst |
-| 5 | Bæta `.limit(10000)` á useHealthScore og useClassification | Meðal | ✅ Leyst |
-| 6 | Laga mánaðarleg þróun til að virða tímabilsval | Meðal | ✅ Leyst |
-| 7 | Dashboard avgMonthlyExpense miðast við valið tímabil | Meðal | ✅ Leyst |
-| 8 | Laga dummy boðskerfi (fjarlægja random UUID) | Meðal | ✅ Leyst |
-| 9 | Admin flipar í URL query params | Lágt | ✅ Leyst |
-| 10 | Bæta við Error Boundary | Lágt | ✅ Leyst |
-| 11 | Skipta notification polling yfir í Realtime | Lágt | ✅ Leyst |
-| 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
-| 13 | Herða bid_messages RLS (aðeins þátttakendur) | Meðal (öryggi) | ✅ Leyst |
-| 14 | Eyða tvíteknu NotificationBell skrá | Lágt | ✅ Leyst |
+**`src/components/ui/card.tsx`** — Glassmorphism card:
+- `bg-white/[0.06]` + `backdrop-blur-xl` + `border border-white/[0.08]`
+- `shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]`
+- Hover: `hover:bg-white/[0.09] hover:border-white/[0.12]` + translateY(-1px)
 
 ---
 
-## Yfirferðarskýrsla 3: Rökfræði, upplifun og virkni
+## Fasi 2: Layout + Aurora bakgrunnur
 
-| # | Verkefni | Alvarleiki | Staða |
-|---|---------|-----------|-------|
-| 1 | Laga Admin sidebar tab links til að matcha tab values | Hátt (brotið) | ✅ Leyst |
-| 2 | Laga DevRoleSwitcher conflict við trigger | Hátt (brotið) | ✅ Leyst |
-| 3 | Laga `isAdmin={true}` í Marketplace | Hátt (UX/öryggi) | ✅ Leyst |
-| 4 | Laga profiles SELECT RLS svo meðlimir sjái nöfn annarra | Hátt (brotið) | ✅ Leyst |
-| 5 | Laga MinVerkefni FK join | Meðal | ✅ Leyst |
-| 6 | Laga ReportsPage avgMonthly / 12 bug | Meðal | ✅ Leyst |
-| 7 | Bæta við "Gleymt lykilorð" flæði á Auth síðu | Meðal | ✅ Leyst |
-| 8 | Fela DevRoleSwitcher í production | Meðal (öryggi) | ✅ Leyst |
-| 9 | Bæta við DELETE á notifications | Lágt | ✅ Leyst |
-| 10 | Laga staleTime: 0 á profile queries | Lágt | ✅ Leyst |
-| 11 | Láta useVendorAnalytics virða tímabilsval | Meðal | ✅ Leyst |
-| 12 | Klára em-dash hreinsun í athugasemdum (294 tilvik) | Lágt | 🔲 Eftir |
-| 13 | Sameina profile queries í shared hook / queryKey | Lágt | ✅ Leyst |
+**`src/layouts/AppLayout.tsx`**:
+- Bakgrunnur fær aurora mesh gradient: 2-3 `radial-gradient` lög með indigo/violet/teal á mjúkri opacity
+- `background-attachment: fixed` svo gradientinn hreyfist ekki við scroll
+- Header: `bg-[#0f0f1a]/80 backdrop-blur-md` í stað `bg-card/80`
+
+**`src/components/AppSidebar.tsx`**:
+- Sidebar bakgrunnur: `#0d0d18` (dýpri en aðalbakgrunnur)
+- Active item: mjúkt glow í stað border-left accent
+- Hover: `bg-white/[0.04]`
+
+**`src/pages/Auth.tsx`**:
+- Full-screen aurora bakgrunnur
+- Innskráningarform á glassmorphism card
+
+---
+
+## Fasi 3: Dashboard Bento Grid + Micro-interactions + Typography
+
+**`src/pages/Dashboard.tsx`** — Bento grid:
+```text
+┌─────────────────────┬──────────┐
+│                     │  Quick   │
+│   Hero / KPI        │  Action  │
+│   (2 cols)          │  (1 col) │
+├────────┬────────┬───┴──────────┤
+│ Balance│ Income │   Expense    │
+│ card   │ card   │   card       │
+├────────┴────────┴──────────────┤
+│      Monthly Trend Chart       │
+├──────────────────┬─────────────┤
+│  Recent Txns     │ Top Cats    │
+│  (3 cols)        │ (2 cols)    │
+└──────────────────┴─────────────┘
+```
+
+**Typography hierarchy**:
+- KPI tölur (sjóðsstaða, tekjur, gjöld): `text-4xl font-bold` eða stærra
+- Section headings: `text-base font-semibold`
+- Card labels: `text-[11px] uppercase tracking-widest text-white/40`
+- Body: `text-sm text-white/60`
+
+**Micro-interactions** (bæta við í tailwind.config.ts og beita):
+- Cards: `transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover`
+- Buttons: `active:scale-[0.97]` press effect
+- Page load: stagger fade-in á cards (`animation-delay`)
+- `@media (prefers-reduced-motion: reduce)` — slökkva á öllu
+
+**`src/components/dashboard/BalanceCard.tsx`**:
+- Stór tala: `text-3xl lg:text-4xl font-bold tabular-nums`
+- Label: `text-[11px] uppercase tracking-widest text-white/40`
+- Icon fær mjúkt glow í bakgrunni
+
+---
+
+## Skrár sem breytast
+
+| Skrá | Breyting |
+|------|---------|
+| `index.html` | Bæta `class="dark"` á html |
+| `src/index.css` | Ný litakerfi, glass utilities, aurora keyframes |
+| `tailwind.config.ts` | Nýjar animations, glass shadows |
+| `src/components/ui/card.tsx` | Glassmorphism stíll |
+| `src/layouts/AppLayout.tsx` | Aurora bakgrunnur, dark header |
+| `src/components/AppSidebar.tsx` | Dark sidebar, glow active state |
+| `src/pages/Dashboard.tsx` | Bento grid, bold typography, micro-interactions |
+| `src/pages/Auth.tsx` | Aurora bakgrunnur, glass card |
+| `src/components/dashboard/BalanceCard.tsx` | Stærri tölur, glass stíll |
+
+---
+
+## Mikilvægt
+
+- **Öll núverandi virkni helst óbreytt** — þetta er eingöngu visuell umbreyting
+- Dark mode verður sjálfgefið en light mode variables verða geymdar (hægt að virkja síðar)
+- `prefers-reduced-motion` verður virt
+- Allar financial semantic litir (teal/rose) virka á dökku og haldast
+- Framkvæmd fer í einni lotu (öll 3 fasa saman) til að forðast blandað útlit
+
