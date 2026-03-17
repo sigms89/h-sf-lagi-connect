@@ -1,5 +1,5 @@
 // ============================================================
-// TaskDetailPage — Full task detail with comments
+// TaskDetailPage: Full task detail with comments
 // ============================================================
 
 import { useState } from 'react';
