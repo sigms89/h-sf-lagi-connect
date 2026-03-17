@@ -193,7 +193,7 @@ export function TasksWidget({ associationId }: TasksWidgetProps) {
             </div>
           )}
 
-          {/* LOKIÐ NÝLEGA — Recently done (green, collapsed) */}
+          {/* LOKIÐ NÝLEGA - Recently done (green, collapsed) */}
           {recentlyDone.length > 0 && (
             <Collapsible open={doneOpen} onOpenChange={setDoneOpen}>
               <CollapsibleTrigger asChild>

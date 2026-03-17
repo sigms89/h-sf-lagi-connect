@@ -95,7 +95,7 @@ function formatISK(amount: number): string {
 }
 
 // ============================================================
-// BidDetail — expanded row showing bids for a bid_request
+// BidDetail: expanded row showing bids for a bid_request
 // ============================================================
 
 interface BidDetailProps {

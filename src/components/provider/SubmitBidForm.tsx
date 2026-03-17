@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — SubmitBidForm
+// Húsfélagið.is: SubmitBidForm
 // Dialog form for a provider to submit a bid
 // ============================================================
 

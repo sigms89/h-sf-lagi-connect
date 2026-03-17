@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AppSidebar v4
+// Húsfélagið.is: AppSidebar v4
 // Role-based navigation: association, provider, admin
 // ============================================================
 import {

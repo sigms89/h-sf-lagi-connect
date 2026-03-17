@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AdminStatsGrid (REPLACE)
+// Húsfélagið.is: AdminStatsGrid (REPLACE)
 // KPI cards for the super admin dashboard
 // Updated: real activeUsers, MRR card, Churn placeholder (7 cards total)
 // ============================================================

@@ -64,7 +64,7 @@ const EMPTY_FORM: CategoryInsert = {
 };
 
 // ============================================================
-// CategoryForm — shared between create and edit dialogs
+// CategoryForm: shared between create and edit dialogs
 // ============================================================
 
 interface CategoryFormProps {

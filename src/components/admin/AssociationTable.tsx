@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — AssociationTable
+// Húsfélagið.is: AssociationTable
 // Full table of all associations for the admin panel
 // ============================================================
 
