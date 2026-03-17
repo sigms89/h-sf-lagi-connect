@@ -496,7 +496,7 @@ export function AdminCategoriesTab() {
                           />
                         )}
                         <span className="text-[10px] font-mono text-muted-foreground">
-                          {cat.color ?? '—'}
+                          {cat.color ?? '-'}
                         </span>
                       </div>
                     </TableCell>

@@ -112,7 +112,7 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative h-9 w-9"
-          aria-label={`Tilkynningar${unreadCount > 0 ? ` — ${unreadCount} ólesnar` : ''}`}
+          aria-label={`Tilkynningar${unreadCount > 0 ? `, ${unreadCount} ólesnar` : ''}`}
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
