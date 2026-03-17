@@ -69,6 +69,11 @@ export function DevRoleSwitcher({ collapsed }: { collapsed: boolean }) {
         `Hlutverk breytt í: ${ROLES.find((r) => r.value === role)?.label}`,
         { description: "Síðan uppfærist sjálfkrafa." }
       );
+
+      // Redirect to correct home page for the new role
+      if (role === 'service_provider') navigate('/provider');
+      else if (role === 'super_admin') navigate('/admin');
+      else navigate('/');
     } catch (e: any) {
       toast.error(`Villa: ${e.message}`);
     } finally {
