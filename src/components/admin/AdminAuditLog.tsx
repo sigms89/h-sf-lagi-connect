@@ -289,7 +289,7 @@ export function AdminAuditLog() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {entry.entity_type ?? '—'}
+                      {entry.entity_type ?? '-'}
                     </TableCell>
                     <TableCell className="text-[10px] font-mono text-muted-foreground max-w-[120px] truncate">
                       {entry.entity_id ?? '—'}
