@@ -160,7 +160,7 @@ export function useAssignTask() {
           .eq('user_id', assignTo)
           .maybeSingle();
         const targetName = targetProfile?.full_name ?? 'Notandi';
-        commentContent = `${currentName} úthlutar verkefni til ${targetName}`;
+        commentContent = `${currentName} úthlutaði verkefnið. Nýr ábyrgðaraðili: ${targetName}`;
       }
 
       // Insert system comment
@@ -171,7 +171,12 @@ export function useAssignTask() {
         is_system: true,
       });
 
-      return { isSelf, targetName: isSelf ? currentName : commentContent.split(' til ')[1] };
+      // Extract target name from the structured comment
+      const extractedName = isSelf ? currentName : (await (async () => {
+        const { data: tp } = await db.from('profiles').select('full_name').eq('user_id', assignTo).maybeSingle();
+        return tp?.full_name ?? 'Notandi';
+      })());
+      return { isSelf, targetName: extractedName };
     },
     onSuccess: (result, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
@@ -181,7 +186,7 @@ export function useAssignTask() {
       if (result?.isSelf) {
         toast.success('Þú ert nú eigandi þessa verkefnis ✓');
       } else {
-        toast.success(`Verkefni úthlutað ${result?.targetName}`);
+        toast.success(`Verkefni úthlutað. Ábyrgðaraðili: ${result?.targetName}`);
       }
     },
     onError: (error: Error) => {
