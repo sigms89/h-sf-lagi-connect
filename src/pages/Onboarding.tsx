@@ -44,7 +44,7 @@ const onboardingSchema = z.object({
   city: z.string().default('Reykjavík'),
   num_units: z.number().int().min(1, 'Þarf að vera a.m.k. 1 íbúð').max(999),
   type: z.enum(['fjolbyli', 'radhus', 'parhus']),
-  building_year: z.number({ required_error: 'Byggingarár vantar — nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ógilt byggingarár').max(2030, 'Ógilt byggingarár'),
+  building_year: z.number({ required_error: 'Byggingarár vantar, nauðsynlegt fyrir samanburð' }).int().min(1800, 'Ógilt byggingarár').max(2030, 'Ógilt byggingarár'),
   has_elevator: z.boolean(),
   has_parking: z.boolean(),
   num_floors: z.number().int().min(1),
