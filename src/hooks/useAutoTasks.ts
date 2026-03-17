@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — useAutoTasks
+// Húsfélagið.is: useAutoTasks
 // Auto-creates tasks from financial alert conditions on load.
 // Dedup uses category + related_entity_id to avoid duplicates.
 // ============================================================
