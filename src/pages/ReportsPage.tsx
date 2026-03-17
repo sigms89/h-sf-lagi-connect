@@ -231,7 +231,7 @@ export default function ReportsPage() {
   const { data: healthScore } = useHealthScore(associationId) as {
     data: HealthScoreResult | null | undefined;
   };
-  const { data: vendors } = useVendorAnalytics(associationId) as {
+  const { data: vendors } = useVendorAnalytics(associationId, range.from) as {
     data: VendorStat[] | null | undefined;
   };
   const { data: alerts } = useFinancialAlerts(associationId) as {

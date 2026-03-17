@@ -45,16 +45,16 @@ const Dashboard = () => {
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
   useAutoTasks(association?.id);
 
-  // Check role for redirect
+  // Check role for redirect (use shared profile hook pattern)
   const { data: dashProfile } = useQuery({
-    queryKey: ['profile-dash-redirect', user?.id],
+    queryKey: ['profile', user?.id],
     queryFn: async (): Promise<Profile | null> => {
       if (!user) return null;
-      const { data } = await db.from('profiles').select('role_type').eq('user_id', user.id).maybeSingle();
+      const { data } = await db.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
       return data as Profile | null;
     },
     enabled: !!user,
-    staleTime: 0,
+    staleTime: 2 * 60 * 1000,
   });
 
   // Redirect provider and admin to their respective dashboards
