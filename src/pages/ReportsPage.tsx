@@ -338,7 +338,7 @@ export default function ReportsPage() {
                   </p>
                 )}
                 <p className="text-sm text-gray-400 mt-1">
-                  Tímabil: {timeRangeLabel ?? "—"}
+                  Tímabil: {timeRangeLabel ?? "-"}
                 </p>
               </div>
 
