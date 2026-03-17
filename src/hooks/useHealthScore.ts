@@ -181,7 +181,7 @@ function calcPaymentRate(txs: TxRow[]): HealthScoreFactor {
 }
 
 /**
- * Factor 4 — Viðvaranir (15%)
+ * Factor 4: Viðvaranir (15%)
  */
 function calcAlerts(txs: TxRow[]): HealthScoreFactor {
   const now = new Date();
