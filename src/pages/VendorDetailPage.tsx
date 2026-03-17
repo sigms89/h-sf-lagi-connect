@@ -66,7 +66,7 @@ function pctChange(prev: number, curr: number): number | null {
 }
 
 function PctBadge({ pct }: { pct: number | null }) {
-  if (pct === null) return <span className="text-muted-foreground">—</span>;
+  if (pct === null) return <span className="text-muted-foreground">-</span>;
   const up = pct > 0;
   const neutral = Math.abs(pct) < 0.5;
   return (
