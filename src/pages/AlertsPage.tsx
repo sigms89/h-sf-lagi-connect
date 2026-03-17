@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — Alerts Page wrapper
+// Húsfélagið.is: Alerts Page wrapper
 // ============================================================
 
 import { useCurrentAssociation } from '@/hooks/useAssociation';

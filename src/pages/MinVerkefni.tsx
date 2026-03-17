@@ -1,5 +1,5 @@
 // ============================================================
-// Mín Verkefni — Personal task view grouped by time
+// Mín Verkefni: Personal task view grouped by time
 // ============================================================
 
 import { useMemo } from "react";

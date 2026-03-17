@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — BenchmarkWidget
+// Húsfélagið.is: BenchmarkWidget
 // Dashboard widget linking to the benchmarking page
 // ============================================================
 
