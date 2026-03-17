@@ -70,8 +70,10 @@
 | 5 | Bæta `.limit(10000)` á useHealthScore og useClassification | Meðal | ✅ Leyst |
 | 6 | Laga mánaðarleg þróun til að virða tímabilsval | Meðal | ✅ Leyst |
 | 7 | Dashboard avgMonthlyExpense miðast við valið tímabil | Meðal | ✅ Leyst |
-| 8 | Innleiða raunverulegt boðskerfi (invite flow) | Meðal | 🔲 Eftir |
+| 8 | Laga dummy boðskerfi (fjarlægja random UUID) | Meðal | ✅ Leyst |
 | 9 | Admin flipar í URL query params | Lágt | ✅ Leyst |
 | 10 | Bæta við Error Boundary | Lágt | ✅ Leyst |
 | 11 | Skipta notification polling yfir í Realtime | Lágt | ✅ Leyst |
 | 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
+| 13 | Herða bid_messages RLS (aðeins þátttakendur) | Meðal (öryggi) | ✅ Leyst |
+| 14 | Eyða tvíteknu NotificationBell skrá | Lágt | ✅ Leyst |
