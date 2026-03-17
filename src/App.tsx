@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is — App Root with Routes (v2: restructured nav)
+// Húsfélagið.is — App Root with Routes (v3: role-based nav)
 // ============================================================
 
 import { Toaster } from "@/components/ui/toaster";
@@ -21,6 +21,9 @@ import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
 import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
+import ProviderRequests from "@/pages/ProviderRequests";
+import ProviderBidsPage from "@/pages/ProviderBidsPage";
+import ProviderProfilePage from "@/pages/ProviderProfilePage";
 import ProviderRegister from "@/pages/ProviderRegister";
 import ProviderPublicProfile from "@/components/marketplace/ProviderPublicProfile";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
@@ -60,6 +63,12 @@ const App = () => (
             <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
             <Route path="/marketplace/provider/:providerId" element={<ProtectedRoute><AppLayout><ProviderPublicProfile /></AppLayout></ProtectedRoute>} />
 
+            {/* Provider routes */}
+            <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
+            <Route path="/provider/requests" element={<ProtectedRoute><AppLayout><ProviderRequests /></AppLayout></ProtectedRoute>} />
+            <Route path="/provider/bids" element={<ProtectedRoute><AppLayout><ProviderBidsPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/provider/profile" element={<ProtectedRoute><AppLayout><ProviderProfilePage /></AppLayout></ProtectedRoute>} />
+
             {/* Legacy redirects → /financials with correct tab */}
             <Route path="/transactions" element={<Navigate to="/financials?tab=faerslur" replace />} />
             <Route path="/classification" element={<Navigate to="/financials?tab=flokkun" replace />} />
@@ -71,7 +80,6 @@ const App = () => (
             <Route path="/upload" element={<ProtectedRoute><AppLayout><Upload /></AppLayout></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
-            <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
             <Route path="/vendors/:vendorName" element={<ProtectedRoute><AppLayout><VendorDetailPage /></AppLayout></ProtectedRoute>} />
             <Route path="/tasks/:taskId" element={<ProtectedRoute><AppLayout><TaskDetailPage /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

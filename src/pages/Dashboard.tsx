@@ -11,6 +11,9 @@ import { useHealthScore } from '@/hooks/useHealthScore';
 import { useAutoTasks } from '@/hooks/useAutoTasks';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '@/integrations/supabase/db';
+import { useAuth } from '@/hooks/useAuth';
+import { Navigate } from 'react-router-dom';
+import type { Profile } from '@/types/database';
 import { StatusSummary } from '@/components/dashboard/StatusSummary';
 import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
@@ -31,6 +34,7 @@ import { formatIskAmount } from '@/lib/categories';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: association, isLoading: assocLoading } = useCurrentAssociation();
   const { range, label } = useTimeRange();
   const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
@@ -40,6 +44,26 @@ const Dashboard = () => {
   });
   const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
   useAutoTasks(association?.id);
+
+  // Check role for redirect
+  const { data: dashProfile } = useQuery({
+    queryKey: ['profile-dash-redirect', user?.id],
+    queryFn: async (): Promise<Profile | null> => {
+      if (!user) return null;
+      const { data } = await db.from('profiles').select('role_type').eq('user_id', user.id).maybeSingle();
+      return data as Profile | null;
+    },
+    enabled: !!user,
+    staleTime: 0,
+  });
+
+  // Redirect provider and admin to their respective dashboards
+  if (dashProfile?.role_type === 'service_provider') {
+    return <Navigate to="/provider" replace />;
+  }
+  if (dashProfile?.role_type === 'super_admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   // Task completion stats
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
