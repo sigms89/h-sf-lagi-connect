@@ -186,7 +186,7 @@ export function useAssignTask() {
       if (result?.isSelf) {
         toast.success('Þú ert nú eigandi þessa verkefnis ✓');
       } else {
-        toast.success(`Verkefni úthlutað ${result?.targetName}`);
+        toast.success(`Verkefni úthlutað. Ábyrgðaraðili: ${result?.targetName}`);
       }
     },
     onError: (error: Error) => {

@@ -88,7 +88,7 @@ export function useAutoTasks(associationId: string | undefined) {
 
           tasksToCreate.push({
             association_id: associationId,
-            title: `Senda áminningu til ${name} vegna húsgjalds ${month}`,
+            title: `Áminning: ${name}, húsgjald ${month}`,
             description: alert.description,
             priority: 'critical',
             category: 'vangreiðsla',

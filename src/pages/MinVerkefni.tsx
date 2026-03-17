@@ -121,7 +121,7 @@ export default function MinVerkefni() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <ClipboardList className="h-12 w-12 text-muted-foreground/40 mb-4" />
           <p className="text-lg font-semibold text-foreground">Ekkert á þínum borði 🎉</p>
-          <p className="text-sm text-muted-foreground mt-1">Engin verkefni eru úthlutað til þín núna.</p>
+          <p className="text-sm text-muted-foreground mt-1">Engin verkefni á þínum borði núna.</p>
         </div>
       )}
 
