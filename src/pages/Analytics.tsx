@@ -308,7 +308,7 @@ export default function AnalyticsPage() {
           {statsLoading ? (
             <div className="space-y-3">{[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
           ) : (stats?.category_breakdown ?? []).length === 0 ? (
-            <div className="py-8 text-center text-sm text-zinc-500">Engar færslur enn — hlaðið upp gögnum til að sjá greiningu</div>
+            <div className="py-8 text-center text-sm text-zinc-500">Engar færslur enn, hlaðið upp gögnum til að sjá greiningu</div>
           ) : (
             <div className="space-y-2">
               {(stats?.category_breakdown ?? []).slice(0, 8).map((cat, i) => (

@@ -173,7 +173,7 @@ export function TransactionList({ associationId }: TransactionListProps) {
       <html><head><title>Færslur: ${association?.name ?? 'Húsfélag'}</title>
       <style>body{font-family:system-ui,sans-serif;padding:20px}table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:6px 8px;border-bottom:2px solid #333;font-weight:600}h1{font-size:16px;margin-bottom:4px}p{color:#666;font-size:12px;margin-bottom:16px}</style>
       </head><body>
-      <h1>Færslur — ${association?.name ?? ''}</h1>
+      <h1>Færslur: ${association?.name ?? ''}</h1>
       <p>Útflutningur ${new Date().toLocaleDateString('is-IS')}</p>
       <table>
         <thead><tr><th>Dagsetning</th><th>Lýsing</th><th style="text-align:right">Upphæð</th><th>Flokkur</th></tr></thead>
