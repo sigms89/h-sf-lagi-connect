@@ -114,7 +114,7 @@ export default function Admin() {
         <Badge variant="outline" className="text-xs ml-2">Super Admin</Badge>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })}>
         <TabsList className="flex-wrap h-auto">
           {/* 1. Yfirlit */}
           <TabsTrigger value="overview" className="gap-1.5">
