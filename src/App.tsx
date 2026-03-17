@@ -22,6 +22,7 @@ import Onboarding from "@/pages/Onboarding";
 import Admin from "@/pages/Admin";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRegister from "@/pages/ProviderRegister";
+import ProviderPublicProfile from "@/components/marketplace/ProviderPublicProfile";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
 import MinVerkefni from "@/pages/MinVerkefni";
