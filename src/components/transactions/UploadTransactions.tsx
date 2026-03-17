@@ -622,7 +622,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
               <CardContent className="pt-3 pb-3 flex items-start gap-2">
                 <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-800">
-                  Stórt gagnasett ({enriched.length} færslur) — forskoðun er síðuð ({PAGE_SIZE} línur/síðu) til að halda appi hröðu. Smelltu á flokk til að breyta honum.
+                  Stórt gagnasett ({enriched.length} færslur) · forskoðun er síðuð ({PAGE_SIZE} línur/síðu) til að halda appi hröðu. Smelltu á flokk til að breyta honum.
                 </p>
               </CardContent>
             </Card>
@@ -690,7 +690,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-base">
-                  Forskoðun — {enriched.length} færslur
+                  Forskoðun · {enriched.length} færslur
                   {testMode && (
                     <Badge variant="outline" className="ml-2 text-xs font-normal">Prófunarhamur</Badge>
                   )}

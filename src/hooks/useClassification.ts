@@ -75,7 +75,8 @@ export function useVendorSummary(associationId: string | null | undefined) {
         .from('transactions')
         .select(`id, description, amount, category:categories(name_is)`)
         .eq('association_id', associationId)
-        .order('description', { ascending: true });
+        .order('description', { ascending: true })
+        .limit(10000);
 
       if (txError) throw txError;
 
@@ -245,7 +246,7 @@ export function useRunAutoClassify() {
         txQuery = txQuery.is('category_id', null);
       }
 
-      const { data: txRows, error: txError } = await txQuery;
+      const { data: txRows, error: txError } = await txQuery.limit(10000);
       if (txError) throw txError;
 
       if (!txRows || txRows.length === 0) {

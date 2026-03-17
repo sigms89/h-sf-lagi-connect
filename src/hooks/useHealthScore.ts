@@ -312,16 +312,17 @@ function aggregateScore(factors: HealthScoreFactor[]): HealthScoreResult {
 // ---------------------------------------------------------------
 
 async function fetchHealthScore(associationId: string): Promise<HealthScoreResult> {
-  const { data: txs, error: txError } = await (db as any)
+  const { data: txs, error: txError } = await db
     .from('transactions')
     .select('amount, balance, is_income, is_individual_payment, date, category_id')
-    .eq('association_id', associationId);
+    .eq('association_id', associationId)
+    .limit(10000);
 
   if (txError) throw txError;
 
   const transactions: TxRow[] = txs ?? [];
 
-  const { data: cats, error: catError } = await (db as any)
+  const { data: cats, error: catError } = await db
     .from('categories')
     .select('id, name_is');
 

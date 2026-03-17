@@ -92,7 +92,8 @@ const Dashboard = () => {
 
   // ── Computed values ────────────────────────────────────────
   const score = healthData?.score ?? 0;
-  const avgMonthlyExpense = (stats?.total_expenses ?? 0) / 12;
+  const monthCount = stats?.monthly_data?.length || 12;
+  const avgMonthlyExpense = (stats?.total_expenses ?? 0) / monthCount;
   const currentBalance = stats?.current_balance ?? 0;
   const balanceMonths = avgMonthlyExpense > 0 ? (currentBalance / avgMonthlyExpense).toFixed(1) : '-';
   const isBalanceLow = currentBalance < avgMonthlyExpense && avgMonthlyExpense > 0;
@@ -147,7 +148,7 @@ const Dashboard = () => {
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Yfirlit</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          {association?.name ?? 'Húsfélagið þitt'} — {label}
+          {association?.name ?? 'Húsfélagið þitt'} · {label}
         </p>
       </div>
 
