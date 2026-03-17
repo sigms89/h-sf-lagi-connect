@@ -160,7 +160,7 @@ export function useAssignTask() {
           .eq('user_id', assignTo)
           .maybeSingle();
         const targetName = targetProfile?.full_name ?? 'Notandi';
-        commentContent = `${currentName} úthlutar verkefni til ${targetName}`;
+        commentContent = `${currentName} úthlutaði verkefnið. Nýr ábyrgðaraðili: ${targetName}`;
       }
 
       // Insert system comment
