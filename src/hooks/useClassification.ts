@@ -75,7 +75,8 @@ export function useVendorSummary(associationId: string | null | undefined) {
         .from('transactions')
         .select(`id, description, amount, category:categories(name_is)`)
         .eq('association_id', associationId)
-        .order('description', { ascending: true });
+        .order('description', { ascending: true })
+        .limit(10000);
 
       if (txError) throw txError;
 
