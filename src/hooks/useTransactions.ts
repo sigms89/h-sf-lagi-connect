@@ -151,7 +151,14 @@ export function useTransactionStats(associationId: string | null | undefined, da
       }
 
       const monthlyMap = new Map<string, MonthlyData>();
-      for (let i = 11; i >= 0; i--) {
+      // Calculate number of months from the effective date range
+      const fromDate = new Date(effectiveFrom);
+      const now = new Date();
+      const monthCount = Math.max(1, Math.min(
+        Math.ceil((now.getTime() - fromDate.getTime()) / (30.44 * 24 * 60 * 60 * 1000)),
+        60 // cap at 5 years
+      ));
+      for (let i = monthCount - 1; i >= 0; i--) {
         const d = subMonths(new Date(), i);
         const key = format(d, 'yyyy-MM');
         monthlyMap.set(key, { month: key, month_label: format(d, 'MMM yyyy', { locale: is }), income: 0, expenses: 0, net: 0 });

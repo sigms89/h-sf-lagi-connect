@@ -92,7 +92,8 @@ const Dashboard = () => {
 
   // ── Computed values ────────────────────────────────────────
   const score = healthData?.score ?? 0;
-  const avgMonthlyExpense = (stats?.total_expenses ?? 0) / 12;
+  const monthCount = stats?.monthly_data?.length || 12;
+  const avgMonthlyExpense = (stats?.total_expenses ?? 0) / monthCount;
   const currentBalance = stats?.current_balance ?? 0;
   const balanceMonths = avgMonthlyExpense > 0 ? (currentBalance / avgMonthlyExpense).toFixed(1) : '-';
   const isBalanceLow = currentBalance < avgMonthlyExpense && avgMonthlyExpense > 0;
