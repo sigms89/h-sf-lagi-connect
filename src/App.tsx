@@ -33,6 +33,7 @@ import MinVerkefni from "@/pages/MinVerkefni";
 import OllVerkefni from "@/pages/OllVerkefni";
 import NotFound from "@/pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
+import LandingPage from "@/pages/LandingPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
