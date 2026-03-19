@@ -44,13 +44,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Home route redirects to landing if not authenticated
-const HomeRedirect = () => {
-  const { user, loading } = require("@/hooks/useAuth").useAuth();
-  if (loading) return null;
-  if (!user) return <Navigate to="/landing" replace />;
-  return <Navigate to="/dashboard" replace />;
-};
 
 const App = () => (
   <ErrorBoundary>
