@@ -160,10 +160,10 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-[rgba(255,255,255,0.06)]">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-12 border-b border-sidebar-border px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-12 border-b border-[rgba(255,255,255,0.06)] px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
@@ -197,7 +197,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-[rgba(255,255,255,0.06)]">
         <SidebarMenu className="gap-0.5 px-2">
           {import.meta.env.DEV && (
             <SidebarMenuItem>

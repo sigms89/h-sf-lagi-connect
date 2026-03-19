@@ -3,121 +3,56 @@
 @tailwind utilities;
 
 /* ============================================================
-   Húsfélagið.is Design System — v4 (Light Mode Default)
-   Google-inspired warm light theme + dark navy sidebar
-   Brand: Primary blue #4A6CF7  |  Accent teal  |  Alert amber
-   Financial: Income green  |  Expense red
+   Húsfélagið.is Design System — v3 (Dark Mode First)
+   Aurora + Glassmorphism + Bento Grid
+   Brand: Primary indigo-500  |  Accent teal  |  Alert amber
+   Financial: Income teal  |  Expense rose
    All colors MUST be HSL.
 ============================================================ */
 
 @layer base {
   :root {
-    /* --- Light mode is default (Google-hönnun) --- */
+    /* --- Dark mode is default --- */
 
-    /* --- Brand Primary: #4A6CF7 → hsl(228, 91%, 63%) --- */
-    --primary: 228 91% 63%;
-    --primary-foreground: 0 0% 100%;
-
-    /* --- Surfaces: warm off-white #F8F7F4 --- */
-    --background: 40 20% 97%;
-    --foreground: 240 28% 14%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 28% 14%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 28% 14%;
-
-    /* --- Secondary --- */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 240 28% 14%;
-
-    /* --- Muted --- */
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-
-    /* --- Accent: teal --- */
-    --accent: 142 71% 45%;
-    --accent-foreground: 0 0% 100%;
-
-    /* --- Destructive: #EF4444 --- */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* --- Borders & inputs: #E5E7EB --- */
-    --border: 220 13% 91%;
-    --input: 220 13% 89%;
-    --ring: 228 91% 63%;
-
-    --radius: 0.75rem;
-
-    /* --- Sidebar: dark navy #1A1A2E (dökkur í báðum modes) --- */
-    --sidebar-background: 240 28% 14%;
-    --sidebar-foreground: 240 5% 65%;
-    --sidebar-primary: 228 91% 63%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 20% 18%;
-    --sidebar-accent-foreground: 220 13% 90%;
-    --sidebar-border: 240 20% 20%;
-    --sidebar-ring: 228 91% 63%;
-
-    /* --- Chart colors --- */
-    --chart-1: 228 91% 63%;
-    --chart-2: 142 71% 45%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 0 84% 60%;
-    --chart-5: 220 9% 46%;
-
-    /* --- Financial semantics --- */
-    --financial-income: 142 71% 45%;
-    --financial-expense: 0 84% 60%;
-    --financial-neutral: 220 9% 46%;
-    --financial-warning: 38 92% 50%;
-
-    /* --- Shadows: soft drop-shadows for light mode --- */
-    --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.03);
-    --shadow-card-hover: 0 4px 12px -2px rgba(0,0,0,0.08), 0 2px 6px -2px rgba(0,0,0,0.04);
-    --shadow-elevated: 0 8px 24px -4px rgba(0,0,0,0.1), 0 4px 12px -4px rgba(0,0,0,0.06);
-
-    /* --- Glass tokens (light mode: white glass) --- */
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-bg-hover: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-border-hover: rgba(0, 0, 0, 0.1);
-    --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.6);
-  }
-
-  /* Dark mode override (opt-in via .dark class) */
-  .dark {
+    /* --- Brand Primary: indigo-500 → hsl(239, 84%, 67%) --- */
     --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --background: 240 20% 6%;
-    --foreground: 220 13% 95%;
+    /* --- Surfaces: deep navy base --- */
+    --background: 240 20% 6%;           /* #0f0f1a */
+    --foreground: 220 13% 95%;          /* #f0f1f4 */
 
-    --card: 240 15% 11%;
+    --card: 240 15% 11%;               /* ~#1a1a2e */
     --card-foreground: 220 13% 95%;
 
-    --popover: 240 15% 14%;
+    --popover: 240 15% 14%;            /* ~#252540 */
     --popover-foreground: 220 13% 95%;
 
+    /* --- Secondary --- */
     --secondary: 240 10% 16%;
     --secondary-foreground: 220 13% 90%;
 
+    /* --- Muted --- */
     --muted: 240 10% 16%;
     --muted-foreground: 240 5% 55%;
 
+    /* --- Accent: teal --- */
     --accent: 175 70% 42%;
     --accent-foreground: 0 0% 100%;
 
+    /* --- Destructive: rose --- */
     --destructive: 347 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
+    /* --- Borders & inputs --- */
     --border: 240 10% 18%;
     --input: 240 10% 18%;
     --ring: 239 84% 67%;
 
-    --sidebar-background: 240 22% 5%;
+    --radius: 0.75rem;
+
+    /* --- Sidebar: deeper dark --- */
+    --sidebar-background: 240 22% 5%;   /* #0d0d18 */
     --sidebar-foreground: 240 5% 55%;
     --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -126,26 +61,85 @@
     --sidebar-border: 240 10% 14%;
     --sidebar-ring: 239 84% 67%;
 
+    /* --- Chart colors --- */
     --chart-1: 239 84% 67%;
     --chart-2: 175 70% 42%;
     --chart-3: 38 92% 50%;
     --chart-4: 347 77% 55%;
     --chart-5: 240 5% 55%;
 
+    /* --- Financial semantics --- */
     --financial-income: 175 70% 48%;
     --financial-expense: 347 70% 58%;
     --financial-neutral: 240 5% 55%;
     --financial-warning: 38 92% 50%;
 
+    /* --- Shadows: glow-based for dark mode --- */
     --shadow-card: 0 0 0 1px rgba(255,255,255,0.04), 0 2px 8px -2px rgba(0,0,0,0.4);
     --shadow-card-hover: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 24px -4px rgba(0,0,0,0.5);
     --shadow-elevated: 0 0 0 1px rgba(255,255,255,0.06), 0 16px 48px -8px rgba(0,0,0,0.6);
 
+    /* --- Glass tokens --- */
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-bg-hover: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-border-hover: rgba(255, 255, 255, 0.12);
     --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.04);
+  }
+
+  /* Light mode override (opt-in) */
+  .light {
+    --primary: 213 52% 24%;
+    --primary-foreground: 210 40% 98%;
+
+    --background: 0 0% 98%;
+    --foreground: 240 6% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 6% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 6% 10%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 213 52% 24%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 175 84% 32%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 347 77% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 6% 92%;
+    --input: 240 6% 90%;
+    --ring: 175 84% 32%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 4% 46%;
+    --sidebar-primary: 175 84% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 240 6% 92%;
+    --sidebar-ring: 175 84% 32%;
+
+    --financial-income: 175 84% 32%;
+    --financial-expense: 347 77% 50%;
+    --financial-neutral: 240 4% 46%;
+    --financial-warning: 38 92% 50%;
+
+    --shadow-card: 0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 3px 0 rgba(0,0,0,0.02);
+    --shadow-card-hover: 0 2px 8px -2px rgba(0,0,0,0.06), 0 4px 16px -4px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 4px 16px -4px rgba(0,0,0,0.08), 0 8px 32px -8px rgba(0,0,0,0.06);
+
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-bg-hover: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-border-hover: rgba(0, 0, 0, 0.1);
+    --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.6);
   }
 }
 
@@ -207,17 +201,8 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Light aurora background: warm subtle gradients */
+  /* Aurora background */
   .aurora-bg {
-    background:
-      radial-gradient(ellipse 80% 60% at 10% 0%, hsla(228, 91%, 63%, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 50% at 80% 20%, hsla(260, 50%, 60%, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 80%, hsla(142, 71%, 45%, 0.03) 0%, transparent 50%),
-      hsl(var(--background));
-    background-attachment: fixed;
-  }
-
-  .dark .aurora-bg {
     background:
       radial-gradient(ellipse 80% 60% at 10% 0%, hsla(239, 84%, 67%, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse 60% 50% at 80% 20%, hsla(270, 60%, 55%, 0.1) 0%, transparent 50%),
