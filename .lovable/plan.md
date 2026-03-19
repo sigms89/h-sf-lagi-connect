@@ -1,99 +1,51 @@
 
 
+# Lendingarsíða (Landing Page) — Fagleg útfærsla
 
-## Yfirferð: Glufur og vandamál í Húsfélagið.is
-
-### 1. Tvítekin uppfleðsla — engin vörn gegn tvíteknum færslum (AÐALVANDAMÁL)
-
-**Vandamálið:** Þegar sama gagnasafn er hlaðið upp tvisvar fer allt beint í gagnagrunn án nokkurrar viðvörunar. Engin greining á hvort færslur séu þegar til staðar.
-
-**Lausn:** Bæta við tvítekningagreiningu í `useUploadTransactions` / `UploadTransactions.tsx`:
-- Áður en vistað er, sækja nýlegar færslur frá gagnagrunninum (síðustu 90 daga) fyrir húsfélagið
-- Bera saman (dagsetning + lýsing + upphæð) við nýju færslurnar
-- Ef >50% samsvörun → sýna viðvörunarglugga: „X af Y færslum líta út fyrir að vera þegar í kerfinu. Viltu halda áfram?"
-- Merkja hverja línu sem „möguleg tvítekning" með appelsínugulu badge í forskoðunartöflunni
-- Bjóða upp á „Sleppa tvíteknum" hnapp
-
-### 2. ProtectedRoute — röng fyrirspurn á profiles
-
-**Vandamálið:** Í `ProtectedRoute.tsx` lína 38 er `.eq('id', user.id)` — en `profiles` taflan notar `user_id` dálk, ekki `id`. Þetta þýðir að hlutverkavörn (requiredRole) virkar ekki rétt og skilar alltaf `'member'` sem fallback.
-
-**Lausn:** Breyta í `.eq('user_id', user.id)`.
-
-### 3. Engin staðfesting á eyðingu eða afturkræf aðgerð
-
-**Vandamálið:** Engin leið til að eyða upload batch eða afturkalla upphleðslu. Ef notandi hleður upp vitlausum gögnum er eina leiðin að eyða hverri færslu handvirkt.
-
-**Lausn:** Bæta við „Afturkalla síðustu upphleðslu" aðgerð á Transactions síðunni sem eyðir öllum færslum með sama `uploaded_batch_id`. Þarf DELETE RLS á `upload_batches` (vantar núna) og cascade delete eða handvirka eyðingu.
-
-### 4. Console viðvörun — Badge ref í Settings
-
-**Vandamálið:** `Function components cannot be given refs` villa vegna `<Badge>` notað sem `SelectValue` barn í Settings. Skaðlaust en ljótt í console.
-
-**Lausn:** Setja `<span>` utan um `<Badge>` í Settings member role Select, eða nota `React.forwardRef` á Badge.
-
-### 5. TimeRange hefur ekki áhrif á gagnasótt
-
-**Vandamálið:** `TimeRangeSelector` er sýndur á Dashboard og Analytics en `useTransactionStats` sækir alltaf síðustu 12 mánuði (`subMonths(new Date(), 12)`). Tímabilsvalið hefur engin áhrif á gögnin.
-
-**Lausn:** Láta `useTransactionStats` og aðra hooks (`useAlerts`, `useAnalytics`) taka á móti `months` frá `useTimeRange` og nota það til að reikna `dateFrom`.
-
-### 6. Supabase 1000 línu takmörkun
-
-**Vandamálið:** `useAlerts`, `useAnalytics`, `useTransactionStats` sækja færslur án `.limit()` eða síðuskiptingar. Ef húsfélag hefur >1000 færslur á 12 mánuðum birtast ekki allar og útreikningar verða rangir — án nokkurrar viðvörunar.
-
-**Lausn:** Bæta við paging eða `.limit(10000)` á þessar fyrirspurnir og sýna viðvörun ef count > skilað gögnum.
+Búa til nýja public lendingarsíðu sem sýnir Húsfélagið.is vöruna áður en notandi skráir sig inn. Hönnunin byggir á Google-kóðanum sem var sendur, aðlöguð að Arctic Editorial design system-inu okkar.
 
 ---
 
-### Forgangsröðun
+## Uppbygging
 
-| # | Vandamál | Alvarleiki | Staða |
-|---|----------|-----------|-------|
-| 1 | Tvítekningagreining á uppfleðslu | Hátt | ✅ Leyst |
-| 2 | ProtectedRoute `.eq('id')` bug | Hátt | ✅ Leyst |
-| 3 | Afturkalla síðustu upphleðslu | Meðal | ✅ Leyst |
-| 4 | TimeRange hefur ekki áhrif | Meðal | ✅ Leyst |
-| 5 | 1000 línu takmörkun | Meðal | ✅ Leyst |
-| 6 | Badge ref viðvörun | Lágt | ✅ Leyst |
+### 1. Ný síða: `src/pages/LandingPage.tsx`
+
+Sjálfstæð síða (ekki wrapt í AppLayout/ProtectedRoute). Inniheldur:
+
+- **Navbar**: Lógó + leiðsögnartenglar (Heim, Lausnir, Verðskrá, Um okkur) + "Innskráning" / "Prófa frítt" hnappar
+- **Hero section**: Fyrirsögn ("Einfaldari rekstur húsfélagsins"), undirtexti, tveir CTA hnappar, "Yfir 200 húsfélög" social proof lína, mock dashboard spjald
+- **Features section**: 3 eiginleikaspjöld (Sjálfvirk færsluflokkun, Skýr fjárhagsyfirlit, Einföld verkefnastýring) með Lucide íkonum
+- **Social proof / trust section**: "Traustið er undirstaðan" með húsfélagsspjöldum
+- **CTA section**: "Tilbúin að einfalda lífið?" — tveir hnappar
+- **Footer**: Lógó, lýsing, tenglar (Vara, Fyrirtækið, Hafðu samband), samfélagsmiðlaíkon, höfundarréttarlína
+
+Allt responsive: single column á mobile, grid á desktop.
+
+### 2. Routing breyting: `src/App.tsx`
+
+- Bæta við `/landing` route sem public (engin ProtectedRoute)
+- Breyta `/` route: ef notandi er EKKI innskráður → redirect á `/landing`, annars Dashboard
+- Eða: búa til `/` sem LandingPage og Dashboard verður `/dashboard` — velur einfaldari leið
+
+### 3. Stílhögun (Arctic Editorial)
+
+- Notar sömu CSS variables og kerfið: `--primary`, `--background`, `--muted`, etc.
+- Hvít spjöld á `bg-muted` bakgrunni (tonal layering, engar línur)
+- Gradient CTA hnappar (`from-primary to-accent`)
+- Manrope fyrir fyrirsagnir, Inter fyrir meginmál
+- Lucide íkon í stað Material Symbols
+- Sidebar-litur (#003345) notaður í navbar og footer bakgrunn
+
+### 4. Engar nýjar dependencies
+
+Allt byggt á Tailwind + Lucide + React Router sem eru þegar í verkefninu.
 
 ---
 
-## Yfirferðarskýrsla 2: Heildarúttekt
+## Skrár
 
-| # | Verkefni | Alvarleiki | Staða |
-|---|---------|-----------|-------|
-| 1 | Loka profiles UPDATE RLS gegn role_type breytingum | Hátt (öryggi) | ✅ Leyst |
-| 2 | Bæta við RLS takmörkunum á categories töfluna | Hátt (öryggi) | ✅ Leyst |
-| 3 | Em-dash hreinsun (notenda-sýnileg) | Meðal | ✅ Leyst |
-| 4 | Laga `in_progress` → `waiting` í useAutoTasks dedup | Meðal | ✅ Leyst |
-| 5 | Bæta `.limit(10000)` á useHealthScore og useClassification | Meðal | ✅ Leyst |
-| 6 | Laga mánaðarleg þróun til að virða tímabilsval | Meðal | ✅ Leyst |
-| 7 | Dashboard avgMonthlyExpense miðast við valið tímabil | Meðal | ✅ Leyst |
-| 8 | Laga dummy boðskerfi (fjarlægja random UUID) | Meðal | ✅ Leyst |
-| 9 | Admin flipar í URL query params | Lágt | ✅ Leyst |
-| 10 | Bæta við Error Boundary | Lágt | ✅ Leyst |
-| 11 | Skipta notification polling yfir í Realtime | Lágt | ✅ Leyst |
-| 12 | Em-dash hreinsun í kóðaathugasemdum (~298 tilfelli) | Lágt | 🔲 Eftir |
-| 13 | Herða bid_messages RLS (aðeins þátttakendur) | Meðal (öryggi) | ✅ Leyst |
-| 14 | Eyða tvíteknu NotificationBell skrá | Lágt | ✅ Leyst |
+| Skrá | Breyting |
+|------|---------|
+| `src/pages/LandingPage.tsx` | **Ný** — full landing page |
+| `src/App.tsx` | Bæta við `/landing` route, aðlaga `/` logic |
 
----
-
-## Yfirferðarskýrsla 3: Rökfræði, upplifun og virkni
-
-| # | Verkefni | Alvarleiki | Staða |
-|---|---------|-----------|-------|
-| 1 | Laga Admin sidebar tab links til að matcha tab values | Hátt (brotið) | ✅ Leyst |
-| 2 | Laga DevRoleSwitcher conflict við trigger | Hátt (brotið) | ✅ Leyst |
-| 3 | Laga `isAdmin={true}` í Marketplace | Hátt (UX/öryggi) | ✅ Leyst |
-| 4 | Laga profiles SELECT RLS svo meðlimir sjái nöfn annarra | Hátt (brotið) | ✅ Leyst |
-| 5 | Laga MinVerkefni FK join | Meðal | ✅ Leyst |
-| 6 | Laga ReportsPage avgMonthly / 12 bug | Meðal | ✅ Leyst |
-| 7 | Bæta við "Gleymt lykilorð" flæði á Auth síðu | Meðal | ✅ Leyst |
-| 8 | Fela DevRoleSwitcher í production | Meðal (öryggi) | ✅ Leyst |
-| 9 | Bæta við DELETE á notifications | Lágt | ✅ Leyst |
-| 10 | Laga staleTime: 0 á profile queries | Lágt | ✅ Leyst |
-| 11 | Láta useVendorAnalytics virða tímabilsval | Meðal | ✅ Leyst |
-| 12 | Klára em-dash hreinsun í athugasemdum (294 tilvik) | Lágt | 🔲 Eftir |
-| 13 | Sameina profile queries í shared hook / queryKey | Lágt | ✅ Leyst |
