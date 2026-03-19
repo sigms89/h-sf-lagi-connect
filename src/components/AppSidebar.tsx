@@ -197,7 +197,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-[rgba(255,255,255,0.06)]">
+      <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu className="gap-0.5 px-2">
           {import.meta.env.DEV && (
             <SidebarMenuItem>
