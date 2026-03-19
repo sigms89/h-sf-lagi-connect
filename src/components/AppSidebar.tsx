@@ -1,6 +1,5 @@
 // ============================================================
-// Húsfélagið.is: AppSidebar v5
-// Dark mode glassmorphism sidebar with glow active state
+// Húsfélagið.is: AppSidebar v6 — Arctic Editorial (Deep Teal)
 // ============================================================
 import {
   LayoutDashboard,
@@ -118,7 +117,6 @@ export function AppSidebar() {
       : (association?.address ?? "Fjármálagreining");
 
   const isActive = (url: string) => {
-    // For admin tab links
     if (url.includes("?tab=")) {
       const urlTab = new URLSearchParams(url.split("?")[1]).get("tab");
       const currentTab = new URLSearchParams(location.search).get("tab");
@@ -146,12 +144,12 @@ export function AppSidebar() {
           to={url}
           className={`flex items-center gap-2.5 text-[13px] h-8 px-3 rounded-md transition-all duration-150 ${
             active
-              ? "font-semibold text-foreground bg-[rgba(255,255,255,0.08)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
-              : "font-normal text-muted-foreground hover:text-foreground hover:bg-[rgba(255,255,255,0.04)]"
+              ? "font-semibold text-white bg-white/10"
+              : "font-normal text-white/60 hover:text-white/90 hover:bg-white/5"
           }`}
         >
           <Icon className={`h-[15px] w-[15px] flex-shrink-0 transition-colors duration-150 ${
-            active ? "text-primary" : "text-muted-foreground/60"
+            active ? "text-white" : "text-white/40"
           }`} />
           {!collapsed && <span>{title}</span>}
         </Link>
@@ -160,27 +158,27 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-[rgba(255,255,255,0.06)]">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-12 border-b border-[rgba(255,255,255,0.06)] px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-12 border-b border-white/10 px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-[0_0_12px_rgba(99,102,241,0.3)]">
-          <Building2 className="h-3.5 w-3.5 text-primary-foreground" />
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
+          <Building2 className="h-3.5 w-3.5 text-white" />
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1 flex items-center gap-1">
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
+              <p className="text-[13px] font-semibold text-white leading-tight truncate">
                 {workspaceName}
               </p>
-              <p className="text-[11px] text-muted-foreground leading-tight truncate">
+              <p className="text-[11px] text-white/50 leading-tight truncate">
                 {workspaceSubtitle}
               </p>
             </div>
-            <ChevronDown className="h-3 w-3 text-muted-foreground/50 flex-shrink-0 ml-auto" />
+            <ChevronDown className="h-3 w-3 text-white/30 flex-shrink-0 ml-auto" />
           </div>
         )}
       </div>
@@ -197,7 +195,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-[rgba(255,255,255,0.06)]">
+      <SidebarFooter className="border-t border-white/10">
         <SidebarMenu className="gap-0.5 px-2">
           {import.meta.env.DEV && (
             <SidebarMenuItem>
@@ -210,10 +208,10 @@ export function AppSidebar() {
           {!collapsed && (
             <SidebarMenuItem>
               <div className="flex items-center gap-2.5 px-3 py-2">
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] font-semibold text-primary">{avatarLetter}</span>
+                <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] font-semibold text-white">{avatarLetter}</span>
                 </div>
-                <span className="text-[11px] text-muted-foreground truncate">
+                <span className="text-[11px] text-white/50 truncate">
                   {user?.email}
                 </span>
               </div>

@@ -3,56 +3,120 @@
 @tailwind utilities;
 
 /* ============================================================
-   Húsfélagið.is Design System — v3 (Dark Mode First)
-   Aurora + Glassmorphism + Bento Grid
-   Brand: Primary indigo-500  |  Accent teal  |  Alert amber
-   Financial: Income teal  |  Expense rose
+   Húsfélagið.is Design System — v4 "Arctic Editorial"
+   Tonal layering · No-line cards · Deep teal primary
+   Financial: Income teal · Expense rose
    All colors MUST be HSL.
 ============================================================ */
 
 @layer base {
   :root {
-    /* --- Dark mode is default --- */
+    /* --- Light mode is default (Arctic Editorial) --- */
 
-    /* --- Brand Primary: indigo-500 → hsl(239, 84%, 67%) --- */
-    --primary: 239 84% 67%;
+    /* --- Brand Primary: deep teal #003345 --- */
+    --primary: 195 100% 14%;
     --primary-foreground: 0 0% 100%;
 
-    /* --- Surfaces: deep navy base --- */
-    --background: 240 20% 6%;           /* #0f0f1a */
-    --foreground: 220 13% 95%;          /* #f0f1f4 */
+    /* --- Surfaces: warm arctic grey --- */
+    --background: 210 17% 98%;            /* #f8f9fa */
+    --foreground: 195 10% 11%;            /* #191c1d */
 
-    --card: 240 15% 11%;               /* ~#1a1a2e */
-    --card-foreground: 220 13% 95%;
+    --card: 0 0% 100%;                    /* #ffffff */
+    --card-foreground: 195 10% 11%;
 
-    --popover: 240 15% 14%;            /* ~#252540 */
-    --popover-foreground: 220 13% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 195 10% 11%;
 
     /* --- Secondary --- */
-    --secondary: 240 10% 16%;
-    --secondary-foreground: 220 13% 90%;
+    --secondary: 210 11% 96%;             /* #f3f4f5 */
+    --secondary-foreground: 195 100% 14%;
 
     /* --- Muted --- */
-    --muted: 240 10% 16%;
-    --muted-foreground: 240 5% 55%;
+    --muted: 210 11% 96%;                 /* #f3f4f5 */
+    --muted-foreground: 200 7% 35%;       /* #40484c */
 
-    /* --- Accent: teal --- */
-    --accent: 175 70% 42%;
+    /* --- Accent: primary-container --- */
+    --accent: 193 100% 19%;               /* #004b63 */
     --accent-foreground: 0 0% 100%;
 
-    /* --- Destructive: rose --- */
-    --destructive: 347 77% 50%;
+    /* --- Destructive --- */
+    --destructive: 0 75% 42%;             /* #93000a area */
     --destructive-foreground: 0 0% 100%;
 
     /* --- Borders & inputs --- */
+    --border: 200 10% 90%;                /* #e7e8e9 */
+    --input: 200 10% 88%;
+    --ring: 195 100% 14%;
+
+    --radius: 0.75rem;
+
+    /* --- Sidebar: deep teal --- */
+    --sidebar-background: 195 100% 14%;   /* #003345 */
+    --sidebar-foreground: 200 20% 80%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 195 100% 14%;
+    --sidebar-accent: 195 50% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 195 60% 18%;
+    --sidebar-ring: 0 0% 100%;
+
+    /* --- Chart colors --- */
+    --chart-1: 195 100% 14%;
+    --chart-2: 175 70% 42%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 75% 42%;
+    --chart-5: 200 7% 35%;
+
+    /* --- Financial semantics --- */
+    --financial-income: 175 70% 42%;
+    --financial-expense: 347 70% 50%;
+    --financial-neutral: 200 7% 35%;
+    --financial-warning: 38 92% 50%;
+
+    /* --- Shadows: ambient for light mode --- */
+    --shadow-card: 0 1px 3px -1px rgba(25,28,29,0.03), 0 1px 2px -1px rgba(25,28,29,0.02);
+    --shadow-card-hover: 0 4px 12px -2px rgba(25,28,29,0.06), 0 2px 6px -2px rgba(25,28,29,0.04);
+    --shadow-elevated: 0 12px 32px -4px rgba(25,28,29,0.08), 0 4px 12px -2px rgba(25,28,29,0.04);
+
+    /* --- Glass tokens (floating overlays only) --- */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-bg-hover: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(192, 199, 205, 0.15);
+    --glass-border-hover: rgba(192, 199, 205, 0.25);
+    --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.6);
+  }
+
+  /* Dark mode override (opt-in) */
+  .dark {
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --background: 240 20% 6%;
+    --foreground: 220 13% 95%;
+
+    --card: 240 15% 11%;
+    --card-foreground: 220 13% 95%;
+
+    --popover: 240 15% 14%;
+    --popover-foreground: 220 13% 95%;
+
+    --secondary: 240 10% 16%;
+    --secondary-foreground: 220 13% 90%;
+
+    --muted: 240 10% 16%;
+    --muted-foreground: 240 5% 55%;
+
+    --accent: 175 70% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 347 77% 50%;
+    --destructive-foreground: 0 0% 100%;
+
     --border: 240 10% 18%;
     --input: 240 10% 18%;
     --ring: 239 84% 67%;
 
-    --radius: 0.75rem;
-
-    /* --- Sidebar: deeper dark --- */
-    --sidebar-background: 240 22% 5%;   /* #0d0d18 */
+    --sidebar-background: 240 22% 5%;
     --sidebar-foreground: 240 5% 55%;
     --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -61,85 +125,26 @@
     --sidebar-border: 240 10% 14%;
     --sidebar-ring: 239 84% 67%;
 
-    /* --- Chart colors --- */
     --chart-1: 239 84% 67%;
     --chart-2: 175 70% 42%;
     --chart-3: 38 92% 50%;
     --chart-4: 347 77% 55%;
     --chart-5: 240 5% 55%;
 
-    /* --- Financial semantics --- */
     --financial-income: 175 70% 48%;
     --financial-expense: 347 70% 58%;
     --financial-neutral: 240 5% 55%;
     --financial-warning: 38 92% 50%;
 
-    /* --- Shadows: glow-based for dark mode --- */
     --shadow-card: 0 0 0 1px rgba(255,255,255,0.04), 0 2px 8px -2px rgba(0,0,0,0.4);
     --shadow-card-hover: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 24px -4px rgba(0,0,0,0.5);
     --shadow-elevated: 0 0 0 1px rgba(255,255,255,0.06), 0 16px 48px -8px rgba(0,0,0,0.6);
 
-    /* --- Glass tokens --- */
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-bg-hover: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-border-hover: rgba(255, 255, 255, 0.12);
     --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.04);
-  }
-
-  /* Light mode override (opt-in) */
-  .light {
-    --primary: 213 52% 24%;
-    --primary-foreground: 210 40% 98%;
-
-    --background: 0 0% 98%;
-    --foreground: 240 6% 10%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 6% 10%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 6% 10%;
-
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 213 52% 24%;
-
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-
-    --accent: 175 84% 32%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 347 77% 50%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 240 6% 92%;
-    --input: 240 6% 90%;
-    --ring: 175 84% 32%;
-
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 4% 46%;
-    --sidebar-primary: 175 84% 32%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 240 6% 92%;
-    --sidebar-ring: 175 84% 32%;
-
-    --financial-income: 175 84% 32%;
-    --financial-expense: 347 77% 50%;
-    --financial-neutral: 240 4% 46%;
-    --financial-warning: 38 92% 50%;
-
-    --shadow-card: 0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 3px 0 rgba(0,0,0,0.02);
-    --shadow-card-hover: 0 2px 8px -2px rgba(0,0,0,0.06), 0 4px 16px -4px rgba(0,0,0,0.04);
-    --shadow-elevated: 0 4px 16px -4px rgba(0,0,0,0.08), 0 8px 32px -8px rgba(0,0,0,0.06);
-
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-bg-hover: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-border-hover: rgba(0, 0, 0, 0.1);
-    --glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.6);
   }
 }
 
@@ -158,7 +163,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.02em;
   }
 }
@@ -201,42 +206,25 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Aurora background */
-  .aurora-bg {
-    background:
-      radial-gradient(ellipse 80% 60% at 10% 0%, hsla(239, 84%, 67%, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 50% at 80% 20%, hsla(270, 60%, 55%, 0.1) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 80%, hsla(175, 70%, 42%, 0.08) 0%, transparent 50%),
-      hsl(var(--background));
-    background-attachment: fixed;
-  }
-
-  /* Glassmorphism card */
-  .glass-card {
+  /* Glass overlay (floating elements only) */
+  .glass-overlay {
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-highlight), var(--shadow-card);
-    transition: all 200ms ease;
-  }
-
-  .glass-card:hover {
-    background: var(--glass-bg-hover);
-    border-color: var(--glass-border-hover);
-    box-shadow: var(--glass-highlight), var(--shadow-card-hover);
-    transform: translateY(-1px);
+    box-shadow: var(--glass-highlight), var(--shadow-elevated);
   }
 
   /* Card label (tiny uppercase) */
   .card-label {
-    @apply text-[11px] uppercase tracking-widest;
+    @apply text-[11px] uppercase tracking-widest font-medium;
     color: hsl(var(--muted-foreground));
   }
 
   /* KPI number style */
   .kpi-number {
     @apply text-3xl lg:text-4xl font-bold tabular-nums;
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
     letter-spacing: -0.02em;
   }
 
@@ -249,7 +237,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .page-enter,
-    .glass-card:hover,
     .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 {
       animation: none !important;
       transition: none !important;
