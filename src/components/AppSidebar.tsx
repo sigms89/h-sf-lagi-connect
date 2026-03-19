@@ -163,7 +163,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* ── Logo / Workspace area ───────────────────────────── */}
       <div
-        className={`flex items-center gap-3 h-12 border-b border-[rgba(255,255,255,0.06)] px-4 flex-shrink-0 ${
+        className={`flex items-center gap-3 h-12 border-b border-sidebar-border px-4 flex-shrink-0 ${
           collapsed ? "justify-center px-2" : ""
         }`}
       >
