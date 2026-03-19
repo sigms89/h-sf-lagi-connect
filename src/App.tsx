@@ -33,6 +33,7 @@ import MinVerkefni from "@/pages/MinVerkefni";
 import OllVerkefni from "@/pages/OllVerkefni";
 import NotFound from "@/pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
+import LandingPage from "@/pages/LandingPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+
 
 const App = () => (
   <ErrorBoundary>
@@ -53,6 +55,7 @@ const App = () => (
         <TimeRangeProvider>
         <AuthProvider>
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
