@@ -76,7 +76,7 @@ export function useYearComparison(
         db
           .from('transactions')
           .select(
-            'amount, is_income, category_id, category:categories(name_is, color)'
+            'amount, is_income, category_id, date, category:categories(name_is, color)'
           )
           .eq('association_id', associationId)
           .gte('date', currentYearStart)
@@ -84,7 +84,7 @@ export function useYearComparison(
         db
           .from('transactions')
           .select(
-            'amount, is_income, category_id, category:categories(name_is, color)'
+            'amount, is_income, category_id, date, category:categories(name_is, color)'
           )
           .eq('association_id', associationId)
           .gte('date', previousYearStart)
