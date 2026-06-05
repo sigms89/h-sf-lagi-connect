@@ -28,9 +28,9 @@ const NAV_LINKS = [
 const FEATURES = [
   {
     icon: ShieldCheck,
-    title: "Sjálfvirk færsluflokkun",
+    title: "Sjálfvirk hreyfingaflokkun",
     description:
-      "Gervigreind okkar flokkar sjálfkrafa bankafærslur svo þú hafir alltaf rétta yfirsýn án handavinnu.",
+      "Gervigreind okkar flokkar sjálfkrafa bankahreyfingar svo þú hafir alltaf rétta yfirsýn án handavinnu.",
     cta: "Læra meira",
   },
   {

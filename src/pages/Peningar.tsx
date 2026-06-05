@@ -8,7 +8,7 @@ import { useTransactionStats } from "@/hooks/useTransactions";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, FileText, AlertCircle, Loader2, Wallet } from "lucide-react";
+import { Upload, FileText, AlertCircle, Loader2, Wallet, Info } from "lucide-react";
 import { MonthlyCategoryList } from "@/components/peningar/MonthlyCategoryList";
 import { uploadPrompt } from "@/lib/insights";
 import { useNavigate } from "react-router-dom";
@@ -101,7 +101,7 @@ export default function Peningar() {
         </Card>
       )}
 
-      {/* Skýrsla + (uppfært staðfesting) */}
+      {/* Skýrsla + upprunagögn (traust) */}
       {hasData && (
         <div className="space-y-3 pt-2">
           <div className="space-y-1.5">
@@ -111,6 +111,12 @@ export default function Peningar() {
             </Button>
             <p className="text-[13px] text-muted-foreground leading-snug max-w-md">
               Tekur saman stöðu, helstu gjöld og opin verkefni svo stjórnin geti yfirfarið.
+            </p>
+          </div>
+          <div className="flex items-start gap-2 text-[13px] text-muted-foreground bg-muted/50 rounded-lg p-3">
+            <Info className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" />
+            <p className="leading-snug">
+              Gögnin koma úr CSV-skrám sem þú hefur hlaðið inn úr netbanka. Við tökum engar ákvarðanir um fjármál án þíns samþykkis — allar flokkunar tillögur þarf að samþykkja.
             </p>
           </div>
           {!prompt && (

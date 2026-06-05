@@ -130,8 +130,8 @@ export default function VendorView() {
                 <TableRow>
                   <TableHead>Birgir</TableHead>
                   <TableHead className="text-right">Heildarútgjöld</TableHead>
-                  <TableHead className="text-right">Færslur</TableHead>
-                  <TableHead>Síðasta færsla</TableHead>
+                  <TableHead className="text-right">Hreyfingar</TableHead>
+                  <TableHead>Síðasta hreyfing</TableHead>
                   <TableHead className="w-8" />
                 </TableRow>
               </TableHeader>
