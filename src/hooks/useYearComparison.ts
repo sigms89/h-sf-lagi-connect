@@ -64,6 +64,9 @@ export function useYearComparison(
         expensesChangePct: null,
         netChangePct: null,
         categoryComparisons: [],
+        currentMonthsWithData: 0,
+        previousMonthsWithData: 0,
+        currentUnclassifiedPct: 0,
       };
 
       if (!associationId) return empty;
