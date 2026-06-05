@@ -31,9 +31,9 @@ const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
 export default function Verkefni() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { data: association } = useCurrentAssociation();
   const associationId = association?.id;
+  const [createOpen, setCreateOpen] = useState(false);
 
   // Membership role for privacy filter
   const { data: memberRole } = useQuery({
