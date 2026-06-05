@@ -147,32 +147,37 @@ export default function Verkefni() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Verkefni</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            {totalOpen} opin · {grouped.done.length} kláruð nýlega
-          </p>
+          <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Verkefni</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">
+            {association?.name ?? "Húsfélagið þitt"}
+          </h1>
+          {totalAll > 0 && (
+            <p className="text-[13px] text-muted-foreground mt-1">
+              {totalOpen} opin · {grouped.done.length} kláruð nýlega
+            </p>
+          )}
         </div>
         {associationId && totalAll > 0 && (
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
+          <Button size="sm" onClick={() => setCreateOpen(true)} className="h-10 shrink-0">
             <Plus className="h-4 w-4 mr-1.5" />
-            Nýtt verkefni
+            Nýtt
           </Button>
         )}
       </div>
 
       {totalAll === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center space-y-4">
+          <CardContent className="py-10 px-6 text-center space-y-5">
             <ClipboardList className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <div>
-              <h3 className="font-semibold text-foreground">Engin verkefni</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Búðu til fyrsta verkefnið þegar þú ert tilbúin.
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Engin opin verkefni.</h3>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">
+                Allt í standi.
               </p>
             </div>
-            <Button size="sm" onClick={() => setCreateOpen(true)} disabled={!associationId}>
+            <Button size="lg" onClick={() => setCreateOpen(true)} disabled={!associationId} className="w-full sm:w-auto h-12">
               <Plus className="h-4 w-4 mr-2" />
               Nýtt verkefni
             </Button>

@@ -35,38 +35,20 @@ export default function Peningar() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Peningar</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">{association.name}</p>
-        </div>
+      <div>
+        <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Peningar</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">{association.name}</h1>
       </div>
-
-      {/* Stór upload takki */}
-      <Card>
-        <CardContent className="p-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Upload className="h-5 w-5 text-accent shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Hlaða inn bankayfirliti</p>
-              <p className="text-xs text-muted-foreground">CSV eða PDF frá bankanum þínum</p>
-            </div>
-          </div>
-          <Button onClick={() => navigate("/upload")} className="shrink-0">
-            <Upload className="h-4 w-4 mr-2" />
-            Hlaða inn
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Óflokkað bíður */}
       {uncategorizedCount > 0 && (
         <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
-            <p className="text-sm text-foreground">
+          <CardContent className="p-5 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-[15px] text-foreground leading-snug">
+              Við þurfum aðeins hjálp með{" "}
               <span className="font-semibold tabular-nums">{uncategorizedCount}</span>{" "}
-              hreyfingar bíða flokkunar — smelltu á flokk í listanum að neðan til að flokka.
+              hreyfingar — smelltu á flokk í listanum.
             </p>
           </CardContent>
         </Card>
@@ -77,15 +59,15 @@ export default function Peningar() {
         <TransactionList associationId={association.id} />
       ) : (
         <Card>
-          <CardContent className="py-12 text-center space-y-4">
+          <CardContent className="py-10 px-6 text-center space-y-5">
             <Wallet className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <div>
-              <h3 className="font-semibold text-foreground">Engar hreyfingar enn</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Byrjaðu með því að hlaða inn bankayfirliti.
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Engar hreyfingar enn.</h3>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">
+                Hladdu inn bankayfirliti og ég flokka allt sjálfkrafa — þú þarft bara að samþykkja.
               </p>
             </div>
-            <Button onClick={() => navigate("/upload")} size="sm">
+            <Button onClick={() => navigate("/upload")} size="lg" className="w-full sm:w-auto h-12">
               <Upload className="h-4 w-4 mr-2" />
               Hlaða inn bankayfirliti
             </Button>
@@ -93,16 +75,23 @@ export default function Peningar() {
         </Card>
       )}
 
-      {/* Sækja skýrslu */}
+      {/* Action takkar */}
       {hasData && (
-        <div className="pt-2">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button
-            variant="outline"
             onClick={() => navigate("/skyrsla")}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto h-12"
           >
             <FileText className="h-4 w-4 mr-2" />
-            Sækja skýrslu
+            Búa til drög að skýrslu fyrir fund
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/upload")}
+            className="w-full sm:w-auto h-12"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Hlaða inn bankayfirliti
           </Button>
         </div>
       )}
