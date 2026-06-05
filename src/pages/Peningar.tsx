@@ -34,6 +34,7 @@ export default function Peningar() {
 
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
+  const prompt = uploadPrompt(stats?.last_transaction_date ?? null);
 
   return (
     <div className="space-y-6">
@@ -41,6 +42,21 @@ export default function Peningar() {
         <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Peningar</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">{association.name}</h1>
       </div>
+
+      {/* Hvaða mánuð vantar? */}
+      {hasData && prompt && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <Upload className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+              <p className="text-[15px] text-foreground leading-snug">{prompt.message}</p>
+            </div>
+            <Button onClick={() => navigate("/upload")} className="w-full sm:w-auto h-11">
+              {prompt.action}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Óflokkað bíður */}
       {uncategorizedCount > 0 && (
@@ -80,14 +96,11 @@ export default function Peningar() {
         </Card>
       )}
 
-      {/* Skýrsla + upload */}
+      {/* Skýrsla + (uppfært staðfesting) */}
       {hasData && (
         <div className="space-y-3 pt-2">
           <div className="space-y-1.5">
-            <Button
-              onClick={() => navigate("/skyrsla")}
-              className="w-full sm:w-auto h-12"
-            >
+            <Button onClick={() => navigate("/skyrsla")} className="w-full sm:w-auto h-12">
               <FileText className="h-4 w-4 mr-2" />
               Búa til drög að skýrslu fyrir fund
             </Button>
@@ -95,14 +108,14 @@ export default function Peningar() {
               Tekur saman stöðu, helstu gjöld og opin verkefni svo stjórnin geti yfirfarið.
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/upload")}
-            className="w-full sm:w-auto h-12"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Hlaða inn bankayfirliti
-          </Button>
+          {!prompt && (
+            <button
+              onClick={() => navigate("/upload")}
+              className="text-[13px] text-muted-foreground hover:text-foreground underline underline-offset-2"
+            >
+              Hlaða inn nýju bankayfirliti
+            </button>
+          )}
         </div>
       )}
     </div>
