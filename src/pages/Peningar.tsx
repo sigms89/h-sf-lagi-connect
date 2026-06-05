@@ -62,7 +62,6 @@ export default function Peningar() {
           <TransactionList associationId={association.id} />
         </>
       ) : (
-      ) : (
         <Card>
           <CardContent className="py-10 px-6 text-center space-y-5">
             <Wallet className="h-10 w-10 text-muted-foreground/40 mx-auto" />
