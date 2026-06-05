@@ -205,6 +205,16 @@ export default function Verkefni() {
         </div>
       )}
 
+      {associationId && totalAll > 0 && (
+        <button
+          onClick={() => setCreateOpen(true)}
+          aria-label="Nýtt verkefni"
+          className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center sm:hidden"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
       {associationId && (
         <CreateTaskModal
           open={createOpen}
