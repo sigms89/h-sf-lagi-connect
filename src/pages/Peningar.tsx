@@ -57,7 +57,11 @@ export default function Peningar() {
 
       {/* Hreyfingar */}
       {hasData ? (
-        <TransactionList associationId={association.id} />
+        <>
+          <YearCategoryOverview associationId={association.id} />
+          <TransactionList associationId={association.id} />
+        </>
+      ) : (
       ) : (
         <Card>
           <CardContent className="py-10 px-6 text-center space-y-5">
