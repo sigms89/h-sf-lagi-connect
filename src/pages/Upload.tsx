@@ -18,9 +18,9 @@ export default function UploadPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">Hlaða upp færslum</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Hlaða inn hreyfingum</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Límdu inn bankafærslur eða hladdu upp CSV skrá
+          Límdu inn bankahreyfingar eða hlaðaðu inn CSV-skrá
         </p>
       </div>
       <UploadTransactions
