@@ -110,6 +110,34 @@ export function useCompleteTask() {
         });
       }
     },
+    // Optimistic: instantly mark task done in cache so UI feels snappy
+    onMutate: async (taskId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['dashboard-tasks'] });
+      await queryClient.cancelQueries({ queryKey: TASK_KEYS.byId(taskId) });
+
+      const prevDashboard = queryClient.getQueriesData({ queryKey: ['dashboard-tasks'] });
+      const prevTask = queryClient.getQueryData(TASK_KEYS.byId(taskId));
+      const prevCounts = queryClient.getQueriesData({ queryKey: ['task-counts'] });
+
+      // Mark in dashboard lists
+      queryClient.setQueriesData<any>({ queryKey: ['dashboard-tasks'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((t: any) =>
+          t?.id === taskId ? { ...t, status: 'done', completed_at: new Date().toISOString() } : t,
+        );
+      });
+      // Decrement open count locally
+      queryClient.setQueriesData<any>({ queryKey: ['task-counts'] }, (old: any) => {
+        if (!old || typeof old.open !== 'number') return old;
+        return { ...old, open: Math.max(0, old.open - 1) };
+      });
+      // Update single task cache
+      queryClient.setQueryData<any>(TASK_KEYS.byId(taskId), (old: any) =>
+        old ? { ...old, status: 'done', completed_at: new Date().toISOString() } : old,
+      );
+
+      return { prevDashboard, prevTask, prevCounts };
+    },
     onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
