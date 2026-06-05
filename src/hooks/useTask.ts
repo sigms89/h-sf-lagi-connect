@@ -145,22 +145,32 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: ['task-counts'] });
       queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
 
-      // Peak-end: lítill „dopamine receipt"
+      // Peak-end: lítill „dopamine receipt" — counts already decremented optimistically
       const cache = queryClient.getQueriesData<{ open: number }>({ queryKey: ['task-counts'] });
       const remaining = cache?.[0]?.[1]?.open;
       const subtitle =
         typeof remaining === 'number'
-          ? remaining <= 1
+          ? remaining <= 0
             ? 'Þú ert búin/n með öll opin verkefni.'
-            : `${remaining - 1} verkefni eftir.`
+            : `${remaining} ${remaining === 1 ? 'verkefni' : 'verkefni'} eftir.`
           : undefined;
       celebrate({
         title: 'Vel gert',
         subtitle,
-        intensity: remaining !== undefined && remaining <= 1 ? 'shower' : 'burst',
+        intensity: remaining !== undefined && remaining <= 0 ? 'shower' : 'burst',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _taskId, ctx) => {
+      // Rollback optimistic changes
+      if (ctx?.prevDashboard) {
+        ctx.prevDashboard.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevCounts) {
+        ctx.prevCounts.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevTask !== undefined) {
+        queryClient.setQueryData(TASK_KEYS.byId(_taskId), ctx.prevTask);
+      }
       toast.error(`Villa: ${error.message}`);
     },
   });
