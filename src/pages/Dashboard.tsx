@@ -160,6 +160,26 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
+          {/* ── Hvaða mánuð vantar? ──────────────────────── */}
+          {(() => {
+            const prompt = uploadPrompt(stats?.last_transaction_date ?? null);
+            if (!prompt) return null;
+            return (
+              <Card>
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Upload className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                    <p className="text-[15px] text-foreground leading-snug">{prompt.message}</p>
+                  </div>
+                  <Button variant="outline" onClick={() => navigate("/upload")} className="w-full sm:w-auto h-11">
+                    {prompt.action}
+                    <ArrowRight className="h-4 w-4 ml-1.5" />
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })()}
+
           {/* ── Action prompts ───────────────────────────── */}
           {uncategorizedCount > 0 && (
             <Card>
