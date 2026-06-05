@@ -39,19 +39,30 @@ const Dashboard = () => {
   if (dashProfile?.role_type === "super_admin") return <Navigate to="/admin" replace />;
 
   // Open tasks (with privacy filter applied at fetch time via RLS)
-  const { data: openTaskCount = 0 } = useQuery({
-    queryKey: ["open-task-count", association?.id],
+  const { data: taskCounts = { open: 0, overdue: 0 } } = useQuery({
+    queryKey: ["task-counts", association?.id],
     queryFn: async () => {
-      if (!association?.id) return 0;
-      const { count } = await db
-        .from("tasks")
-        .select("id", { count: "exact", head: true })
-        .eq("association_id", association.id)
-        .in("status", ["open", "waiting"]);
-      return count ?? 0;
+      if (!association?.id) return { open: 0, overdue: 0 };
+      const today = new Date().toISOString().slice(0, 10);
+      const [openRes, overdueRes] = await Promise.all([
+        db
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("association_id", association.id)
+          .in("status", ["open", "waiting"]),
+        db
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("association_id", association.id)
+          .in("status", ["open", "waiting"])
+          .lt("due_date", today),
+      ]);
+      return { open: openRes.count ?? 0, overdue: overdueRes.count ?? 0 };
     },
     enabled: !!association?.id,
   });
+  const openTaskCount = taskCounts.open;
+  const overdueTaskCount = taskCounts.overdue;
 
   // Last-month income/expenses
   const { data: lastMonth } = useQuery({
