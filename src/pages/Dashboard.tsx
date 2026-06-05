@@ -143,15 +143,46 @@ const Dashboard = () => {
                     {formatIskAmount(currentBalance)}
                   </p>
                   <p className="text-[13px] text-muted-foreground mt-1">á reikningi.</p>
-                  {lastMonth && (lastMonth.income > 0 || lastMonth.expense > 0) && (
-                    <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                      {netLastMonth >= 0
-                        ? <>Síðasti mánuður fór vel — <span className="text-teal-600 font-medium tabular-nums">{formatIskAmount(netLastMonth)}</span> í plús.</>
-                        : <>Síðasti mánuður endaði <span className="text-rose-600 font-medium tabular-nums">{formatIskAmount(Math.abs(netLastMonth))}</span> í mínus.</>}
-                    </p>
-                  )}
+                  {(() => {
+                    const runway = monthsOfOperation(currentBalance, stats?.monthly_data ?? []);
+                    const vsLast = vsLastMonth(stats?.monthly_data ?? []);
+                    const lines = [runway, vsLast].filter(Boolean) as string[];
+                    if (lines.length === 0) {
+                      return (
+                        <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                          {NOT_ENOUGH_DATA_MSG}
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="mt-4 space-y-1.5">
+                        {lines.map((l, i) => (
+                          <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+                            {l}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* ── Næsta skref ──────────────────────────────── */}
+          <Card>
+            <CardContent className="p-5">
+              <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground mb-1.5">
+                Næsta skref
+              </p>
+              <p className="text-[15px] text-foreground leading-snug">
+                {nextStep({
+                  hasData,
+                  uncategorizedCount,
+                  overdueTaskCount,
+                  month: new Date().getMonth(),
+                })}
+              </p>
             </CardContent>
           </Card>
 
