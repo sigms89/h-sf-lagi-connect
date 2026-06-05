@@ -4,9 +4,16 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Upload } from "lucide-react";
+import { FolderOpen, Upload, FileText, Receipt, FileSignature, ShieldCheck } from "lucide-react";
 import { useCurrentAssociation } from "@/hooks/useAssociation";
 import { toast } from "sonner";
+
+const DOC_TYPES = [
+  { icon: FileText, label: "Fundargerðir" },
+  { icon: Receipt, label: "Reikningar" },
+  { icon: FileSignature, label: "Samningar" },
+  { icon: ShieldCheck, label: "Tryggingar" },
+];
 
 export default function Skjol() {
   const { data: association } = useCurrentAssociation();
@@ -21,7 +28,7 @@ export default function Skjol() {
       </div>
 
       <Card>
-        <CardContent className="py-10 px-6 text-center space-y-5">
+        <CardContent className="py-10 px-6 text-center space-y-6">
           <FolderOpen className="h-10 w-10 text-muted-foreground/40 mx-auto" />
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-foreground">Engin skjöl enn.</h3>
@@ -29,6 +36,19 @@ export default function Skjol() {
               Hér geymir þú fundargerðir, samninga og reikninga.
             </p>
           </div>
+
+          <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto pt-2">
+            {DOC_TYPES.map((t) => (
+              <div
+                key={t.label}
+                className="flex items-center gap-2 p-3 rounded-lg bg-muted/40 text-[13px] text-muted-foreground"
+              >
+                <t.icon className="h-4 w-4 shrink-0" />
+                <span>{t.label}</span>
+              </div>
+            ))}
+          </div>
+
           <Button
             size="lg"
             onClick={() => toast.info("Skjalavistun kemur fljótlega.")}

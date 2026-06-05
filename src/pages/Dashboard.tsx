@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Upload, ArrowRight, ClipboardList, Wallet } from "lucide-react";
 import { formatIskAmount } from "@/lib/categories";
+import { monthsOfOperation, vsLastMonth, nextStep, NOT_ENOUGH_DATA_MSG } from "@/lib/insights";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -38,51 +39,36 @@ const Dashboard = () => {
   if (dashProfile?.role_type === "super_admin") return <Navigate to="/admin" replace />;
 
   // Open tasks (with privacy filter applied at fetch time via RLS)
-  const { data: openTaskCount = 0 } = useQuery({
-    queryKey: ["open-task-count", association?.id],
+  const { data: taskCounts = { open: 0, overdue: 0 } } = useQuery({
+    queryKey: ["task-counts", association?.id],
     queryFn: async () => {
-      if (!association?.id) return 0;
-      const { count } = await db
-        .from("tasks")
-        .select("id", { count: "exact", head: true })
-        .eq("association_id", association.id)
-        .in("status", ["open", "waiting"]);
-      return count ?? 0;
+      if (!association?.id) return { open: 0, overdue: 0 };
+      const today = new Date().toISOString().slice(0, 10);
+      const [openRes, overdueRes] = await Promise.all([
+        db
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("association_id", association.id)
+          .in("status", ["open", "waiting"]),
+        db
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("association_id", association.id)
+          .in("status", ["open", "waiting"])
+          .lt("due_date", today),
+      ]);
+      return { open: openRes.count ?? 0, overdue: overdueRes.count ?? 0 };
     },
     enabled: !!association?.id,
   });
-
-  // Last-month income/expenses
-  const { data: lastMonth } = useQuery({
-    queryKey: ["last-month-stats", association?.id],
-    queryFn: async () => {
-      if (!association?.id) return { income: 0, expense: 0 };
-      const now = new Date();
-      const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const from = firstOfLastMonth.toISOString().slice(0, 10);
-      const to = firstOfThisMonth.toISOString().slice(0, 10);
-      const { data } = await db
-        .from("transactions")
-        .select("amount, is_income")
-        .eq("association_id", association.id)
-        .gte("date", from)
-        .lt("date", to);
-      let income = 0, expense = 0;
-      (data ?? []).forEach((t: { amount: number; is_income: boolean }) => {
-        if (t.is_income) income += t.amount; else expense += Math.abs(t.amount);
-      });
-      return { income, expense };
-    },
-    enabled: !!association?.id,
-  });
+  const openTaskCount = taskCounts.open;
+  const overdueTaskCount = taskCounts.overdue;
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
   const currentBalance = stats?.current_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
   const houseName = association?.name ?? "Húsfélagið þitt";
-  const netLastMonth = (lastMonth?.income ?? 0) - (lastMonth?.expense ?? 0);
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -131,15 +117,46 @@ const Dashboard = () => {
                     {formatIskAmount(currentBalance)}
                   </p>
                   <p className="text-[13px] text-muted-foreground mt-1">á reikningi.</p>
-                  {lastMonth && (lastMonth.income > 0 || lastMonth.expense > 0) && (
-                    <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                      {netLastMonth >= 0
-                        ? <>Síðasti mánuður fór vel — <span className="text-teal-600 font-medium tabular-nums">{formatIskAmount(netLastMonth)}</span> í plús.</>
-                        : <>Síðasti mánuður endaði <span className="text-rose-600 font-medium tabular-nums">{formatIskAmount(Math.abs(netLastMonth))}</span> í mínus.</>}
-                    </p>
-                  )}
+                  {(() => {
+                    const runway = monthsOfOperation(currentBalance, stats?.monthly_data ?? []);
+                    const vsLast = vsLastMonth(stats?.monthly_data ?? []);
+                    const lines = [runway, vsLast].filter(Boolean) as string[];
+                    if (lines.length === 0) {
+                      return (
+                        <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                          {NOT_ENOUGH_DATA_MSG}
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="mt-4 space-y-1.5">
+                        {lines.map((l, i) => (
+                          <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+                            {l}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* ── Næsta skref ──────────────────────────────── */}
+          <Card>
+            <CardContent className="p-5">
+              <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground mb-1.5">
+                Næsta skref
+              </p>
+              <p className="text-[15px] text-foreground leading-snug">
+                {nextStep({
+                  hasData,
+                  uncategorizedCount,
+                  overdueTaskCount,
+                  month: new Date().getMonth(),
+                })}
+              </p>
             </CardContent>
           </Card>
 
