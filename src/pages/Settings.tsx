@@ -56,6 +56,7 @@ import {
 } from '@/hooks/useMembers';
 import { useAuth } from '@/hooks/useAuth';
 import type { MemberRole } from '@/types/database';
+import { toast } from 'sonner';
 
 // ============================================================
 // SCHEMAS
