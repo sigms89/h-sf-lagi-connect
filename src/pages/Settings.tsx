@@ -170,6 +170,7 @@ export default function Settings() {
   const onSubmit = async (data: AssociationFormData) => {
     if (!association) return;
     await updateAssoc.mutateAsync({ id: association.id, updates: data });
+    toast.success("Breytingar vistaðar");
   };
 
   const onInvite = async (data: InviteFormData) => {
