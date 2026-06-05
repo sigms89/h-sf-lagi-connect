@@ -149,10 +149,10 @@ const Auth = () => {
     <>
       <CardHeader className="text-center">
         <CardTitle className="text-xl font-bold">
-          {isLogin ? "Velkomin/n aftur" : "Búðu til aðgang"}
+          {isLogin ? "Velkomin aftur" : "Nýr í húsfélaginu?"}
         </CardTitle>
         <CardDescription>
-          {isLogin ? "Skráðu þig inn á aðganginn þinn" : "Búðu til nýjan aðgang"}
+          {isLogin ? "Skráðu þig inn og haltu áfram" : "Búðu til aðgang á einni mínútu"}
         </CardDescription>
       </CardHeader>
       <CardContent>

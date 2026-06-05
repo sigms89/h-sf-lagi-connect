@@ -56,6 +56,7 @@ import {
 } from '@/hooks/useMembers';
 import { useAuth } from '@/hooks/useAuth';
 import type { MemberRole } from '@/types/database';
+import { toast } from 'sonner';
 
 // ============================================================
 // SCHEMAS
@@ -169,6 +170,7 @@ export default function Settings() {
   const onSubmit = async (data: AssociationFormData) => {
     if (!association) return;
     await updateAssoc.mutateAsync({ id: association.id, updates: data });
+    toast.success("Breytingar vistaðar");
   };
 
   const onInvite = async (data: InviteFormData) => {
@@ -233,7 +235,7 @@ export default function Settings() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Stillingar</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Upplýsingar um húsfélagið og meðlimastjórnun
+          Grunnupplýsingar og meðlimir húsfélagsins
         </p>
       </div>
 
@@ -244,7 +246,7 @@ export default function Settings() {
         <CardHeader>
           <CardTitle>Upplýsingar um húsfélagið</CardTitle>
           <CardDescription>
-            Grunnupplýsingar sem notaðar eru í greiningu og samanburði
+            Þessar upplýsingar notum við til að sérsníða greiningu og samanburð
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -394,7 +396,7 @@ export default function Settings() {
             <div>
               <CardTitle>Meðlimir</CardTitle>
               <CardDescription>
-                Stjórnendur og meðlimir húsfélagsins
+                Hér sérð þú hverjir hafa aðgang og getur bætt við nýjum meðlimum
               </CardDescription>
             </div>
             <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
@@ -486,7 +488,7 @@ export default function Settings() {
               ) : members.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    Engir meðlimir skráðir
+                    Engir meðlimir enn. Bjóða fyrsta meðlim með takkanum hér að ofan.
                   </TableCell>
                 </TableRow>
               ) : (

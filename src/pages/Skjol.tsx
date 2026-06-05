@@ -1,12 +1,12 @@
 // ============================================================
-// Húsfélagið.is: Skjöl — Placeholder empty state
+// Húsfélagið.is: Skjöl — Honest empty state (feature coming soon)
 // ============================================================
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Upload, FileText, Receipt, FileSignature, ShieldCheck } from "lucide-react";
+import { FolderOpen, FileText, Receipt, FileSignature, ShieldCheck, ArrowLeft } from "lucide-react";
 import { useCurrentAssociation } from "@/hooks/useAssociation";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const DOC_TYPES = [
   { icon: FileText, label: "Fundargerðir" },
@@ -17,6 +17,7 @@ const DOC_TYPES = [
 
 export default function Skjol() {
   const { data: association } = useCurrentAssociation();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -31,9 +32,10 @@ export default function Skjol() {
         <CardContent className="py-10 px-6 text-center space-y-6">
           <FolderOpen className="h-10 w-10 text-muted-foreground/40 mx-auto" />
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-foreground">Engin skjöl enn.</h3>
-            <p className="text-[15px] text-muted-foreground leading-relaxed">
-              Hér geymir þú fundargerðir, samninga og reikninga.
+            <h3 className="text-lg font-semibold text-foreground">Skjalageymsla á leiðinni</h3>
+            <p className="text-[15px] text-muted-foreground leading-relaxed max-w-sm mx-auto">
+              Bráðlega getur þú geymt fundargerðir, samninga og tryggingapappír hér á einum stað.
+              Við látum þig vita þegar þetta er tilbúið.
             </p>
           </div>
 
@@ -50,12 +52,13 @@ export default function Skjol() {
           </div>
 
           <Button
+            variant="outline"
             size="lg"
-            onClick={() => toast.info("Skjalavistun kemur fljótlega.")}
+            onClick={() => navigate("/")}
             className="w-full sm:w-auto h-12"
           >
-            <Upload className="h-4 w-4 mr-2" />
-            Hlaða inn skjali
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Til baka á yfirlit
           </Button>
         </CardContent>
       </Card>
