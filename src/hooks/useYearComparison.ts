@@ -25,6 +25,9 @@ export interface YearComparisonData {
   expensesChangePct: number | null;
   netChangePct: number | null;
   categoryComparisons: YearCategoryComparison[];
+  currentMonthsWithData: number;
+  previousMonthsWithData: number;
+  currentUnclassifiedPct: number;
 }
 
 export function useYearComparison(
