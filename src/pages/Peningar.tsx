@@ -63,11 +63,16 @@ export default function Peningar() {
         <Card>
           <CardContent className="p-5 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-[15px] text-foreground leading-snug">
-              Við þurfum aðeins hjálp með{" "}
-              <span className="font-semibold tabular-nums">{uncategorizedCount}</span>{" "}
-              hreyfingar — smelltu á flokk í listanum.
-            </p>
+            <div className="space-y-1">
+              <p className="text-[15px] text-foreground leading-snug">
+                Við þurfum aðeins hjálp með{" "}
+                <span className="font-semibold tabular-nums">{uncategorizedCount}</span>{" "}
+                {uncategorizedCount === 1 ? "hreyfingu" : "hreyfingar"} — smelltu á flokk í listanum.
+              </p>
+              <p className="text-[13px] text-muted-foreground leading-snug">
+                Eftir það er bókhaldið uppfært og skýrslan tilbúin.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

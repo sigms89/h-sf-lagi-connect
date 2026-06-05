@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { formatIskAmount } from "@/lib/categories";
+import { relativeUpdatedLabel } from "@/lib/dates";
 import {
   monthsOfOperation,
   vsLastMonth,
@@ -226,6 +227,15 @@ const Dashboard = () => {
                     </p>
                   ))}
                 </div>
+              );
+            })()}
+            {(() => {
+              const updated = relativeUpdatedLabel(stats?.last_transaction_date ?? null);
+              if (!updated) return null;
+              return (
+                <p className="text-xs text-zinc-400 mt-3">
+                  Byggt á hreyfingum, uppfært {updated}.
+                </p>
               );
             })()}
           </CardContent>
