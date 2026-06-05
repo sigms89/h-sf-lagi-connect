@@ -3,8 +3,8 @@
 // Aðalfundarskýrsla: Print-ready annual meeting financial report
 // ============================================================
 
-import { useState } from "react";
-import { Download, AlertTriangle, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, AlertTriangle, TrendingUp, TrendingDown, Minus, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { is } from "date-fns/locale";
@@ -222,6 +222,8 @@ function ReportSkeleton() {
 
 export default function ReportsPage() {
   const [showIndividualNotes, setShowIndividualNotes] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   const { data: association } = useCurrentAssociation();
   const associationId = association?.id;
@@ -264,9 +266,71 @@ export default function ReportsPage() {
 
   // ---- Handlers ----
 
-  function handleDownloadPDF() {
-    toast("PDF útflutningur kemur fljótlega");
+  async function handleDownloadPDF() {
+    if (!reportRef.current || isExporting) return;
+
+    setIsExporting(true);
+    const toastId = toast.loading("Bý til PDF skýrslu...");
+
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas-pro"),
+        import("jspdf"),
+      ]);
+
+      // Render the report card to a high-resolution canvas
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      // A4 portrait in mm
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const imgWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
+
+      // Multi-page: slice the canvas vertically
+      if (imgHeight <= pageHeight - margin * 2) {
+        pdf.addImage(imgData, "JPEG", margin, margin, imgWidth, imgHeight);
+      } else {
+        const pageContentHeight = pageHeight - margin * 2;
+        const totalPages = Math.ceil(imgHeight / pageContentHeight);
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0) pdf.addPage();
+          const yOffset = margin - i * pageContentHeight;
+          pdf.addImage(imgData, "JPEG", margin, yOffset, imgWidth, imgHeight);
+        }
+      }
+
+      const safeName = (association?.name ?? "husfelag")
+        .toLowerCase()
+        .replace(/[^a-z0-9\u00e1\u00e9\u00ed\u00f3\u00fa\u00fd\u00fe\u00e6\u00f0\u00f6]+/gi, "-")
+        .replace(/^-+|-+$/g, "");
+      const dateStr = format(new Date(), "yyyy-MM-dd");
+      pdf.save(`adalfundarskyrsla-${safeName}-${dateStr}.pdf`);
+
+      toast.success("PDF skýrsla tilbúin", { id: toastId });
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      toast.error("Ekki tókst að búa til PDF", { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
   }
+
+
 
   // ---- Render ----
 
@@ -306,10 +370,15 @@ export default function ReportsPage() {
 
           <Button
             onClick={handleDownloadPDF}
+            disabled={isLoading || isExporting}
             className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white gap-2 shrink-0"
           >
-            <Download className="h-4 w-4" />
-            Sækja PDF skýrslu
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isExporting ? "Bý til PDF..." : "Sækja PDF skýrslu"}
           </Button>
         </div>
 
@@ -317,7 +386,7 @@ export default function ReportsPage() {
         {isLoading ? (
           <ReportSkeleton />
         ) : (
-          <Card className="max-w-4xl mx-auto shadow-md border border-gray-200 bg-white">
+          <Card ref={reportRef} className="max-w-4xl mx-auto shadow-md border border-gray-200 bg-white">
             <CardContent className="p-8 sm:p-10 space-y-10">
               {/* ===== SECTION A: Report Header ===== */}
               <div className="text-center space-y-1.5 pb-4 border-b border-gray-100">
