@@ -3,8 +3,8 @@
 // Aðalfundarskýrsla: Print-ready annual meeting financial report
 // ============================================================
 
-import { useState } from "react";
-import { Download, AlertTriangle, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, AlertTriangle, TrendingUp, TrendingDown, Minus, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { is } from "date-fns/locale";
