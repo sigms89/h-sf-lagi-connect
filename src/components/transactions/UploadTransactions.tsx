@@ -493,9 +493,9 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
           <TabsContent value="paste">
             <Card>
               <CardHeader>
-                <CardTitle>Líma inn bankafærslur</CardTitle>
+                <CardTitle>Líma inn bankahreyfingar</CardTitle>
                 <CardDescription>
-                  Opnaðu netbanka, veldu allar færslurnar og límdu þær inn hér.
+                  Opnaðu netbanka, veldu allar hreyfingarnar og límdu þær inn hér.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

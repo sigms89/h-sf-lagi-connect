@@ -241,7 +241,7 @@ export default function CategoryDetail() {
         <Card>
           <CardContent className="pt-5">
             <p className="text-xs text-muted-foreground mb-1">
-              Fjöldi færslna
+              Fjöldi hreyfinga
             </p>
             <p className="text-xl font-bold">{transactions.length}</p>
           </CardContent>

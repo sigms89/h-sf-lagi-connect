@@ -267,7 +267,7 @@ export default function HandoverPackage() {
                 </dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-sm text-gray-600">Síðasta færsla</dt>
+                <dt className="text-sm text-gray-600">Síðasta hreyfing</dt>
                 <dd className="text-sm text-gray-700">
                   {stats?.last_transaction_date
                     ? format(new Date(stats.last_transaction_date), "d. MMM yyyy", {

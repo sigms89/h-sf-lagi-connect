@@ -34,9 +34,9 @@ export function AlertsWidget({ uncategorizedCount, isLoading }: AlertsWidgetProp
           >
             <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-yellow-800">Óflokkaðar færslur</p>
+              <p className="text-sm font-medium text-yellow-800">Óflokkaðar hreyfingar</p>
               <p className="text-xs text-yellow-700">
-                {uncategorizedCount} færsl{uncategorizedCount === 1 ? 'a' : 'ur'} vantar flokkun
+                {uncategorizedCount} hreyfing{uncategorizedCount === 1 ? '' : 'ar'} vantar flokkun
               </p>
             </div>
           </Link>
