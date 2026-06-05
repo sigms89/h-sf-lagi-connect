@@ -172,6 +172,17 @@ export function useYearComparison(
         (a, b) => b.currentYear - a.currentYear
       );
 
+      function monthsWithData(txs: TxRow[]) {
+        const s = new Set<string>();
+        for (const t of txs) s.add(t.date.slice(0, 7));
+        return s.size;
+      }
+      const currentExpenseTx = currentTx.filter((t) => !t.is_income);
+      const unclassifiedExpense = currentExpenseTx.filter((t) => !t.category_id).length;
+      const currentUnclassifiedPct = currentExpenseTx.length === 0
+        ? 0
+        : Math.round((unclassifiedExpense / currentExpenseTx.length) * 100);
+
       return {
         currentYear: cy,
         previousYear: py,
@@ -188,6 +199,9 @@ export function useYearComparison(
           previous.income - previous.expenses
         ),
         categoryComparisons,
+        currentMonthsWithData: monthsWithData(currentTx),
+        previousMonthsWithData: monthsWithData(previousTx),
+        currentUnclassifiedPct,
       };
     },
     enabled: !!associationId,
