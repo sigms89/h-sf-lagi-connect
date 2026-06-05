@@ -58,7 +58,7 @@ export default function Peningar() {
       {/* Hreyfingar */}
       {hasData ? (
         <>
-          <YearCategoryOverview associationId={association.id} />
+          <MonthlyCategoryList associationId={association.id} />
           <TransactionList associationId={association.id} />
         </>
       ) : (
