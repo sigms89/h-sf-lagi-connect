@@ -81,27 +81,31 @@ const Dashboard = () => {
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
   const currentBalance = stats?.current_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
+  const houseName = association?.name ?? "Húsfélagið þitt";
+  const netLastMonth = (lastMonth?.income ?? 0) - (lastMonth?.expense ?? 0);
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">Yfirlit</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">
-          {association?.name ?? "Húsfélagið þitt"}
-        </p>
+        <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Yfirlit</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">
+          {houseName}
+        </h1>
       </div>
 
       {!isLoading && !hasData ? (
         <Card>
-          <CardContent className="py-12 text-center space-y-4">
+          <CardContent className="py-10 px-6 text-center space-y-5">
             <Wallet className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <div>
-              <h3 className="font-semibold text-foreground">Engar hreyfingar enn</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Byrjaðu með því að hlaða inn bankayfirliti.
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">
+                Velkomin/n. Þú ert formaður {houseName}.
+              </h3>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">
+                Byrjaðu á að hlaða inn síðasta bankayfirliti — þá sýni ég þér stöðuna.
               </p>
             </div>
-            <Button onClick={() => navigate("/peningar")} size="sm">
+            <Button onClick={() => navigate("/peningar")} size="lg" className="w-full sm:w-auto h-12">
               <Upload className="h-4 w-4 mr-2" />
               Hlaða inn bankayfirliti
             </Button>
@@ -114,22 +118,24 @@ const Dashboard = () => {
             <CardContent className="p-6">
               {isLoading ? (
                 <div className="space-y-3">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-10 w-48" />
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-12 w-56" />
                   <Skeleton className="h-4 w-64" />
                 </div>
               ) : (
                 <>
-                  <p className="text-[13px] text-muted-foreground">Staða hússjóðs</p>
-                  <p className="text-3xl font-semibold tracking-tight text-foreground mt-1 tabular-nums">
+                  <p className="text-[15px] text-foreground leading-snug">
+                    <span className="font-semibold">{houseName}</span> á
+                  </p>
+                  <p className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mt-2 tabular-nums">
                     {formatIskAmount(currentBalance)}
                   </p>
+                  <p className="text-[13px] text-muted-foreground mt-1">á reikningi.</p>
                   {lastMonth && (lastMonth.income > 0 || lastMonth.expense > 0) && (
-                    <p className="text-[13px] text-muted-foreground mt-3">
-                      Síðasti mánuður:{" "}
-                      <span className="text-teal-600 tabular-nums">+{formatIskAmount(lastMonth.income)}</span>
-                      {" / "}
-                      <span className="text-rose-600 tabular-nums">−{formatIskAmount(lastMonth.expense)}</span>
+                    <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                      {netLastMonth >= 0
+                        ? <>Síðasti mánuður fór vel — <span className="text-teal-600 font-medium tabular-nums">{formatIskAmount(netLastMonth)}</span> í plús.</>
+                        : <>Síðasti mánuður endaði <span className="text-rose-600 font-medium tabular-nums">{formatIskAmount(Math.abs(netLastMonth))}</span> í mínus.</>}
                     </p>
                   )}
                 </>
@@ -140,16 +146,17 @@ const Dashboard = () => {
           {/* ── Action prompts ───────────────────────────── */}
           {uncategorizedCount > 0 && (
             <Card>
-              <CardContent className="p-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Wallet className="h-5 w-5 text-amber-500 shrink-0" />
-                  <p className="text-sm text-foreground">
-                    Þú þarft að flokka <span className="font-semibold">{uncategorizedCount}</span> hreyfingar
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <Wallet className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-[15px] text-foreground leading-snug">
+                    Við þurfum aðeins hjálp með{" "}
+                    <span className="font-semibold tabular-nums">{uncategorizedCount}</span> hreyfingar.
                   </p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => navigate("/peningar")}>
-                  Sjá hreyfingar
-                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                <Button variant="outline" onClick={() => navigate("/peningar")} className="w-full sm:w-auto h-11">
+                  Skoða hreyfingar
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
               </CardContent>
             </Card>
@@ -157,16 +164,16 @@ const Dashboard = () => {
 
           {openTaskCount > 0 && (
             <Card>
-              <CardContent className="p-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <ClipboardList className="h-5 w-5 text-accent shrink-0" />
-                  <p className="text-sm text-foreground">
-                    Þú átt <span className="font-semibold">{openTaskCount}</span> opin verkefni
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <ClipboardList className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <p className="text-[15px] text-foreground leading-snug">
+                    Þú átt <span className="font-semibold tabular-nums">{openTaskCount}</span> opin verkefni.
                   </p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => navigate("/verkefni")}>
-                  Sjá verkefni
-                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                <Button variant="outline" onClick={() => navigate("/verkefni")} className="w-full sm:w-auto h-11">
+                  Skoða verkefni
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
               </CardContent>
             </Card>
