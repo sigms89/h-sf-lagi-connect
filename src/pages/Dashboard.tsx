@@ -199,7 +199,7 @@ const Dashboard = () => {
       )}
 
       {/* ── Stöðukort (quieter) ────────────────────────────── */}
-      {hasData && (
+      {hasData ? (
         <Card className="border-0 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
           <CardContent className="p-6">
             <p className="text-[11px] uppercase tracking-widest font-medium text-zinc-500 mb-3">
@@ -240,7 +240,23 @@ const Dashboard = () => {
             })()}
           </CardContent>
         </Card>
-      )}
+      ) : step.kind !== "upload-first" ? (
+        <Card className="border-0 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <CardContent className="p-6 text-center space-y-3">
+            <Wallet className="h-8 w-8 text-zinc-300 mx-auto" />
+            <div className="space-y-1">
+              <p className="text-[15px] text-zinc-700 font-medium">Engin hreyfing ennþá</p>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Hlaðu inn fyrsta bankayfirlitinu og ég tek við restinni — flokkun, útskyringar og skýrslur.
+              </p>
+            </div>
+            <Button onClick={() => navigate("/upload")} size="lg" className="h-12 px-6">
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Hlaða inn yfirliti
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 };
