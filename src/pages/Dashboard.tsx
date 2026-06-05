@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Upload, ArrowRight, ClipboardList, Wallet } from "lucide-react";
 import { formatIskAmount } from "@/lib/categories";
+import { monthsOfOperation, vsLastMonth, nextStep, NOT_ENOUGH_DATA_MSG } from "@/lib/insights";
 
 const Dashboard = () => {
   const navigate = useNavigate();
