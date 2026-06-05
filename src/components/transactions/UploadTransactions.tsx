@@ -502,7 +502,7 @@ export function UploadTransactions({ associationId, onSuccess, testModeDefault =
                 <Textarea
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
-                  placeholder={`Límdu bankafærslur hér...\n\nDæmi:\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567`}
+                  placeholder={`Límdu bankahreyfingar hér...\n\nDæmi:\n23.02.2026\tRafmagnsreikningur HS Orka\t-45.188\t1.234.567`}
                   className="min-h-[200px] font-mono text-sm"
                 />
                 <div className="flex items-center justify-between">
