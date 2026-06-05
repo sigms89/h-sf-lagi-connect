@@ -8,7 +8,8 @@ import { useTransactionStats } from "@/hooks/useTransactions";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, FileText, AlertCircle, Loader2, Wallet, Info } from "lucide-react";
+import { Upload, FileText, AlertCircle, Wallet, Info } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MonthlyCategoryList } from "@/components/peningar/MonthlyCategoryList";
 import { uploadPrompt } from "@/lib/insights";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +21,13 @@ export default function Peningar() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-7 w-56" />
+        </div>
+        <Skeleton className="h-28 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );
   }
