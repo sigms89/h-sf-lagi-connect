@@ -331,6 +331,71 @@ export type Database = {
           },
         ]
       }
+      handover_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          association_id: string
+          created_at: string
+          expires_at: string
+          handover_date: string | null
+          id: string
+          invited_by: string
+          invited_by_name: string | null
+          invitee_email: string
+          invitee_name: string
+          personal_message: string | null
+          role: string
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          association_id: string
+          created_at?: string
+          expires_at?: string
+          handover_date?: string | null
+          id?: string
+          invited_by: string
+          invited_by_name?: string | null
+          invitee_email: string
+          invitee_name: string
+          personal_message?: string | null
+          role?: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          association_id?: string
+          created_at?: string
+          expires_at?: string
+          handover_date?: string | null
+          id?: string
+          invited_by?: string
+          invited_by_name?: string | null
+          invitee_email?: string
+          invitee_name?: string
+          personal_message?: string | null
+          role?: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handover_invitations_association_id_fkey"
+            columns: ["association_id"]
+            isOneToOne: false
+            referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -935,6 +1000,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_handover_invitation: { Args: { _token: string }; Returns: Json }
       is_association_admin: { Args: { assoc_id: string }; Returns: boolean }
       is_association_member: { Args: { assoc_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
