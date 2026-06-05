@@ -13,7 +13,7 @@ import type { Profile } from "@/types/database";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles, AlertCircle, Wallet } from "lucide-react";
 import { formatIskAmount } from "@/lib/categories";
 import { relativeUpdatedLabel } from "@/lib/dates";
 import {
