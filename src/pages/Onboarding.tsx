@@ -111,7 +111,7 @@ export default function Onboarding() {
           <Card>
             <CardHeader>
               <CardTitle>Hver ert þú?</CardTitle>
-              <CardDescription>Við notum þetta til að setja upp aðganginn þinn.</CardDescription>
+              <CardDescription>Látum vita hver stjórnar og við stillum restina fyrir þig.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={formOne.handleSubmit(handleStepOne)} className="space-y-4">
@@ -219,7 +219,7 @@ export default function Onboarding() {
             <CardHeader>
               <CardTitle>Hladdu inn bankayfirliti</CardTitle>
               <CardDescription>
-                Þú getur líka sleppt þessu og gert það seinna.
+                Þú getur líka hoppað yfir þetta og gert það þegar þér hentar.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
