@@ -172,9 +172,9 @@ export default function Verkefni() {
           <CardContent className="py-10 px-6 text-center space-y-5">
             <ClipboardList className="h-10 w-10 text-muted-foreground/40 mx-auto" />
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">Engin opin verkefni.</h3>
+              <h3 className="text-lg font-semibold text-foreground">Engin opin verkefni. Allt í standi.</h3>
               <p className="text-[15px] text-muted-foreground leading-relaxed">
-                Allt í standi.
+                Dæmi um næstu verk: laga ljós í sameign, fá tilboð í málun.
               </p>
             </div>
             <Button size="lg" onClick={() => setCreateOpen(true)} disabled={!associationId} className="w-full sm:w-auto h-12">
