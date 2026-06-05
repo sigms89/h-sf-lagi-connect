@@ -110,6 +110,34 @@ export function useCompleteTask() {
         });
       }
     },
+    // Optimistic: instantly mark task done in cache so UI feels snappy
+    onMutate: async (taskId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['dashboard-tasks'] });
+      await queryClient.cancelQueries({ queryKey: TASK_KEYS.byId(taskId) });
+
+      const prevDashboard = queryClient.getQueriesData({ queryKey: ['dashboard-tasks'] });
+      const prevTask = queryClient.getQueryData(TASK_KEYS.byId(taskId));
+      const prevCounts = queryClient.getQueriesData({ queryKey: ['task-counts'] });
+
+      // Mark in dashboard lists
+      queryClient.setQueriesData<any>({ queryKey: ['dashboard-tasks'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((t: any) =>
+          t?.id === taskId ? { ...t, status: 'done', completed_at: new Date().toISOString() } : t,
+        );
+      });
+      // Decrement open count locally
+      queryClient.setQueriesData<any>({ queryKey: ['task-counts'] }, (old: any) => {
+        if (!old || typeof old.open !== 'number') return old;
+        return { ...old, open: Math.max(0, old.open - 1) };
+      });
+      // Update single task cache
+      queryClient.setQueryData<any>(TASK_KEYS.byId(taskId), (old: any) =>
+        old ? { ...old, status: 'done', completed_at: new Date().toISOString() } : old,
+      );
+
+      return { prevDashboard, prevTask, prevCounts };
+    },
     onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
@@ -117,22 +145,32 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: ['task-counts'] });
       queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
 
-      // Peak-end: lítill „dopamine receipt"
+      // Peak-end: lítill „dopamine receipt" — counts already decremented optimistically
       const cache = queryClient.getQueriesData<{ open: number }>({ queryKey: ['task-counts'] });
       const remaining = cache?.[0]?.[1]?.open;
       const subtitle =
         typeof remaining === 'number'
-          ? remaining <= 1
+          ? remaining <= 0
             ? 'Þú ert búin/n með öll opin verkefni.'
-            : `${remaining - 1} verkefni eftir.`
+            : `${remaining} ${remaining === 1 ? 'verkefni' : 'verkefni'} eftir.`
           : undefined;
       celebrate({
         title: 'Vel gert',
         subtitle,
-        intensity: remaining !== undefined && remaining <= 1 ? 'shower' : 'burst',
+        intensity: remaining !== undefined && remaining <= 0 ? 'shower' : 'burst',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _taskId, ctx) => {
+      // Rollback optimistic changes
+      if (ctx?.prevDashboard) {
+        ctx.prevDashboard.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevCounts) {
+        ctx.prevCounts.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevTask !== undefined) {
+        queryClient.setQueryData(TASK_KEYS.byId(_taskId), ctx.prevTask);
+      }
       toast.error(`Villa: ${error.message}`);
     },
   });
@@ -194,6 +232,21 @@ export function useAssignTask() {
       })());
       return { isSelf, targetName: extractedName };
     },
+    onMutate: async ({ taskId, userId }) => {
+      const assignTo = userId ?? user?.id;
+      if (!assignTo) return;
+      await queryClient.cancelQueries({ queryKey: ['dashboard-tasks'] });
+      const prevDashboard = queryClient.getQueriesData({ queryKey: ['dashboard-tasks'] });
+      const prevTask = queryClient.getQueryData(TASK_KEYS.byId(taskId));
+      queryClient.setQueriesData<any>({ queryKey: ['dashboard-tasks'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((t: any) => (t?.id === taskId ? { ...t, assigned_to: assignTo } : t));
+      });
+      queryClient.setQueryData<any>(TASK_KEYS.byId(taskId), (old: any) =>
+        old ? { ...old, assigned_to: assignTo } : old,
+      );
+      return { prevDashboard, prevTask };
+    },
     onSuccess: (result, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
@@ -205,7 +258,13 @@ export function useAssignTask() {
         toast.success(`Verkefni úthlutað. Ábyrgðaraðili: ${result?.targetName}`);
       }
     },
-    onError: (error: Error) => {
+    onError: (error: Error, { taskId }, ctx: any) => {
+      if (ctx?.prevDashboard) {
+        ctx.prevDashboard.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevTask !== undefined) {
+        queryClient.setQueryData(TASK_KEYS.byId(taskId), ctx.prevTask);
+      }
       toast.error(`Villa: ${error.message}`);
     },
   });
