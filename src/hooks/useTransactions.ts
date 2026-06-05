@@ -208,6 +208,7 @@ export function useTransactionStats(associationId: string | null | undefined, da
         net_balance: totalIncome - totalExpenses, uncategorized_count: uncategorizedCount,
         monthly_data: Array.from(monthlyMap.values()), category_breakdown: categoryBreakdown,
         current_balance: latestTx?.balance ?? null,
+        last_transaction_date: txList.length > 0 ? txList[0].date : null,
       };
     },
     enabled: !!associationId,
