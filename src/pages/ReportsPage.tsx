@@ -357,6 +357,19 @@ export default function ReportsPage() {
         {/* ---- Handover Package (Lota 2) ---- */}
         <HandoverPackage />
 
+        {/* ---- Invite Successor (Lota 3) ---- */}
+        <div className="rounded-lg border border-zinc-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <div>
+            <h3 className="font-semibold text-zinc-900">Að hætta í stjórn?</h3>
+            <p className="text-sm text-zinc-600 mt-1">
+              Bjóddu nýjum formanni inn með persónulegri kveðju. Hann fær
+              afhendingarpakkann og aðganginn í einni einföldu yfirferð.
+            </p>
+          </div>
+          <InviteSuccessorDialog />
+        </div>
+
+
         {/* ---- Controls Row ---- */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <label className="flex items-center gap-2.5 cursor-pointer select-none">
