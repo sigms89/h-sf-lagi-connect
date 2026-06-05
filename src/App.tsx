@@ -35,6 +35,7 @@ import ReportsPage from "@/pages/ReportsPage";
 import NotFound from "@/pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
 import LandingPage from "@/pages/LandingPage";
+import WelcomeNewChairman from "@/pages/WelcomeNewChairman";
 
 const queryClient = new QueryClient({
   defaultOptions: {
