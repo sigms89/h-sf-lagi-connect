@@ -1,6 +1,6 @@
 // ============================================================
-// Húsfélagið.is: Dashboard v5 — Simplified
-// "Staðan + næsta skref" — eitt kort, ekkert KPI dashboard
+// Húsfélagið.is: Dashboard v6 — "Næsta skref" model
+// One thing first. Numbers second. Wins visible.
 // ============================================================
 
 import { useCurrentAssociation } from "@/hooks/useAssociation";
@@ -13,9 +13,14 @@ import type { Profile } from "@/types/database";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Upload, ArrowRight, ClipboardList, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { formatIskAmount } from "@/lib/categories";
-import { monthsOfOperation, vsLastMonth, nextStep, NOT_ENOUGH_DATA_MSG, uploadPrompt } from "@/lib/insights";
+import {
+  monthsOfOperation,
+  vsLastMonth,
+  nextStepV2,
+  NOT_ENOUGH_DATA_MSG,
+} from "@/lib/insights";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -34,17 +39,17 @@ const Dashboard = () => {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Provider/admin redirects preserved for backward compat (hidden from sidebar)
   if (dashProfile?.role_type === "service_provider") return <Navigate to="/provider" replace />;
   if (dashProfile?.role_type === "super_admin") return <Navigate to="/admin" replace />;
 
-  // Open tasks (with privacy filter applied at fetch time via RLS)
-  const { data: taskCounts = { open: 0, overdue: 0 } } = useQuery({
+  // Tasks: open, overdue, recently completed (this week)
+  const { data: taskCounts = { open: 0, overdue: 0, completedThisWeek: 0 } } = useQuery({
     queryKey: ["task-counts", association?.id],
     queryFn: async () => {
-      if (!association?.id) return { open: 0, overdue: 0 };
+      if (!association?.id) return { open: 0, overdue: 0, completedThisWeek: 0 };
       const today = new Date().toISOString().slice(0, 10);
-      const [openRes, overdueRes] = await Promise.all([
+      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+      const [openRes, overdueRes, doneRes] = await Promise.all([
         db
           .from("tasks")
           .select("id", { count: "exact", head: true })
@@ -56,166 +61,175 @@ const Dashboard = () => {
           .eq("association_id", association.id)
           .in("status", ["open", "waiting"])
           .lt("due_date", today),
+        db
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("association_id", association.id)
+          .eq("status", "completed")
+          .gte("updated_at", weekAgo),
       ]);
-      return { open: openRes.count ?? 0, overdue: overdueRes.count ?? 0 };
+      return {
+        open: openRes.count ?? 0,
+        overdue: overdueRes.count ?? 0,
+        completedThisWeek: doneRes.count ?? 0,
+      };
     },
     enabled: !!association?.id,
   });
-  const openTaskCount = taskCounts.open;
-  const overdueTaskCount = taskCounts.overdue;
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
   const currentBalance = stats?.current_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
   const houseName = association?.name ?? "Húsfélagið þitt";
+  const firstName = dashProfile?.full_name?.split(" ")[0] ?? null;
+
+  // Months behind — derived from last_transaction_date
+  const monthsBehind = (() => {
+    const last = stats?.last_transaction_date;
+    if (!last) return 0;
+    const d = new Date(last);
+    if (isNaN(d.getTime())) return 0;
+    const now = new Date();
+    return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+  })();
+
+  const step = nextStepV2({
+    hasData,
+    uncategorizedCount,
+    overdueTaskCount: taskCounts.overdue,
+    openTaskCount: taskCounts.open,
+    monthsBehind,
+    month: new Date().getMonth(),
+  });
+
+  const greeting = firstName ? `Hæ ${firstName}` : "Hæ";
+
+  // ──────────────────────────────────────────────────────────
+  // Loading skeleton
+  // ──────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-44 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Tone-based styling for hero card
+  // ──────────────────────────────────────────────────────────
+  const heroStyles = {
+    warn: {
+      ring: "ring-1 ring-amber-200",
+      icon: <AlertCircle className="h-5 w-5 text-amber-600" />,
+      label: "Þetta kallar á þig",
+      labelClass: "text-amber-700",
+    },
+    neutral: {
+      ring: "ring-1 ring-teal-200",
+      icon: <ArrowRight className="h-5 w-5 text-teal-700" />,
+      label: "Næsta skref",
+      labelClass: "text-teal-700",
+    },
+    calm: {
+      ring: "",
+      icon: <CheckCircle2 className="h-5 w-5 text-teal-600" />,
+      label: "Staðan",
+      labelClass: "text-zinc-500",
+    },
+  }[step.tone];
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-5 max-w-2xl">
+      {/* ── Greeting ───────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Yfirlit</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">
+        <p className="text-[15px] text-zinc-500">{greeting},</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 mt-0.5">
           {houseName}
         </h1>
       </div>
 
-      {!isLoading && !hasData ? (
-        <Card>
-          <CardContent className="py-10 px-6 text-center space-y-5">
-            <Wallet className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">
-                Velkomin/n. Þú ert formaður {houseName}.
-              </h3>
-              <p className="text-[15px] text-muted-foreground leading-relaxed">
-                Byrjaðu á að hlaða inn síðasta bankayfirliti — þá sýni ég þér stöðuna.
-              </p>
-            </div>
-            <Button onClick={() => navigate("/peningar")} size="lg" className="w-full sm:w-auto h-12">
-              <Upload className="h-4 w-4 mr-2" />
-              Hlaða inn bankayfirliti
+      {/* ── HERO: Næsta skref ──────────────────────────────── */}
+      <Card className={`border-0 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] ${heroStyles.ring}`}>
+        <CardContent className="p-6 space-y-5">
+          <div className="flex items-center gap-2">
+            {heroStyles.icon}
+            <p className={`text-[11px] uppercase tracking-widest font-semibold ${heroStyles.labelClass}`}>
+              {heroStyles.label}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 leading-tight">
+              {step.title}
+            </h2>
+            {step.subtitle && (
+              <p className="text-[15px] text-zinc-600 leading-relaxed">{step.subtitle}</p>
+            )}
+          </div>
+
+          {step.cta && (
+            <Button
+              onClick={() => navigate(step.cta!.href)}
+              size="lg"
+              className="w-full sm:w-auto h-12 px-6"
+            >
+              {step.cta.label}
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Recent wins (dopamine recap) ───────────────────── */}
+      {taskCounts.completedThisWeek > 0 && (
+        <div className="flex items-center gap-2 px-1 text-sm text-zinc-600">
+          <Sparkles className="h-4 w-4 text-teal-600" />
+          <span>
+            <span className="font-semibold text-zinc-900">
+              {taskCounts.completedThisWeek}
+            </span>{" "}
+            {taskCounts.completedThisWeek === 1 ? "verkefni klárað" : "verkefni kláruð"} í þessari viku.
+          </span>
+        </div>
+      )}
+
+      {/* ── Stöðukort (quieter) ────────────────────────────── */}
+      {hasData && (
+        <Card className="border-0 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <CardContent className="p-6">
+            <p className="text-[11px] uppercase tracking-widest font-medium text-zinc-500 mb-3">
+              Hússjóður
+            </p>
+            <p className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 tabular-nums">
+              {formatIskAmount(currentBalance)}
+            </p>
+            {(() => {
+              const runway = monthsOfOperation(currentBalance, stats?.monthly_data ?? []);
+              const vsLast = vsLastMonth(stats?.monthly_data ?? []);
+              const lines = [runway, vsLast].filter(Boolean) as string[];
+              if (lines.length === 0) {
+                return (
+                  <p className="text-sm text-zinc-500 mt-3 leading-relaxed">
+                    {NOT_ENOUGH_DATA_MSG}
+                  </p>
+                );
+              }
+              return (
+                <div className="mt-3 space-y-1">
+                  {lines.map((l, i) => (
+                    <p key={i} className="text-sm text-zinc-600 leading-relaxed">
+                      {l}
+                    </p>
+                  ))}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {/* ── Staða hússjóðs ────────────────────────────── */}
-          <Card>
-            <CardContent className="p-6">
-              {isLoading ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-12 w-56" />
-                  <Skeleton className="h-4 w-64" />
-                </div>
-              ) : (
-                <>
-                  <p className="text-[15px] text-foreground leading-snug">
-                    <span className="font-semibold">{houseName}</span> á
-                  </p>
-                  <p className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mt-2 tabular-nums">
-                    {formatIskAmount(currentBalance)}
-                  </p>
-                  <p className="text-[13px] text-muted-foreground mt-1">á reikningi.</p>
-                  {(() => {
-                    const runway = monthsOfOperation(currentBalance, stats?.monthly_data ?? []);
-                    const vsLast = vsLastMonth(stats?.monthly_data ?? []);
-                    const lines = [runway, vsLast].filter(Boolean) as string[];
-                    if (lines.length === 0) {
-                      return (
-                        <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                          {NOT_ENOUGH_DATA_MSG}
-                        </p>
-                      );
-                    }
-                    return (
-                      <div className="mt-4 space-y-1.5">
-                        {lines.map((l, i) => (
-                          <p key={i} className="text-sm text-muted-foreground leading-relaxed">
-                            {l}
-                          </p>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* ── Næsta skref ──────────────────────────────── */}
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground mb-1.5">
-                Næsta skref
-              </p>
-              <p className="text-[15px] text-foreground leading-snug">
-                {nextStep({
-                  hasData,
-                  uncategorizedCount,
-                  overdueTaskCount,
-                  month: new Date().getMonth(),
-                })}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* ── Hvaða mánuð vantar? ──────────────────────── */}
-          {(() => {
-            const prompt = uploadPrompt(stats?.last_transaction_date ?? null);
-            if (!prompt) return null;
-            return (
-              <Card>
-                <CardContent className="p-5 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Upload className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                    <p className="text-[15px] text-foreground leading-snug">{prompt.message}</p>
-                  </div>
-                  <Button variant="outline" onClick={() => navigate("/upload")} className="w-full sm:w-auto h-11">
-                    {prompt.action}
-                    <ArrowRight className="h-4 w-4 ml-1.5" />
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })()}
-
-          {/* ── Action prompts ───────────────────────────── */}
-          {uncategorizedCount > 0 && (
-            <Card>
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start gap-3">
-                  <Wallet className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                  <p className="text-[15px] text-foreground leading-snug">
-                    Við þurfum aðeins hjálp með{" "}
-                    <span className="font-semibold tabular-nums">{uncategorizedCount}</span> hreyfingar.
-                  </p>
-                </div>
-                <Button variant="outline" onClick={() => navigate("/peningar")} className="w-full sm:w-auto h-11">
-                  Skoða hreyfingar
-                  <ArrowRight className="h-4 w-4 ml-1.5" />
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {openTaskCount > 0 && (
-            <Card>
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start gap-3">
-                  <ClipboardList className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                  <p className="text-[15px] text-foreground leading-snug">
-                    Þú átt <span className="font-semibold tabular-nums">{openTaskCount}</span> opin verkefni.
-                  </p>
-                </div>
-                <Button variant="outline" onClick={() => navigate("/verkefni")} className="w-full sm:w-auto h-11">
-                  Skoða verkefni
-                  <ArrowRight className="h-4 w-4 ml-1.5" />
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </>
       )}
     </div>
   );

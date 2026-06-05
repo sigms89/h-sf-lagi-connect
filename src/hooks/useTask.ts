@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '@/integrations/supabase/db';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { celebrate } from '@/lib/celebrate';
 
 export interface TaskWithProfiles {
   id: string;
@@ -113,8 +114,23 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
       queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-counts'] });
       queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
-      toast.success('Verkefni klárað ✓');
+
+      // Peak-end: lítill „dopamine receipt"
+      const cache = queryClient.getQueriesData<{ open: number }>({ queryKey: ['task-counts'] });
+      const remaining = cache?.[0]?.[1]?.open;
+      const subtitle =
+        typeof remaining === 'number'
+          ? remaining <= 1
+            ? 'Þú ert búin/n með öll opin verkefni.'
+            : `${remaining - 1} verkefni eftir.`
+          : undefined;
+      celebrate({
+        title: 'Vel gert',
+        subtitle,
+        intensity: remaining !== undefined && remaining <= 1 ? 'shower' : 'burst',
+      });
     },
     onError: (error: Error) => {
       toast.error(`Villa: ${error.message}`);

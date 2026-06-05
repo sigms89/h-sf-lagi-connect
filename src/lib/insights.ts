@@ -16,16 +16,6 @@ const MONTH_NAMES_IS_ACC = [
   "júlí", "ágúst", "september", "október", "nóvember", "desember",
 ];
 
-/**
- * Smart "what month is missing?" prompt.
- * Returns { title, action } or null if up-to-date.
- *
- * Rules:
- *  - No data → null (empty state handles it)
- *  - Last tx in a previous month → "Síðasta hreyfing er frá <mán>. Viltu hlaða inn <næsta mán>?"
- *  - Last tx >25 days ago in same month → "Mánuður liðinn frá síðustu uppfærslu."
- *  - Otherwise → null (everything looks current)
- */
 export interface UploadPromptResult {
   message: string;
   action: string;
@@ -77,10 +67,6 @@ function formatISK(amount: number): string {
   return abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " kr.";
 }
 
-/**
- * "Þetta dugar fyrir um X mánaða venjulegan rekstur."
- * Krefst: ≥3 mánaða af útgjöldum OG balance > 0.
- */
 export function monthsOfOperation(
   balance: number | null,
   monthly: MonthlyData[]
@@ -96,10 +82,6 @@ export function monthsOfOperation(
   return `Þetta dugar fyrir um ${months} ${months === 1 ? "mánuð" : "mánaða"} venjulegan rekstur.`;
 }
 
-/**
- * "Staðan er X kr. hærri en í síðasta mánuði." eða lægri.
- * Notar nettó síðasta heila mánaðar.
- */
 export function vsLastMonth(monthly: MonthlyData[]): string | null {
   const withData = monthly.filter((m) => m.income > 0 || m.expenses > 0);
   if (withData.length < 1) return null;
@@ -112,45 +94,122 @@ export function vsLastMonth(monthly: MonthlyData[]): string | null {
   return `Staðan lækkaði um ${formatISK(net)} í mánuðinum. Gæti verið eðlilegt ef stór reikningur var greiddur.`;
 }
 
-/**
- * "Hladdu inn nokkrum mánuðum og þá get ég sagt betur."
- */
 export const NOT_ENOUGH_DATA_MSG =
   "Hladdu inn nokkrum mánuðum og þá get ég sagt betur.";
 
-/**
- * Næsta skref á Yfirliti — alltaf ein setning, forgangsröðuð.
- */
+// ============================================================
+// Next step — ein aðgerð, einn takki, ein setning.
+// ============================================================
+
+export type NextStepKind =
+  | "upload-first"
+  | "overdue-tasks"
+  | "uncategorized"
+  | "missing-month"
+  | "annual-meeting"
+  | "all-good";
+
+export interface NextStepResult {
+  kind: NextStepKind;
+  /** Stuttur titill — það sem skiptir máli */
+  title: string;
+  /** Útskýring í einni línu — af hverju þetta núna */
+  subtitle?: string;
+  /** Takki sem klárar skrefið */
+  cta?: { label: string; href: string };
+  /** "neutral" venjulega, "warn" þegar eitthvað kallar á athygli */
+  tone: "neutral" | "warn" | "calm";
+}
+
 export interface NextStepInput {
   hasData: boolean;
   uncategorizedCount: number;
   overdueTaskCount: number;
+  openTaskCount: number;
+  monthsBehind: number; // 0 = up to date
   month: number; // 0-indexed
 }
 
-export function nextStep(input: NextStepInput): string {
-  if (!input.hasData) return "Byrjaðu á bankayfirliti.";
+export function nextStepV2(input: NextStepInput): NextStepResult {
+  if (!input.hasData) {
+    return {
+      kind: "upload-first",
+      title: "Byrjaðu á að hlaða inn bankayfirliti",
+      subtitle: "Tekur tvær mínútur. Svo sé ég stöðuna fyrir þig.",
+      cta: { label: "Hlaða inn yfirliti", href: "/upload" },
+      tone: "neutral",
+    };
+  }
+
   if (input.overdueTaskCount > 0) {
-    return `${input.overdueTaskCount} ${input.overdueTaskCount === 1 ? "verkefni komið" : "verkefni komin"} fram yfir.`;
+    const n = input.overdueTaskCount;
+    return {
+      kind: "overdue-tasks",
+      title: `${n} ${n === 1 ? "verkefni er" : "verkefni eru"} komin fram yfir`,
+      subtitle: "Renndu yfir og klárðu eða færðu áfram.",
+      cta: { label: "Skoða verkefnin", href: "/verkefni" },
+      tone: "warn",
+    };
   }
+
+  if (input.monthsBehind >= 1) {
+    return {
+      kind: "missing-month",
+      title:
+        input.monthsBehind === 1
+          ? "Síðasti mánuður vantar inn"
+          : `${input.monthsBehind} mánuði vantar inn`,
+      subtitle: "Tekur tvær mínútur að uppfæra.",
+      cta: { label: "Hlaða inn yfirliti", href: "/upload" },
+      tone: "warn",
+    };
+  }
+
   if (input.uncategorizedCount > 0) {
-    return `Við þurfum aðeins hjálp með ${input.uncategorizedCount} ${input.uncategorizedCount === 1 ? "hreyfingu" : "hreyfingar"}.`;
+    const n = input.uncategorizedCount;
+    return {
+      kind: "uncategorized",
+      title: `Mig vantar hjálp með ${n} ${n === 1 ? "hreyfingu" : "hreyfingar"}`,
+      subtitle: "Eitt smell á flokk og þetta er búið.",
+      cta: { label: "Flokka hreyfingar", href: "/peningar" },
+      tone: "neutral",
+    };
   }
-  // Janúar (0) - apríl (3)
+
+  // Janúar (0) - apríl (3): aðalfundartími
   if (input.month <= 3) {
-    return "Aðalfundur nálgast. Gott er að hafa ársyfirlitið tilbúið.";
+    return {
+      kind: "annual-meeting",
+      title: "Aðalfundur nálgast",
+      subtitle: "Gott er að hafa ársyfirlitið tilbúið. Ég get útbúið drög.",
+      cta: { label: "Útbúa skýrslu", href: "/skyrsla" },
+      tone: "calm",
+    };
   }
-  return "Ekkert kallar á athygli. Þú getur búið til drög að skýrslu þegar þú vilt.";
+
+  return {
+    kind: "all-good",
+    title: "Allt er í lagi hjá þér",
+    subtitle:
+      input.openTaskCount > 0
+        ? `${input.openTaskCount} ${input.openTaskCount === 1 ? "verkefni bíður" : "verkefni bíða"} en ekkert sem brennur.`
+        : "Engin verkefni opin. Komdu aftur þegar nýtt yfirlit er tilbúið.",
+    tone: "calm",
+  };
+}
+
+// Gamla útgáfan — höldum eftir fyrir aðra notkun.
+export function nextStep(input: Omit<NextStepInput, "openTaskCount" | "monthsBehind">): string {
+  return nextStepV2({ ...input, openTaskCount: 0, monthsBehind: 0 }).title;
 }
 
 /**
  * Forgangsröðuð innsýnar-setning fyrir Peningar.
- * A) Óvenjulegt > B) Stærst > C) Tekjur vs gjöld > D) Ekki nóg gögn.
  */
 export interface MonthlyCategorySnapshot {
   name: string;
-  current: number; // síðasti mánuður
-  avg3: number; // meðaltal síðustu 3 mán (án síðasta?)
+  current: number;
+  avg3: number;
 }
 
 export function peningarInsight(args: {
@@ -163,7 +222,6 @@ export function peningarInsight(args: {
     return "Þegar fleiri mánuðir eru komnir inn get ég sýnt þróun.";
   }
 
-  // A) Óvenjulegt: hækkun >20% og >50.000 kr breyting
   if (args.monthsAvailable >= 3) {
     const unusual = args.categories
       .filter((c) => c.avg3 > 0 && c.current - c.avg3 > 50_000)
@@ -179,13 +237,11 @@ export function peningarInsight(args: {
     }
   }
 
-  // B) Stærst
   const biggest = [...args.categories].sort((a, b) => b.current - a.current)[0];
   if (biggest && biggest.current > 0) {
     return `Stærsti kostnaðurinn í mánuðinum var ${biggest.name}, ${formatISK(biggest.current)}.`;
   }
 
-  // C) Tekjur vs gjöld
   if (args.lastMonthIncome > 0 || args.lastMonthExpenses > 0) {
     const diff = args.lastMonthExpenses - args.lastMonthIncome;
     if (Math.abs(diff) < 1000) {
