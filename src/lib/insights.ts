@@ -6,6 +6,72 @@
 
 import type { MonthlyData } from "@/types/database";
 
+const MONTH_NAMES_IS = [
+  "janúar", "febrúar", "mars", "apríl", "maí", "júní",
+  "júlí", "ágúst", "september", "október", "nóvember", "desember",
+];
+
+const MONTH_NAMES_IS_ACC = [
+  "janúar", "febrúar", "mars", "apríl", "maí", "júní",
+  "júlí", "ágúst", "september", "október", "nóvember", "desember",
+];
+
+/**
+ * Smart "what month is missing?" prompt.
+ * Returns { title, action } or null if up-to-date.
+ *
+ * Rules:
+ *  - No data → null (empty state handles it)
+ *  - Last tx in a previous month → "Síðasta hreyfing er frá <mán>. Viltu hlaða inn <næsta mán>?"
+ *  - Last tx >25 days ago in same month → "Mánuður liðinn frá síðustu uppfærslu."
+ *  - Otherwise → null (everything looks current)
+ */
+export interface UploadPromptResult {
+  message: string;
+  action: string;
+}
+
+export function uploadPrompt(lastTransactionDate: string | null): UploadPromptResult | null {
+  if (!lastTransactionDate) return null;
+  const last = new Date(lastTransactionDate);
+  const now = new Date();
+  if (isNaN(last.getTime())) return null;
+
+  const lastMonth = last.getMonth();
+  const lastYear = last.getFullYear();
+  const curMonth = now.getMonth();
+  const curYear = now.getFullYear();
+
+  const monthsBehind = (curYear - lastYear) * 12 + (curMonth - lastMonth);
+  const daysSince = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (monthsBehind >= 1) {
+    const nextDate = new Date(lastYear, lastMonth + 1, 1);
+    const nextName = MONTH_NAMES_IS_ACC[nextDate.getMonth()];
+    const lastName = MONTH_NAMES_IS[lastMonth];
+    if (monthsBehind === 1) {
+      return {
+        message: `Síðasta hreyfing er frá ${lastName}. Viltu hlaða inn ${nextName}?`,
+        action: `Hlaða inn ${nextName}`,
+      };
+    }
+    return {
+      message: `Það vantar ${monthsBehind} mánuði af gögnum. Síðasta hreyfing er frá ${lastName}.`,
+      action: "Hlaða inn nýju yfirliti",
+    };
+  }
+
+  if (daysSince >= 25) {
+    return {
+      message: "Mánuður liðinn frá síðustu uppfærslu. Tekur tvær mínútur að uppfæra.",
+      action: "Hlaða inn nýju yfirliti",
+    };
+  }
+
+  return null;
+}
+
+
 function formatISK(amount: number): string {
   const abs = Math.abs(Math.round(amount));
   return abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " kr.";

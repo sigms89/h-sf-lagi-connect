@@ -167,6 +167,7 @@ export interface TransactionStats {
   monthly_data: MonthlyData[];
   category_breakdown: CategoryBreakdown[];
   current_balance: number | null;
+  last_transaction_date: string | null;
 }
 
 // ============================================================
