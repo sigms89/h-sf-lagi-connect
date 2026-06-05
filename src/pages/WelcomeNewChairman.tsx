@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { is } from "date-fns/locale";
-import { Loader2, Heart, CheckCircle2, ArrowRight, Building2 } from "lucide-react";
+import { Loader2, Heart, CheckCircle2, ArrowRight, Building2, Wallet, ListChecks, FileText, Sparkles } from "lucide-react";
 
 import { db, supabase } from "@/integrations/supabase/db";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +38,7 @@ export default function WelcomeNewChairman() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [justAccepted, setJustAccepted] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -85,7 +86,8 @@ export default function WelcomeNewChairman() {
         _token: token,
       });
       if (error) throw error;
-      navigate("/");
+      setJustAccepted(true);
+      setAccepting(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Villa kom upp";
       setError(msg);
@@ -127,6 +129,101 @@ export default function WelcomeNewChairman() {
   const dateStr = invitation.handover_date
     ? format(new Date(invitation.handover_date), "d. MMMM yyyy", { locale: is })
     : null;
+
+  // ============================================================
+  // "First 5 minutes" - shown right after accepting
+  // ============================================================
+  if (justAccepted) {
+    const firstName = invitation.invitee_name.split(" ")[0];
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-teal-50 to-zinc-50 p-6">
+        <div className="max-w-xl mx-auto pt-12 space-y-6">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-teal-100">
+              <Sparkles className="h-7 w-7 text-teal-600" />
+            </div>
+            <h1 className="text-2xl font-semibold text-zinc-900">
+              Þú ert komin/n í stjórn, {firstName}
+            </h1>
+            <p className="text-zinc-600">
+              {invitation.association_name} bíður eftir þér. Hér eru fyrstu skrefin.
+            </p>
+          </div>
+
+          {invitation.personal_message && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-xs uppercase tracking-wide text-zinc-500 font-medium mb-2">
+                  Frá {invitation.invited_by_name ?? "fyrri formanni"}
+                </p>
+                <p className="text-zinc-800 whitespace-pre-wrap leading-relaxed italic">
+                  "{invitation.personal_message}"
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-wide text-zinc-500 font-medium px-1">
+              Byrjaðu hér
+            </p>
+
+            <button
+              onClick={() => navigate("/skyrsla")}
+              className="w-full text-left bg-white rounded-xl p-4 flex items-center gap-3 hover:bg-zinc-50 transition shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]"
+            >
+              <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
+                <FileText className="h-5 w-5 text-teal-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-zinc-900">Sækja afhendingarpakka</p>
+                <p className="text-sm text-zinc-500">Allt á einum stað sem PDF</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-zinc-400" />
+            </button>
+
+            <button
+              onClick={() => navigate("/peningar")}
+              className="w-full text-left bg-white rounded-xl p-4 flex items-center gap-3 hover:bg-zinc-50 transition shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]"
+            >
+              <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
+                <Wallet className="h-5 w-5 text-teal-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-zinc-900">Sjá fjármálin</p>
+                <p className="text-sm text-zinc-500">Sjóðsstaða og hreyfingar</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-zinc-400" />
+            </button>
+
+            <button
+              onClick={() => navigate("/verkefni")}
+              className="w-full text-left bg-white rounded-xl p-4 flex items-center gap-3 hover:bg-zinc-50 transition shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]"
+            >
+              <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
+                <ListChecks className="h-5 w-5 text-teal-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-zinc-900">Skoða opin verkefni</p>
+                <p className="text-sm text-zinc-500">Hvað bíður þín fyrst</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-zinc-400" />
+            </button>
+          </div>
+
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="w-full"
+          >
+            Eða bara á forsíðu
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 to-zinc-50 p-6">
