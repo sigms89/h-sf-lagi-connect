@@ -79,16 +79,21 @@ export default function Peningar() {
         </Card>
       )}
 
-      {/* Action takkar */}
+      {/* Skýrsla + upload */}
       {hasData && (
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button
-            onClick={() => navigate("/skyrsla")}
-            className="w-full sm:w-auto h-12"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Búa til drög að skýrslu fyrir fund
-          </Button>
+        <div className="space-y-3 pt-2">
+          <div className="space-y-1.5">
+            <Button
+              onClick={() => navigate("/skyrsla")}
+              className="w-full sm:w-auto h-12"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Búa til drög að skýrslu fyrir fund
+            </Button>
+            <p className="text-[13px] text-muted-foreground leading-snug max-w-md">
+              Tekur saman stöðu, helstu gjöld og opin verkefni svo stjórnin geti yfirfarið.
+            </p>
+          </div>
           <Button
             variant="outline"
             onClick={() => navigate("/upload")}
