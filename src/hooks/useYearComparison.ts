@@ -25,6 +25,9 @@ export interface YearComparisonData {
   expensesChangePct: number | null;
   netChangePct: number | null;
   categoryComparisons: YearCategoryComparison[];
+  currentMonthsWithData: number;
+  previousMonthsWithData: number;
+  currentUnclassifiedPct: number;
 }
 
 export function useYearComparison(
@@ -61,6 +64,9 @@ export function useYearComparison(
         expensesChangePct: null,
         netChangePct: null,
         categoryComparisons: [],
+        currentMonthsWithData: 0,
+        previousMonthsWithData: 0,
+        currentUnclassifiedPct: 0,
       };
 
       if (!associationId) return empty;
@@ -70,7 +76,7 @@ export function useYearComparison(
         db
           .from('transactions')
           .select(
-            'amount, is_income, category_id, category:categories(name_is, color)'
+            'amount, is_income, category_id, date, category:categories(name_is, color)'
           )
           .eq('association_id', associationId)
           .gte('date', currentYearStart)
@@ -78,7 +84,7 @@ export function useYearComparison(
         db
           .from('transactions')
           .select(
-            'amount, is_income, category_id, category:categories(name_is, color)'
+            'amount, is_income, category_id, date, category:categories(name_is, color)'
           )
           .eq('association_id', associationId)
           .gte('date', previousYearStart)
@@ -92,6 +98,7 @@ export function useYearComparison(
         amount: number;
         is_income: boolean;
         category_id: string | null;
+        date: string;
         category: { name_is: string; color: string | null } | null;
       };
 
@@ -165,6 +172,17 @@ export function useYearComparison(
         (a, b) => b.currentYear - a.currentYear
       );
 
+      function monthsWithData(txs: TxRow[]) {
+        const s = new Set<string>();
+        for (const t of txs) s.add(t.date.slice(0, 7));
+        return s.size;
+      }
+      const currentExpenseTx = currentTx.filter((t) => !t.is_income);
+      const unclassifiedExpense = currentExpenseTx.filter((t) => !t.category_id).length;
+      const currentUnclassifiedPct = currentExpenseTx.length === 0
+        ? 0
+        : Math.round((unclassifiedExpense / currentExpenseTx.length) * 100);
+
       return {
         currentYear: cy,
         previousYear: py,
@@ -181,6 +199,9 @@ export function useYearComparison(
           previous.income - previous.expenses
         ),
         categoryComparisons,
+        currentMonthsWithData: monthsWithData(currentTx),
+        previousMonthsWithData: monthsWithData(previousTx),
+        currentUnclassifiedPct,
       };
     },
     enabled: !!associationId,

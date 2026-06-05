@@ -9,6 +9,7 @@ import { TransactionList } from "@/components/transactions/TransactionList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, AlertCircle, Loader2, Wallet } from "lucide-react";
+import { YearCategoryOverview } from "@/components/peningar/YearCategoryOverview";
 import { useNavigate } from "react-router-dom";
 
 export default function Peningar() {
@@ -56,7 +57,10 @@ export default function Peningar() {
 
       {/* Hreyfingar */}
       {hasData ? (
-        <TransactionList associationId={association.id} />
+        <>
+          <YearCategoryOverview associationId={association.id} />
+          <TransactionList associationId={association.id} />
+        </>
       ) : (
         <Card>
           <CardContent className="py-10 px-6 text-center space-y-5">
