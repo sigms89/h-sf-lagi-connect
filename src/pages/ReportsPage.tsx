@@ -370,10 +370,15 @@ export default function ReportsPage() {
 
           <Button
             onClick={handleDownloadPDF}
+            disabled={isLoading || isExporting}
             className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white gap-2 shrink-0"
           >
-            <Download className="h-4 w-4" />
-            Sækja PDF skýrslu
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isExporting ? "Bý til PDF..." : "Sækja PDF skýrslu"}
           </Button>
         </div>
 
@@ -381,7 +386,7 @@ export default function ReportsPage() {
         {isLoading ? (
           <ReportSkeleton />
         ) : (
-          <Card className="max-w-4xl mx-auto shadow-md border border-gray-200 bg-white">
+          <Card ref={reportRef} className="max-w-4xl mx-auto shadow-md border border-gray-200 bg-white">
             <CardContent className="p-8 sm:p-10 space-y-10">
               {/* ===== SECTION A: Report Header ===== */}
               <div className="text-center space-y-1.5 pb-4 border-b border-gray-100">
