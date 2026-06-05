@@ -98,6 +98,7 @@ export function useYearComparison(
         amount: number;
         is_income: boolean;
         category_id: string | null;
+        date: string;
         category: { name_is: string; color: string | null } | null;
       };
 
