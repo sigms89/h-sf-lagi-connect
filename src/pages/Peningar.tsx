@@ -9,7 +9,7 @@ import { TransactionList } from "@/components/transactions/TransactionList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, AlertCircle, Loader2, Wallet } from "lucide-react";
-import { YearCategoryOverview } from "@/components/peningar/YearCategoryOverview";
+import { MonthlyCategoryList } from "@/components/peningar/MonthlyCategoryList";
 import { useNavigate } from "react-router-dom";
 
 export default function Peningar() {
