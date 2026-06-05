@@ -4,7 +4,7 @@
 // Privacy filter preserved (board-only tasks hidden from members)
 // ============================================================
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,14 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ClipboardList, Plus } from "lucide-react";
-import {
-  differenceInCalendarDays,
-  isPast,
-  isToday,
-  isThisWeek,
-} from "date-fns";
+import { isPast, isToday, isThisWeek } from "date-fns";
 import TaskCard, { type TaskCardData } from "@/components/tasks/TaskCard";
-import { useNavigate } from "react-router-dom";
+import { CreateTaskModal } from "@/components/tasks/CreateTaskModal";
 
 type BucketKey = "overdue" | "today" | "week" | "later" | "done";
 
