@@ -23,6 +23,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import HandoverPackage from "@/components/reports/HandoverPackage";
 
 // ============================================================
 // Types
@@ -351,7 +352,10 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="px-6 max-w-4xl mx-auto space-y-6">
+      <div className="px-6 max-w-4xl mx-auto space-y-10">
+        {/* ---- Handover Package (Lota 2) ---- */}
+        <HandoverPackage />
+
         {/* ---- Controls Row ---- */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <label className="flex items-center gap-2.5 cursor-pointer select-none">
