@@ -117,7 +117,7 @@ export function useTransactionStats(associationId: string | null | undefined, da
     queryKey: [...TRANSACTION_KEYS.stats(associationId ?? ''), dateFrom ?? '12m'],
     queryFn: async (): Promise<TransactionStats> => {
       if (!associationId) {
-        return { total_income: 0, total_expenses: 0, net_balance: 0, uncategorized_count: 0, monthly_data: [], category_breakdown: [], current_balance: null };
+        return { total_income: 0, total_expenses: 0, net_balance: 0, uncategorized_count: 0, monthly_data: [], category_breakdown: [], current_balance: null, last_transaction_date: null };
       }
 
       const effectiveFrom = dateFrom ?? format(subMonths(new Date(), 12), 'yyyy-MM-dd');
