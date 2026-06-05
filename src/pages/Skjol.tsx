@@ -1,6 +1,5 @@
 // ============================================================
 // Húsfélagið.is: Skjöl — Placeholder empty state
-// Will gain real document storage in a later iteration.
 // ============================================================
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,24 +14,25 @@ export default function Skjol() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">Skjöl</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">
+        <p className="text-[11px] uppercase tracking-widest font-medium text-muted-foreground">Skjöl</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">
           {association?.name ?? "Húsfélagið þitt"}
-        </p>
+        </h1>
       </div>
 
       <Card>
-        <CardContent className="py-12 text-center space-y-4">
+        <CardContent className="py-10 px-6 text-center space-y-5">
           <FolderOpen className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-          <div>
-            <h3 className="font-semibold text-foreground">Engin skjöl enn</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Hladdu inn fundargerðum, reikningum eða öðrum skjölum húsfélagsins.
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-foreground">Engin skjöl enn.</h3>
+            <p className="text-[15px] text-muted-foreground leading-relaxed">
+              Hér geymir þú fundargerðir, samninga og reikninga.
             </p>
           </div>
           <Button
-            size="sm"
+            size="lg"
             onClick={() => toast.info("Skjalavistun kemur fljótlega.")}
+            className="w-full sm:w-auto h-12"
           >
             <Upload className="h-4 w-4 mr-2" />
             Hlaða inn skjali
