@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import HandoverPackage from "@/components/reports/HandoverPackage";
+import InviteSuccessorDialog from "@/components/handover/InviteSuccessorDialog";
 
 // ============================================================
 // Types
@@ -355,6 +356,19 @@ export default function ReportsPage() {
       <div className="px-6 max-w-4xl mx-auto space-y-10">
         {/* ---- Handover Package (Lota 2) ---- */}
         <HandoverPackage />
+
+        {/* ---- Invite Successor (Lota 3) ---- */}
+        <div className="rounded-lg border border-zinc-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <div>
+            <h3 className="font-semibold text-zinc-900">Að hætta í stjórn?</h3>
+            <p className="text-sm text-zinc-600 mt-1">
+              Bjóddu nýjum formanni inn með persónulegri kveðju. Hann fær
+              afhendingarpakkann og aðganginn í einni einföldu yfirferð.
+            </p>
+          </div>
+          <InviteSuccessorDialog />
+        </div>
+
 
         {/* ---- Controls Row ---- */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

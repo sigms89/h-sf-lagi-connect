@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,13 @@ import { toast as sonnerToast } from "sonner";
 import { Building2 } from "lucide-react";
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
+  const prefilledEmail = searchParams.get("email") || "";
+
   const [isLogin, setIsLogin] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +26,11 @@ const Auth = () => {
   const { toast } = useToast();
   const { session } = useAuth();
 
-  if (session) return <Navigate to="/" replace />;
+  useEffect(() => {
+    if (prefilledEmail) setIsLogin(false);
+  }, [prefilledEmail]);
+
+  if (session) return <Navigate to={redirectTo} replace />;
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,14 +61,14 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/");
+        navigate(redirectTo);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { full_name: fullName },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}${redirectTo}`,
           },
         });
         if (error) throw error;
