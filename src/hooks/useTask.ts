@@ -232,6 +232,21 @@ export function useAssignTask() {
       })());
       return { isSelf, targetName: extractedName };
     },
+    onMutate: async ({ taskId, userId }) => {
+      const assignTo = userId ?? user?.id;
+      if (!assignTo) return;
+      await queryClient.cancelQueries({ queryKey: ['dashboard-tasks'] });
+      const prevDashboard = queryClient.getQueriesData({ queryKey: ['dashboard-tasks'] });
+      const prevTask = queryClient.getQueryData(TASK_KEYS.byId(taskId));
+      queryClient.setQueriesData<any>({ queryKey: ['dashboard-tasks'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((t: any) => (t?.id === taskId ? { ...t, assigned_to: assignTo } : t));
+      });
+      queryClient.setQueryData<any>(TASK_KEYS.byId(taskId), (old: any) =>
+        old ? { ...old, assigned_to: assignTo } : old,
+      );
+      return { prevDashboard, prevTask };
+    },
     onSuccess: (result, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.byId(taskId) });
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.all });
@@ -243,7 +258,13 @@ export function useAssignTask() {
         toast.success(`Verkefni úthlutað. Ábyrgðaraðili: ${result?.targetName}`);
       }
     },
-    onError: (error: Error) => {
+    onError: (error: Error, { taskId }, ctx: any) => {
+      if (ctx?.prevDashboard) {
+        ctx.prevDashboard.forEach(([key, data]: any) => queryClient.setQueryData(key, data));
+      }
+      if (ctx?.prevTask !== undefined) {
+        queryClient.setQueryData(TASK_KEYS.byId(taskId), ctx.prevTask);
+      }
       toast.error(`Villa: ${error.message}`);
     },
   });
