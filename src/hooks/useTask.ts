@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '@/integrations/supabase/db';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { celebrate } from '@/lib/celebrate';
 
 export interface TaskWithProfiles {
   id: string;
