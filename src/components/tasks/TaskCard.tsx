@@ -4,11 +4,11 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow, differenceInDays, isPast, isToday, format } from 'date-fns';
-import { is } from 'date-fns/locale';
+import { differenceInCalendarDays, isPast, isToday } from 'date-fns';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAssignTask, useCompleteTask } from '@/hooks/useTask';
+import { relativeDueLabel } from '@/lib/dates';
 
 export interface TaskCardData {
   id: string;
@@ -25,28 +25,21 @@ interface TaskCardProps {
 
 function getDueDateInfo(dueDateStr: string | null): { label: string; colorClass: string } | null {
   if (!dueDateStr) return null;
+  const label = relativeDueLabel(dueDateStr);
+  if (!label) return null;
 
   const dueDate = new Date(dueDateStr + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (isPast(dueDate) && !isToday(dueDate)) {
-    const label = formatDistanceToNow(dueDate, { locale: is, addSuffix: true });
+  if ((isPast(dueDate) && !isToday(dueDate)) || isToday(dueDate)) {
     return { label, colorClass: 'text-[hsl(347,77%,50%)]' };
   }
-  if (isToday(dueDate)) {
-    return { label: 'Í dag', colorClass: 'text-[hsl(347,77%,50%)]' };
-  }
 
-  const days = differenceInDays(dueDate, today);
-
-  if (days <= 6) {
-    return { label: format(dueDate, 'd. MMM', { locale: is }), colorClass: 'text-[hsl(38,92%,50%)]' };
-  }
-  if (days <= 14) {
-    return { label: format(dueDate, 'd. MMM', { locale: is }), colorClass: 'text-accent' };
-  }
-  return { label: format(dueDate, 'd. MMM', { locale: is }), colorClass: 'text-muted-foreground' };
+  const days = differenceInCalendarDays(dueDate, today);
+  if (days <= 6) return { label, colorClass: 'text-[hsl(38,92%,50%)]' };
+  if (days <= 14) return { label, colorClass: 'text-accent' };
+  return { label, colorClass: 'text-muted-foreground' };
 }
 
 export default function TaskCard({ task }: TaskCardProps) {
