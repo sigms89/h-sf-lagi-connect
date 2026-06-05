@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import HandoverPackage from "@/components/reports/HandoverPackage";
+import InviteSuccessorDialog from "@/components/handover/InviteSuccessorDialog";
 
 // ============================================================
 // Types
