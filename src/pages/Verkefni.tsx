@@ -147,13 +147,19 @@ export default function Verkefni() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-foreground">Verkefni</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
             {totalOpen} opin · {grouped.done.length} kláruð nýlega
           </p>
         </div>
+        {associationId && totalAll > 0 && (
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nýtt verkefni
+          </Button>
+        )}
       </div>
 
       {totalAll === 0 ? (
@@ -166,7 +172,7 @@ export default function Verkefni() {
                 Búðu til fyrsta verkefnið þegar þú ert tilbúin.
               </p>
             </div>
-            <Button size="sm" onClick={() => navigate("/tasks/new")}>
+            <Button size="sm" onClick={() => setCreateOpen(true)} disabled={!associationId}>
               <Plus className="h-4 w-4 mr-2" />
               Nýtt verkefni
             </Button>
@@ -192,6 +198,14 @@ export default function Verkefni() {
             ) : null
           )}
         </div>
+      )}
+
+      {associationId && (
+        <CreateTaskModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          associationId={associationId}
+        />
       )}
     </div>
   );
