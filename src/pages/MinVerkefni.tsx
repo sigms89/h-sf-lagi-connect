@@ -5,7 +5,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInDays, isPast, isToday } from "date-fns";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { db } from "@/integrations/supabase/db";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentAssociation } from "@/hooks/useAssociation";
@@ -134,7 +136,15 @@ export default function MinVerkefni() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <ClipboardList className="h-12 w-12 text-muted-foreground/40 mb-4" />
           <p className="text-lg font-semibold text-foreground">Ekkert á þínum borði 🎉</p>
-          <p className="text-sm text-muted-foreground mt-1">Engin verkefni á þínum borði núna.</p>
+          <p className="text-sm text-muted-foreground mt-1 mb-5">
+            Þú gætir tekið að þér eitt af opnum verkefnum hússins.
+          </p>
+          <Button asChild size="lg" className="h-12">
+            <Link to="/verkefni">
+              Skoða öll verkefni
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
         </div>
       )}
 
