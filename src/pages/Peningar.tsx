@@ -8,7 +8,7 @@ import { useTransactionStats } from "@/hooks/useTransactions";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, FileText, AlertCircle, Loader2, Wallet } from "lucide-react";
+import { Upload, FileText, AlertCircle, Loader2, Wallet, Info } from "lucide-react";
 import { MonthlyCategoryList } from "@/components/peningar/MonthlyCategoryList";
 import { uploadPrompt } from "@/lib/insights";
 import { useNavigate } from "react-router-dom";
