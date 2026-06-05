@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, AlertCircle, Loader2, Wallet } from "lucide-react";
 import { MonthlyCategoryList } from "@/components/peningar/MonthlyCategoryList";
+import { uploadPrompt } from "@/lib/insights";
 import { useNavigate } from "react-router-dom";
 
 export default function Peningar() {
