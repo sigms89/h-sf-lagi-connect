@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { is } from "date-fns/locale";
-import { Loader2, Heart, CheckCircle2, ArrowRight, Building2 } from "lucide-react";
+import { Loader2, Heart, CheckCircle2, ArrowRight, Building2, Wallet, ListChecks, FileText, Sparkles } from "lucide-react";
 
 import { db, supabase } from "@/integrations/supabase/db";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +38,7 @@ export default function WelcomeNewChairman() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [justAccepted, setJustAccepted] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -85,7 +86,8 @@ export default function WelcomeNewChairman() {
         _token: token,
       });
       if (error) throw error;
-      navigate("/");
+      setJustAccepted(true);
+      setAccepting(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Villa kom upp";
       setError(msg);
