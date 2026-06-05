@@ -64,37 +64,11 @@ const Dashboard = () => {
   const openTaskCount = taskCounts.open;
   const overdueTaskCount = taskCounts.overdue;
 
-  // Last-month income/expenses
-  const { data: lastMonth } = useQuery({
-    queryKey: ["last-month-stats", association?.id],
-    queryFn: async () => {
-      if (!association?.id) return { income: 0, expense: 0 };
-      const now = new Date();
-      const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const from = firstOfLastMonth.toISOString().slice(0, 10);
-      const to = firstOfThisMonth.toISOString().slice(0, 10);
-      const { data } = await db
-        .from("transactions")
-        .select("amount, is_income")
-        .eq("association_id", association.id)
-        .gte("date", from)
-        .lt("date", to);
-      let income = 0, expense = 0;
-      (data ?? []).forEach((t: { amount: number; is_income: boolean }) => {
-        if (t.is_income) income += t.amount; else expense += Math.abs(t.amount);
-      });
-      return { income, expense };
-    },
-    enabled: !!association?.id,
-  });
-
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
   const currentBalance = stats?.current_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
   const houseName = association?.name ?? "Húsfélagið þitt";
-  const netLastMonth = (lastMonth?.income ?? 0) - (lastMonth?.expense ?? 0);
 
   return (
     <div className="space-y-6 max-w-2xl">
