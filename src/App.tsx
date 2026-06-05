@@ -1,5 +1,5 @@
 // ============================================================
-// Húsfélagið.is: App Root with Routes (v3: role-based nav)
+// Húsfélagið.is: App Root with Routes (v4: simplified nav)
 // ============================================================
 
 import { Toaster } from "@/components/ui/toaster";
@@ -14,7 +14,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/layouts/AppLayout";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
-import Financials from "@/pages/Financials";
+import Peningar from "@/pages/Peningar";
+import Verkefni from "@/pages/Verkefni";
+import Skjol from "@/pages/Skjol";
 import Upload from "@/pages/Upload";
 import Benchmarking from "@/pages/Benchmarking";
 import Marketplace from "@/pages/Marketplace";
@@ -29,8 +31,7 @@ import ProviderRegister from "@/pages/ProviderRegister";
 import ProviderPublicProfile from "@/components/marketplace/ProviderPublicProfile";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import TaskDetailPage from "@/pages/TaskDetailPage";
-import MinVerkefni from "@/pages/MinVerkefni";
-import OllVerkefni from "@/pages/OllVerkefni";
+import ReportsPage from "@/pages/ReportsPage";
 import NotFound from "@/pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
 import LandingPage from "@/pages/LandingPage";
@@ -44,58 +45,62 @@ const queryClient = new QueryClient({
   },
 });
 
-
 const App = () => (
   <ErrorBoundary>
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner richColors closeButton />
-      <BrowserRouter>
-        <TimeRangeProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/provider/register" element={<ProtectedRoute><AppLayout><ProviderRegister /></AppLayout></ProtectedRoute>} />
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner richColors closeButton />
+        <BrowserRouter>
+          <TimeRangeProvider>
+            <AuthProvider>
+              <Routes>
+                <Route path="/landing" element={<LandingPage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                <Route path="/provider/register" element={<ProtectedRoute><AppLayout><ProviderRegister /></AppLayout></ProtectedRoute>} />
 
-            {/* Primary destinations */}
-            <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-            <Route path="/min-verkefni" element={<ProtectedRoute><AppLayout><MinVerkefni /></AppLayout></ProtectedRoute>} />
-            <Route path="/verkefni" element={<ProtectedRoute><AppLayout><OllVerkefni /></AppLayout></ProtectedRoute>} />
-            <Route path="/financials" element={<ProtectedRoute><AppLayout><Financials /></AppLayout></ProtectedRoute>} />
-            <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
-            <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
-            <Route path="/marketplace/provider/:providerId" element={<ProtectedRoute><AppLayout><ProviderPublicProfile /></AppLayout></ProtectedRoute>} />
+                {/* Primary destinations — 4 items */}
+                <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+                <Route path="/peningar" element={<ProtectedRoute><AppLayout><Peningar /></AppLayout></ProtectedRoute>} />
+                <Route path="/verkefni" element={<ProtectedRoute><AppLayout><Verkefni /></AppLayout></ProtectedRoute>} />
+                <Route path="/skjol" element={<ProtectedRoute><AppLayout><Skjol /></AppLayout></ProtectedRoute>} />
 
-            {/* Provider routes */}
-            <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
-            <Route path="/provider/requests" element={<ProtectedRoute><AppLayout><ProviderRequests /></AppLayout></ProtectedRoute>} />
-            <Route path="/provider/bids" element={<ProtectedRoute><AppLayout><ProviderBidsPage /></AppLayout></ProtectedRoute>} />
-            <Route path="/provider/profile" element={<ProtectedRoute><AppLayout><ProviderProfilePage /></AppLayout></ProtectedRoute>} />
+                {/* Hidden but reachable: benchmarking, marketplace, admin, provider */}
+                <Route path="/benchmarking" element={<ProtectedRoute><AppLayout><Benchmarking /></AppLayout></ProtectedRoute>} />
+                <Route path="/marketplace" element={<ProtectedRoute><AppLayout><Marketplace /></AppLayout></ProtectedRoute>} />
+                <Route path="/marketplace/provider/:providerId" element={<ProtectedRoute><AppLayout><ProviderPublicProfile /></AppLayout></ProtectedRoute>} />
+                <Route path="/provider" element={<ProtectedRoute><AppLayout><ProviderDashboard /></AppLayout></ProtectedRoute>} />
+                <Route path="/provider/requests" element={<ProtectedRoute><AppLayout><ProviderRequests /></AppLayout></ProtectedRoute>} />
+                <Route path="/provider/bids" element={<ProtectedRoute><AppLayout><ProviderBidsPage /></AppLayout></ProtectedRoute>} />
+                <Route path="/provider/profile" element={<ProtectedRoute><AppLayout><ProviderProfilePage /></AppLayout></ProtectedRoute>} />
 
-            {/* Legacy redirects → /financials with correct tab */}
-            <Route path="/transactions" element={<Navigate to="/financials?tab=faerslur" replace />} />
-            <Route path="/classification" element={<Navigate to="/financials?tab=flokkun" replace />} />
-            <Route path="/analytics" element={<Navigate to="/financials?tab=greining" replace />} />
-            <Route path="/alerts" element={<Navigate to="/financials?tab=faerslur" replace />} />
-            <Route path="/reports" element={<Navigate to="/financials?tab=skyrsla" replace />} />
+                {/* Report (Sækja skýrslu) */}
+                <Route path="/skyrsla" element={<ProtectedRoute><AppLayout><ReportsPage /></AppLayout></ProtectedRoute>} />
 
-            {/* System pages */}
-            <Route path="/upload" element={<ProtectedRoute><AppLayout><Upload /></AppLayout></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
-            <Route path="/vendors/:vendorName" element={<ProtectedRoute><AppLayout><VendorDetailPage /></AppLayout></ProtectedRoute>} />
-            <Route path="/tasks/:taskId" element={<ProtectedRoute><AppLayout><TaskDetailPage /></AppLayout></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-        </TimeRangeProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+                {/* Legacy redirects → simplified pages */}
+                <Route path="/financials" element={<Navigate to="/peningar" replace />} />
+                <Route path="/transactions" element={<Navigate to="/peningar" replace />} />
+                <Route path="/classification" element={<Navigate to="/peningar" replace />} />
+                <Route path="/analytics" element={<Navigate to="/peningar" replace />} />
+                <Route path="/alerts" element={<Navigate to="/peningar" replace />} />
+                <Route path="/reports" element={<Navigate to="/skyrsla" replace />} />
+                <Route path="/min-verkefni" element={<Navigate to="/verkefni" replace />} />
+
+                {/* System pages */}
+                <Route path="/upload" element={<ProtectedRoute><AppLayout><Upload /></AppLayout></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+                <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
+                <Route path="/vendors/:vendorName" element={<ProtectedRoute><AppLayout><VendorDetailPage /></AppLayout></ProtectedRoute>} />
+                <Route path="/tasks/:taskId" element={<ProtectedRoute><AppLayout><TaskDetailPage /></AppLayout></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </TimeRangeProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   </ErrorBoundary>
 );
 

@@ -1,328 +1,176 @@
 // ============================================================
-// Húsfélagið.is: Dashboard v4
-// Dark mode + Bento grid + Bold typography + Glassmorphism
+// Húsfélagið.is: Dashboard v5 — Simplified
+// "Staðan + næsta skref" — eitt kort, ekkert KPI dashboard
 // ============================================================
 
-import { useCurrentAssociation } from '@/hooks/useAssociation';
-import { useTransactionStats } from '@/hooks/useTransactions';
-import { useTransactions } from '@/hooks/useTransactions';
-import { useTimeRange } from '@/hooks/useTimeRange';
-import { useHealthScore } from '@/hooks/useHealthScore';
-import { useAutoTasks } from '@/hooks/useAutoTasks';
-import { useQuery } from '@tanstack/react-query';
-import { db } from '@/integrations/supabase/db';
-import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
-import type { Profile } from '@/types/database';
-import { StatusSummary } from '@/components/dashboard/StatusSummary';
-import { TasksWidget } from '@/components/dashboard/TasksWidget';
-import { MonthlyChart } from '@/components/dashboard/MonthlyChart';
-import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
-import { TimeRangeSelector } from '@/components/shared/TimeRangeSelector';
-import { BalanceCard } from '@/components/dashboard/BalanceCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import {
-  Upload,
-  ArrowRight,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { formatIskAmount } from '@/lib/categories';
-
+import { useCurrentAssociation } from "@/hooks/useAssociation";
+import { useTransactionStats } from "@/hooks/useTransactions";
+import { useQuery } from "@tanstack/react-query";
+import { db } from "@/integrations/supabase/db";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate, useNavigate } from "react-router-dom";
+import type { Profile } from "@/types/database";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Upload, ArrowRight, ClipboardList, Wallet } from "lucide-react";
+import { formatIskAmount } from "@/lib/categories";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: association, isLoading: assocLoading } = useCurrentAssociation();
-  const { range, label } = useTimeRange();
-  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id, range.from);
-  const { data: txData, isLoading: txLoading } = useTransactions(association?.id, {
-    page: 1,
-    page_size: 5,
-  });
-  const { data: healthData, isLoading: healthLoading } = useHealthScore(association?.id);
-  useAutoTasks(association?.id);
+  const { data: stats, isLoading: statsLoading } = useTransactionStats(association?.id);
 
-  // Check role for redirect
   const { data: dashProfile } = useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ["profile", user?.id],
     queryFn: async (): Promise<Profile | null> => {
       if (!user) return null;
-      const { data } = await db.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+      const { data } = await db.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
       return data as Profile | null;
     },
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
   });
 
-  if (dashProfile?.role_type === 'service_provider') {
-    return <Navigate to="/provider" replace />;
-  }
-  if (dashProfile?.role_type === 'super_admin') {
-    return <Navigate to="/admin" replace />;
-  }
+  // Provider/admin redirects preserved for backward compat (hidden from sidebar)
+  if (dashProfile?.role_type === "service_provider") return <Navigate to="/provider" replace />;
+  if (dashProfile?.role_type === "super_admin") return <Navigate to="/admin" replace />;
 
-  // Task completion stats
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: taskStats } = useQuery({
-    queryKey: ['task-stats', association?.id],
+  // Open tasks (with privacy filter applied at fetch time via RLS)
+  const { data: openTaskCount = 0 } = useQuery({
+    queryKey: ["open-task-count", association?.id],
     queryFn: async () => {
-      const [doneRes, openRes] = await Promise.all([
-        db.from('tasks').select('id', { count: 'exact', head: true })
-          .eq('association_id', association!.id)
-          .eq('status', 'done')
-          .gte('completed_at', thirtyDaysAgo),
-        db.from('tasks').select('id', { count: 'exact', head: true })
-          .eq('association_id', association!.id)
-          .in('status', ['open', 'waiting']),
-      ]);
-      return {
-        doneCount: doneRes.count ?? 0,
-        openCount: openRes.count ?? 0,
-      };
+      if (!association?.id) return 0;
+      const { count } = await db
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("association_id", association.id)
+        .in("status", ["open", "waiting"]);
+      return count ?? 0;
+    },
+    enabled: !!association?.id,
+  });
+
+  // Last-month income/expenses
+  const { data: lastMonth } = useQuery({
+    queryKey: ["last-month-stats", association?.id],
+    queryFn: async () => {
+      if (!association?.id) return { income: 0, expense: 0 };
+      const now = new Date();
+      const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const from = firstOfLastMonth.toISOString().slice(0, 10);
+      const to = firstOfThisMonth.toISOString().slice(0, 10);
+      const { data } = await db
+        .from("transactions")
+        .select("amount, is_income")
+        .eq("association_id", association.id)
+        .gte("date", from)
+        .lt("date", to);
+      let income = 0, expense = 0;
+      (data ?? []).forEach((t: { amount: number; is_income: boolean }) => {
+        if (t.is_income) income += t.amount; else expense += Math.abs(t.amount);
+      });
+      return { income, expense };
     },
     enabled: !!association?.id,
   });
 
   const isLoading = assocLoading || statsLoading;
   const hasData = (stats?.total_income ?? 0) > 0 || (stats?.total_expenses ?? 0) > 0;
-
-  // ── Computed values ────────────────────────────────────────
-  const score = healthData?.score ?? 0;
-  const monthCount = stats?.monthly_data?.length || 12;
-  const avgMonthlyExpense = (stats?.total_expenses ?? 0) / monthCount;
   const currentBalance = stats?.current_balance ?? 0;
-  const balanceMonths = avgMonthlyExpense > 0 ? (currentBalance / avgMonthlyExpense).toFixed(1) : '-';
-  const isBalanceLow = currentBalance < avgMonthlyExpense && avgMonthlyExpense > 0;
-  const netBalance = stats?.net_balance ?? 0;
   const uncategorizedCount = stats?.uncategorized_count ?? 0;
 
-  // ── Build summary text ─────────────────────────────────────
-  let summaryText = `Sjóðsstaða er ${formatIskAmount(currentBalance)}. `;
-  if (isBalanceLow) {
-    summaryText += `Þetta er undir meðalmánaðarútgjöldum (${formatIskAmount(Math.round(avgMonthlyExpense))}) sem þýðir að sjóðurinn þolir ekki stóran reikning. `;
-  } else if (avgMonthlyExpense > 0) {
-    summaryText += `Þetta samsvarar ${balanceMonths} mánaða útgjöldum sem gefur ásættanlegan stuðpúða. `;
-  }
-  summaryText += `Tekjur síðustu 12 mánaða voru ${formatIskAmount(stats?.total_income ?? 0)} og gjöld ${formatIskAmount(stats?.total_expenses ?? 0)}.`;
-  if (netBalance < 0) {
-    summaryText += ` Gjöld eru ${formatIskAmount(Math.abs(netBalance))} umfram tekjur á tímabilinu.`;
-  }
-  if (uncategorizedCount > 0) {
-    summaryText += ` Athugið: ${uncategorizedCount} færslur eru óflokkaðar.`;
-  }
-
-  // ── Status headline ────────────────────────────────────────
-  const statusHeadline = score >= 75
-    ? 'Staðan er góð'
-    : score >= 50
-      ? 'Nokkur atriði þarfnast athygli'
-      : 'Viðbrögð þarf';
-
-  // ── Status dot color ───────────────────────────────────────
-  const dotColor = score >= 75
-    ? 'bg-emerald-400'
-    : score >= 50
-      ? 'bg-amber-400'
-      : 'bg-rose-400';
-
-  // ── Chart insight ──────────────────────────────────────────
-  const monthlyData = stats?.monthly_data ?? [];
-  const latestMonth = monthlyData[monthlyData.length - 1];
-  const avgExpenseChart = monthlyData.length > 0
-    ? monthlyData.reduce((s, m) => s + (m.expenses ?? 0), 0) / monthlyData.length
-    : 0;
-  const isSpike = latestMonth && avgExpenseChart > 0 && (latestMonth.expenses ?? 0) > avgExpenseChart * 1.25;
-  const pctAbove = isSpike ? (((latestMonth.expenses ?? 0) / avgExpenseChart - 1) * 100).toFixed(0) : '';
-
-  // ── Category breakdown (top 5) ─────────────────────────────
-  const categories = (stats?.category_breakdown ?? []).slice(0, 5);
-
   return (
-    <div className="space-y-6">
-      {/* ── Page header ───────────────────────────────────── */}
+    <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Yfirlit</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          {association?.name ?? 'Húsfélagið þitt'} · {label}
+          {association?.name ?? "Húsfélagið þitt"}
         </p>
       </div>
 
-      {/* ── Empty state ───────────────────────────────────── */}
-      {!isLoading && !hasData && (
-        <div className="glass-card rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] py-16 text-center">
-          <Upload className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-          <h3 className="font-semibold text-foreground">Engin gögn ennþá</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Hladdu upp bankafærslum til að sjá yfirlit yfir rekstrarkostnað húsfélagsins.
-          </p>
-          <Button onClick={() => navigate('/upload')} size="sm" className="mt-4">
-            <Upload className="h-4 w-4 mr-2" />
-            Hlaða upp færslum
-          </Button>
-        </div>
-      )}
-
-      {(isLoading || hasData) && (
+      {!isLoading && !hasData ? (
+        <Card>
+          <CardContent className="py-12 text-center space-y-4">
+            <Wallet className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+            <div>
+              <h3 className="font-semibold text-foreground">Engar hreyfingar enn</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Byrjaðu með því að hlaða inn bankayfirliti.
+              </p>
+            </div>
+            <Button onClick={() => navigate("/peningar")} size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Hlaða inn bankayfirliti
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
         <>
-          {/* ═══ BENTO ROW 1: Hero (2col) + Quick Stats (1col) ═══ */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Hero card — spans 2 columns */}
-            <Card className="lg:col-span-2 animate-fade-in">
-              <CardContent className="p-6">
-                {isLoading || healthLoading ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-8 w-64" />
-                  </div>
-                ) : (
-                  <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left — Summary */}
-                    <div className="flex-1 min-w-0 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor} shadow-[0_0_8px_currentColor]`} />
-                        <h2 className="text-lg font-semibold text-foreground">{statusHeadline}</h2>
-                      </div>
-                      <p className="text-[13px] text-muted-foreground leading-relaxed">{summaryText}</p>
-                    </div>
-                    {/* Right — Status Summary */}
-                    {healthData && (
-                      <div className="w-full lg:w-80 flex-shrink-0">
-                        <StatusSummary healthData={healthData} />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quick stats card */}
-            <div className="flex flex-col gap-4 animate-fade-in stagger-1">
-              {taskStats && (taskStats.doneCount > 0 || taskStats.openCount > 0) && (
-                <Card>
-                  <CardContent className="p-5">
-                    <span className="card-label">Verkefni (30 dagar)</span>
-                    <div className="flex items-baseline gap-3 mt-2">
-                      <span className="kpi-number text-foreground">{taskStats.doneCount}</span>
-                      <span className="text-sm text-muted-foreground">kláruð</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      📋 {taskStats.openCount} opin verkefni
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-              <BalanceCard
-                label="Sjóðsstaða"
-                amount={currentBalance}
-                isLoading={isLoading}
-                type="balance"
-                subtitle={avgMonthlyExpense > 0 ? `${balanceMonths} mán. stuðpúði` : undefined}
-              />
-            </div>
-          </div>
-
-          {/* ═══ BENTO ROW 2: KPI Cards ═══════════════════════ */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="animate-fade-in stagger-2">
-              <BalanceCard
-                label="Tekjur"
-                amount={stats?.total_income}
-                isLoading={isLoading}
-                type="income"
-              />
-            </div>
-            <div className="animate-fade-in stagger-3">
-              <BalanceCard
-                label="Gjöld"
-                amount={stats?.total_expenses}
-                isLoading={isLoading}
-                type="expense"
-              />
-            </div>
-            <div className="animate-fade-in stagger-4">
-              <BalanceCard
-                label="Nettó"
-                amount={netBalance}
-                isLoading={isLoading}
-                type={netBalance >= 0 ? 'income' : 'expense'}
-              />
-            </div>
-          </div>
-
-          {/* ═══ SECTION: TASKS ═══════════════════════════════ */}
-          <TasksWidget associationId={association?.id} />
-
-          {/* ═══ SECTION: TREND CHART (full width) ════════════ */}
-          <Card className="animate-fade-in stagger-5">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Mánaðarleg þróun</CardTitle>
-                <TimeRangeSelector />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <MonthlyChart data={monthlyData} isLoading={isLoading} bare>
-                {isSpike && latestMonth && (
-                  <p className="text-xs text-muted-foreground mt-3 px-1">
-                    ↑ Gjöld í {latestMonth.month_label} voru {pctAbove}% yfir meðaltali síðustu 12 mánaða
+          {/* ── Staða hússjóðs ────────────────────────────── */}
+          <Card>
+            <CardContent className="p-6">
+              {isLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+              ) : (
+                <>
+                  <p className="text-[13px] text-muted-foreground">Staða hússjóðs</p>
+                  <p className="text-3xl font-semibold tracking-tight text-foreground mt-1 tabular-nums">
+                    {formatIskAmount(currentBalance)}
                   </p>
-                )}
-              </MonthlyChart>
+                  {lastMonth && (lastMonth.income > 0 || lastMonth.expense > 0) && (
+                    <p className="text-[13px] text-muted-foreground mt-3">
+                      Síðasti mánuður:{" "}
+                      <span className="text-teal-600 tabular-nums">+{formatIskAmount(lastMonth.income)}</span>
+                      {" / "}
+                      <span className="text-rose-600 tabular-nums">−{formatIskAmount(lastMonth.expense)}</span>
+                    </p>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 
-          {/* ═══ BOTTOM ROW: Txns (3col) + Categories (2col) ══ */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Nýlegar færslur</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RecentTransactions transactions={txData?.data ?? []} isLoading={txLoading} />
-                <button
-                  onClick={() => navigate('/financials')}
-                  className="text-xs text-accent hover:text-accent/80 font-medium mt-4 inline-flex items-center gap-1 transition-colors"
-                >
-                  Sjá allar færslur <ArrowRight className="h-3 w-3" />
-                </button>
+          {/* ── Action prompts ───────────────────────────── */}
+          {uncategorizedCount > 0 && (
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Wallet className="h-5 w-5 text-amber-500 shrink-0" />
+                  <p className="text-sm text-foreground">
+                    Þú þarft að flokka <span className="font-semibold">{uncategorizedCount}</span> hreyfingar
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => navigate("/peningar")}>
+                  Sjá hreyfingar
+                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
               </CardContent>
             </Card>
+          )}
 
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Stærstu gjaldaliðir</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-6 w-full rounded" />)}
-                  </div>
-                ) : categories.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">Engar flokkaðar færslur</p>
-                ) : (
-                  <div className="space-y-0.5">
-                    {categories.map((cat, i) => (
-                      <div key={cat.category_id} className="flex items-center justify-between py-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs text-muted-foreground/60 w-4 text-right tabular-nums">{i + 1}.</span>
-                          <span className="text-[13px] text-foreground truncate">{cat.category_name}</span>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <div className="w-14 h-1 rounded-full bg-secondary overflow-hidden">
-                            <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(cat.percentage, 100)}%` }} />
-                          </div>
-                          <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">{cat.percentage.toFixed(0)}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {openTaskCount > 0 && (
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <ClipboardList className="h-5 w-5 text-accent shrink-0" />
+                  <p className="text-sm text-foreground">
+                    Þú átt <span className="font-semibold">{openTaskCount}</span> opin verkefni
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => navigate("/verkefni")}>
+                  Sjá verkefni
+                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
               </CardContent>
             </Card>
-          </div>
+          )}
         </>
       )}
     </div>
